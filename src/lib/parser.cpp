@@ -2,7 +2,6 @@
 #include <set>
 
 #include "../include/parser.hpp"
-#include "../include/parsing_error.hpp"
 
 namespace input {
 
@@ -18,25 +17,25 @@ Parser& Parser::addOption(const std::function<Option()>& create_option) {
 void Parser::parse(int argc, char* raw_argv[]) {
   std::vector<std::string> argv(raw_argv, raw_argv + argc);
   for (int index = 1; index < argc; ++index) {
-    if (isFlag(argv[index])) parseFlag(argv[index]);
-    else if (isSingle(argv[index])) index += parseSingle(argv, index);
-    else if (isMultiple(argv[index])) index += parseMultiple(argv, index);
+    if (hasFlag(argv[index])) parseFlag(argv[index]);
+    else if (hasSingle(argv[index])) index += parseSingle(argv, index);
+    else if (hasMultiple(argv[index])) index += parseMultiple(argv, index);
     else throw ParsingError("Invalid arguments provided!");
   }
   checkMissingOptions();
 }
 
-bool Parser::isFlag(const std::string& name) const {
+bool Parser::hasFlag(const std::string& name) const {
   if (options.contains(name)) return options.at(name)->isFlag();
   return false;
 }
 
-bool Parser::isSingle(const std::string& name) const {
+bool Parser::hasSingle(const std::string& name) const {
   if (options.contains(name)) return options.at(name)->isSingle();
   return false;
 }
 
-bool Parser::isMultiple(const std::string& name) const {
+bool Parser::hasMultiple(const std::string& name) const {
   if (options.contains(name)) return options.at(name)->isMultiple();
   return false;
 }
@@ -69,7 +68,8 @@ int Parser::parseMultiple(const std::vector<std::string>& arguments,
 
 void Parser::checkMissingOptions() const {
   for (const auto& [option_name, option] : options) {
-    if (!option->hasValue()) throw ParsingError("Missing option " + option_name);
+    if (!option->hasValue() && !option->hasDefaultValue())
+      throw ParsingError("Missing option " + option_name);
   }
 }
 

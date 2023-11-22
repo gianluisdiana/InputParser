@@ -160,6 +160,11 @@ class Option {
     return value_.has_value();
   }
 
+  /** @brief Checks if the option has a default value defined */
+  inline bool hasDefaultValue() const {
+    return default_value_.has_value();
+  }
+
   // ----------------------- Common transformations ----------------------- //
 
   /**
@@ -274,6 +279,16 @@ class Option {
    * @param value The value to check
    */
   void checkConstraints(const std::any& value) const;
+
+  /**
+   * @brief Depending on the type of the option, converts the value to a
+   * string.
+   *  If the option is multiple, the values will be separated by a space.
+   *
+   * @param value The value to convert
+   * @return The string representation of the value
+   */
+  const std::string valueToString(const std::any& value) const;
 };
 
 template <class... Ts>

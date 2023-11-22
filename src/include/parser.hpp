@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "./option.hpp"
+#include "./parsing_error.hpp"
 
 namespace input {
 
@@ -29,9 +30,7 @@ class Parser {
    * @tparam T The type of the value to be returned.
    */
   template <class T = std::string>
-  inline const T getValue(const std::string& name) const {
-    return options.at(name)->getValue<T>();
-  }
+  const T getValue(const std::string& name) const;
 
   /**
    * @brief Parses command line input to provide values ​​for previously added
@@ -69,7 +68,7 @@ class Parser {
    * @param name The name of the possible option.
    * @return Whether the parser registered the option or not.
    */
-  bool isFlag(const std::string& name) const;
+  bool hasFlag(const std::string& name) const;
 
   /**
    * @brief Tells if the parser has a single option with the name provided.
@@ -77,7 +76,7 @@ class Parser {
    * @param name The name of the possible option.
    * @return Whether the parser registered the option or not.
    */
-  bool isSingle(const std::string& name) const;
+  bool hasSingle(const std::string& name) const;
 
   /**
    * @brief Tells if the parser has a multiple option with the name provided.
@@ -85,7 +84,7 @@ class Parser {
    * @param name The name of the possible option.
    * @return Whether the parser registered the option or not.
    */
-  bool isMultiple(const std::string& name) const;
+  bool hasMultiple(const std::string& name) const;
 
   /**
    * @brief Changes the flag option provided to true.
@@ -124,6 +123,14 @@ class Parser {
    */
   void checkMissingOptions() const;
 };
+
+template <class T>
+const T Parser::getValue(const std::string& name) const {
+  if (!options.contains(name)) {
+    throw ParsingError("The option " + name + " was not assigned at the parser");
+  }
+  return options.at(name)->getValue<T>();
+}
 
 } // namespace input
 

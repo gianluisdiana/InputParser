@@ -24,15 +24,13 @@ Option& Option::addConstraint(const std::function<bool(const std::any&)>& constr
 }
 
 void Option::setValue(const std::any& value) {
-  std::any current_value;
   if (transform_before_check_) {
-    current_value = applyTransformation(value);
-    checkConstraints(current_value);
+    value_ = applyTransformation(value);
+    checkConstraints(value_);
   } else {
     checkConstraints(value);
-    current_value = applyTransformation(value);
+    value_ = applyTransformation(value);
   }
-  value_ = current_value;
 }
 
 // ------------------------ Common transformations ------------------------ //
@@ -65,13 +63,20 @@ Option& Option::transformBeforeCheck(void) {
 void Option::checkConstraints(const std::any& value) const {
   for (const auto& constraint : constraints_) {
     if (!constraint(value)) {
-      if (transform_before_check_) {
-        throw input::ParsingError("Constraint not satisfied");
-      }
-      throw input::ParsingError("Constraint not satisfied, value: " +
-        std::any_cast<std::string>(value));
+      if (transform_before_check_) throw ParsingError("Constraint not satisfied");
+      throw ParsingError("Constraint not satisfied, value: " + valueToString(value));
     }
   }
+}
+
+const std::string Option::valueToString(const std::any& value) const {
+  if (isFlag()) return std::any_cast<bool>(value) ? "true" : "false";
+  if (isSingle()) return std::any_cast<std::string>(value);
+  std::string string_value = "";
+  for (const auto& val : std::any_cast<std::vector<std::string>>(value)) {
+    string_value += val + " ";
+  }
+  return string_value;
 }
 
 } // namespace input
