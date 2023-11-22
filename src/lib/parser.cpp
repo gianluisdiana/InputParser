@@ -17,6 +17,10 @@ Parser& Parser::addOption(const std::function<Option()>& create_option) {
 void Parser::parse(int argc, char* raw_argv[]) {
   std::vector<std::string> argv(raw_argv, raw_argv + argc);
   for (int index = 1; index < argc; ++index) {
+    if (hasHelpOption() && isHelpOption(argv[index])) {
+      displayUsage();
+      exit(0);
+    }
     if (hasFlag(argv[index])) parseFlag(argv[index]);
     else if (hasSingle(argv[index])) index += parseSingle(argv, index);
     else if (hasMultiple(argv[index])) index += parseMultiple(argv, index);
@@ -66,14 +70,14 @@ int Parser::parseMultiple(const std::vector<std::string>& arguments,
   return local_index - index - 1;
 }
 
-void Parser::checkMissingOptions() const {
+void Parser::checkMissingOptions(void) const {
   for (const auto& [option_name, option] : options) {
     if (!option->hasValue() && !option->hasDefaultValue())
       throw ParsingError("Missing option " + option_name);
   }
 }
 
-void Parser::displayUsage() const {
+void Parser::displayUsage(void) const {
   std::string usage = "Usage: ./exec_name";
   std::string description = "";
   std::set<Option*> option_names;

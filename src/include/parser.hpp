@@ -23,6 +23,26 @@ class Parser {
    */
   Parser& addOption(const std::function<Option()>& create_option);
 
+  /**
+   * @brief Adds a basic help option to the parser.
+   *  The option will be a flag and will have the names "-h" and "--help".
+   *
+   *  Shortcut for:
+   *    addOption([] -> auto { return Option(OptionType::Flag)
+   *      .addNames("-h", "--help")
+   *      .addDescription("Shows how to use the program.");
+   *    });
+   *
+   * @return The instance of the object that called this method.
+   */
+  Parser& addHelpOption(void) {
+    return addOption([] -> auto {
+      return Option(OptionType::Flag)
+        .addNames("-h", "--help")
+        .addDescription("Shows how to use the program.");
+    });
+  }
+
     /**
    * @brief Gets the value from an option.
    *
@@ -46,7 +66,7 @@ class Parser {
   /**
    * @brief Shows to the user how to execute the program correctly.
    */
-  void displayUsage() const;
+  void displayUsage(void) const;
 
  private:
   // All the options registered.
@@ -87,6 +107,25 @@ class Parser {
   bool hasMultiple(const std::string& name) const;
 
   /**
+   * @brief Tells if the parser has a help option.
+   *
+   * @return Whether the parser registered the option or not.
+   */
+  inline bool hasHelpOption(void) const {
+    return hasFlag("-h") || hasFlag("--help");
+  }
+
+  /**
+   * @brief Tells if the option provided is the help option.
+   *
+   * @param name The name of the possible option.
+   * @return Whether the option is the help option or not.
+   */
+  inline bool isHelpOption(const std::string& name) const {
+    return name == "-h" || name == "--help";
+  }
+
+  /**
    * @brief Changes the flag option provided to true.
    *
    * @param flag_name The name of the option to give the value of true.
@@ -121,7 +160,7 @@ class Parser {
    * @brief Check if there are options that have not been specified.
    *  If so, a std::invalid_argument error will be thrown.
    */
-  void checkMissingOptions() const;
+  void checkMissingOptions(void) const;
 };
 
 template <class T>
