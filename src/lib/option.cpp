@@ -18,11 +18,6 @@ Option& Option::addDescription(const std::string& description) {
   return *this;
 }
 
-Option& Option::addConstraint(const std::function<bool(const std::any&)>& constraint) {
-  constraints_.push_back(constraint);
-  return *this;
-}
-
 void Option::setValue(const std::any& value) {
   if (transform_before_check_) {
     value_ = applyTransformation(value);
@@ -62,9 +57,10 @@ Option& Option::transformBeforeCheck(void) {
 
 void Option::checkConstraints(const std::any& value) const {
   for (const auto& constraint : constraints_) {
-    if (!constraint(value)) {
-      if (transform_before_check_) throw ParsingError("Constraint not satisfied");
-      throw ParsingError("Constraint not satisfied, value: " + valueToString(value));
+    if (!constraint.call(value)) {
+      const std::string error_message = constraint.getErrorMessage();
+      throw ParsingError(error_message == "" ?
+        "Constraint not satisfied." : error_message);
     }
   }
 }

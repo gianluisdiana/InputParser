@@ -2,6 +2,7 @@
 #define _INPUT_OPTION_HPP_
 
 #include "./transformation.hpp"
+#include "./constraint.hpp"
 
 namespace input {
 
@@ -85,29 +86,19 @@ class Option {
 
   /**
    * @brief Adds a constraint to the option.
-   *
-   * @param constraint A function that receives the value of the option and
-   * returns a boolean indicating if the value is valid.
-   * @return The instance of the object that called this method.
-  */
-  Option& addConstraint(const std::function<bool(const std::any&)>& constraint);
-
-  /**
-   * @brief Adds a constraint to the option.
    *   This method must be used only if te value type is string or if the
    * transformationBeforeCheck method was called before.
    *
    * @tparam T The type of the value of the option
    * @param constraint A function that receives the value of the option and
    * returns a boolean indicating if the value is valid.
+   * @param error_message The error message to be displayed if the constraint
+   * fails.
    * @return The instance of the object that called this method.
   */
   template <class T>
-  inline Option& addConstraint(const std::function<bool(const T&)>& constraint) {
-    return addConstraint([constraint](const std::any& value) -> bool {
-      return constraint(std::any_cast<T>(value));
-    });
-  }
+  Option& addConstraint(const std::function<bool(const T&)>& constraint,
+    const std::string& error_message = "");
 
   /**
    * @brief Gets the value of the option.
@@ -256,7 +247,7 @@ class Option {
   // A function that transforms the value of the option
   std::function<std::any(const std::any&)> transformation_;
   // A list of constraints that the value of the option must satisfy
-  std::vector<std::function<bool(const std::any&)>> constraints_;
+  std::vector<Constraint> constraints_;
   // Indicates if the transformation function should be applied before or after
   // the constraints
   bool transform_before_check_;
@@ -295,6 +286,15 @@ template <class... Ts>
 std::enable_if_t<(is_string_type<Ts> && ...), Option&>
 Option::addNames(const Ts... names) {
   names_ = std::vector<std::string>{names...};
+  return *this;
+}
+
+template <class T>
+Option& Option::addConstraint(const std::function<bool(const T&)>& constraint,
+  const std::string& error_message) {
+  constraints_.emplace_back([constraint](const std::any& value) -> bool {
+    return constraint(std::any_cast<T>(value));
+  }, error_message);
   return *this;
 }
 
