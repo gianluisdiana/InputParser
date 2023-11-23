@@ -5,7 +5,7 @@
 namespace input {
 
 Option::Option(const OptionType& type) : type_{type}, value_{}, default_value_{},
-  names_{}, description_{}, transformation_{nullptr}, constraints_{},
+  names_{}, description_{}, required_{true}, transformation_{nullptr}, constraints_{},
   transform_before_check_{false} {}
 
 Option& Option::addDefaultValue(const std::any& default_value) {
@@ -50,6 +50,11 @@ Option& Option::toFloat(void) {
 
 Option& Option::transformBeforeCheck(void) {
   transform_before_check_ = true;
+  return *this;
+}
+
+Option& Option::beRequired(const bool required) {
+  required_ = required;
   return *this;
 }
 

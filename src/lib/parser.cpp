@@ -14,6 +14,15 @@ Parser& Parser::addOption(const std::function<Option()>& create_option) {
   return *this;
 }
 
+Parser& Parser::addHelpOption(void) {
+  return addOption([] -> auto {
+    return Option(OptionType::Flag)
+      .addNames("-h", "--help")
+      .addDescription("Shows how to use the program.")
+      .beRequired(false);
+  });
+}
+
 void Parser::parse(int argc, char* raw_argv[]) {
   std::vector<std::string> argv(raw_argv, raw_argv + argc);
   for (int index = 1; index < argc; ++index) {
@@ -72,7 +81,7 @@ int Parser::parseMultiple(const std::vector<std::string>& arguments,
 
 void Parser::checkMissingOptions(void) const {
   for (const auto& [option_name, option] : options) {
-    if (!option->hasValue() && !option->hasDefaultValue())
+    if (option->isRequired() && !option->hasValue() && !option->hasDefaultValue())
       throw ParsingError("Missing option " + option_name);
   }
 }
@@ -83,14 +92,19 @@ void Parser::displayUsage(void) const {
   std::set<Option*> option_names;
   for (const auto& [option_name, option] : options) {
     if (option_names.contains(option)) continue;
-    if (option->isFlag()) {
-      usage += " [" + option_name + "]";
-    } else if (option->isSingle()) {
-      usage += " [" + option_name + " extra_argument]";
+    const std::pair<std::string, std::string> brackets_or_not =
+      option->isRequired() ? std::make_pair("<", ">") : std::make_pair("[", "]");
+    usage += " " + brackets_or_not.first + option_name;
+    if (option->isSingle()) {
+      usage += " extra_argument";
     } else if (option->isMultiple()) {
-      usage += " [" + option_name + " extra_argument1 extra_argument2 ...]";
+      usage += " extra_argument1 extra_argument2 ...";
     }
-    description += option_name + " -> " + option->getDescription() + "\n";
+    usage += brackets_or_not.second;
+    if (option->getDescription() != "") {
+      description += option_name + " -> " + option->getDescription() + "\n";
+    }
+
     option_names.insert(option);
   }
   std::cout << usage << "\n\n" << description << "\n";

@@ -28,20 +28,17 @@ class Parser {
    *  The option will be a flag and will have the names "-h" and "--help".
    *
    *  Shortcut for:
+   * ```cpp
    *    addOption([] -> auto { return Option(OptionType::Flag)
    *      .addNames("-h", "--help")
-   *      .addDescription("Shows how to use the program.");
+   *      .addDescription("Shows how to use the program.")
+   *      .beRequired(false);
    *    });
+   * ```
    *
    * @return The instance of the object that called this method.
    */
-  Parser& addHelpOption(void) {
-    return addOption([] -> auto {
-      return Option(OptionType::Flag)
-        .addNames("-h", "--help")
-        .addDescription("Shows how to use the program.");
-    });
-  }
+  Parser& addHelpOption(void);
 
     /**
    * @brief Gets the value from an option.

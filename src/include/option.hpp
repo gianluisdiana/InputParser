@@ -57,6 +57,8 @@ class Option {
    */
   Option(const OptionType& type);
 
+  // ------------------------------- Adders ------------------------------- //
+
   /**
    * @brief Assigns a default value to the option
    *
@@ -100,6 +102,8 @@ class Option {
   Option& addConstraint(const std::function<bool(const T&)>& constraint,
     const std::string& error_message = "");
 
+  // ------------------------------- Getters ------------------------------- //
+
   /**
    * @brief Gets the value of the option.
    *   If the option has no value, the default value will be returned.
@@ -131,6 +135,8 @@ class Option {
    */
   void setValue(const std::any& value);
 
+  // ------------------------------- Checks ------------------------------- //
+
   /** @brief Checks if the option is a flag */
   inline bool isFlag() const {
     return type_ == OptionType::Flag;
@@ -144,6 +150,11 @@ class Option {
   /** @brief Checks if the option will require at least one extra parameter */
   inline bool isMultiple() const {
     return type_ == OptionType::Multiple;
+  }
+
+  /** @brief Checks if the option is required */
+  inline bool isRequired() const {
+    return required_;
   }
 
   /** @brief Checks if the option has a value defined */
@@ -225,6 +236,8 @@ class Option {
   template <class T>
   Option& elementsTo(const std::function<T(const std::string&)>& transformation);
 
+  // ---------------------------- Other methods ---------------------------- //
+
   /**
    * @brief If a transformation function was provided, apply the function
    * before checking the constraints (at the moment of setting the value).
@@ -232,6 +245,15 @@ class Option {
    * @return The instance of the object that called this method.
    */
   Option& transformBeforeCheck(void);
+
+  /**
+   * @brief Makes the option required or not.
+   *
+   * @param required Whether the option should be required or not. True by
+   * default.
+   * @return The instance of the object that called this method.
+   */
+  Option& beRequired(const bool required = true);
 
  private:
   // The type of the option
@@ -244,13 +266,15 @@ class Option {
   std::vector<std::string> names_;
   // Short explanation of what the option does
   std::string description_;
+  // Indicates if the option is required
+  bool required_;
+  // Indicates if the transformation function should be applied before or after
+  // the constraints
+  bool transform_before_check_;
   // A function that transforms the value of the option
   std::function<std::any(const std::any&)> transformation_;
   // A list of constraints that the value of the option must satisfy
   std::vector<Constraint> constraints_;
-  // Indicates if the transformation function should be applied before or after
-  // the constraints
-  bool transform_before_check_;
 
   /**
    * @brief Applies the transformation function to the provided value
