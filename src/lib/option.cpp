@@ -28,25 +28,6 @@ void Option::setValue(const std::any& value) {
   }
 }
 
-// ------------------------ Common transformations ------------------------ //
-
-Option& Option::toInt(void) {
-  if (isSingle()) transformation_ = Transformation::toInt;
-  else if (isMultiple()) transformation_ = Transformation::allElementsToInt;
-  return *this;
-}
-
-Option& Option::toDouble(void) {
-  if (isSingle()) transformation_ = Transformation::toDouble;
-  else if (isMultiple()) transformation_ = Transformation::allElementsToDouble;
-  return *this;
-}
-
-Option& Option::toFloat(void) {
-  if (isSingle()) transformation_ = Transformation::toFloat;
-  else if (isMultiple()) transformation_ = Transformation::allElementsToFloat;
-  return *this;
-}
 
 Option& Option::transformBeforeCheck(void) {
   transform_before_check_ = true;
@@ -68,16 +49,6 @@ void Option::checkConstraints(const std::any& value) const {
         "Constraint not satisfied." : error_message);
     }
   }
-}
-
-const std::string Option::valueToString(const std::any& value) const {
-  if (isFlag()) return std::any_cast<bool>(value) ? "true" : "false";
-  if (isSingle()) return std::any_cast<std::string>(value);
-  std::string string_value = "";
-  for (const auto& val : std::any_cast<std::vector<std::string>>(value)) {
-    string_value += val + " ";
-  }
-  return string_value;
 }
 
 } // namespace input

@@ -2,13 +2,15 @@
 #include <set>
 
 #include "../include/parser.hpp"
+#include "../include/option/flag_option.hpp"
 
 namespace input {
 
-Parser& Parser::addOption(const std::function<Option()>& create_option) {
-  Option* option = new Option(create_option());
+Parser& Parser::addOption(const std::function<Option*()>& create_option) {
+  Option* option = create_option();
   for (const auto& name : option->getNames()) {
     if (hasOption(name)) throw std::invalid_argument("Option already exists!");
+    std::cout << name << "\n";
     options[name] = option;
   }
   return *this;
@@ -16,7 +18,7 @@ Parser& Parser::addOption(const std::function<Option()>& create_option) {
 
 Parser& Parser::addHelpOption(void) {
   return addOption([] -> auto {
-    return Option(OptionType::Flag)
+    return &FlagOption()
       .addNames("-h", "--help")
       .addDescription("Shows how to use the program.")
       .beRequired(false);
@@ -85,6 +87,51 @@ void Parser::checkMissingOptions(void) const {
       throw ParsingError("Missing option " + option_name);
   }
 }
+
+/**
+ * Format:
+ * NAME:
+ *  ./exec_name
+ *
+ * SYNOPSIS:
+ *  ./exec_name [-f, --flag] [-s, --single <extra_argument>] [-m, --multiple <extra_argument1> <extra_argument2> ...]
+ *
+ * DESCRIPTION:
+ * Program description.
+ *
+ * -h, --help
+ *   Shows how to use the program.
+ *
+ * -f, --flag
+ *   Flag description.
+ *
+ * -s, --single <extra_argument>
+ *   Single description.
+ *
+ * -m, --multiple <extra_argument1> <extra_argument2> ...
+ *   Multiple description.
+ *
+ * AUTHOR:
+ *   Written by ...
+ */
+// void Parser::displayManual(void) const {
+//   std::string synopsis = "SYNOPSIS:\n\t" + getExecutableName() + " ";
+//   std::string description = "DESCRIPTION:\n\t" + getDescription() + "\n";
+
+//   std::set<Option*> displayed_options;
+//   for (const auto& [_, option] : options) {
+//     if (displayed_options.contains(option)) continue;
+//     const std::vector<std::string>& names = option->getNames();
+//     for (size_t name_index = 0; name_index < names.size() - 1; ++name_index) {
+//       description += names[name_index] + ", ";
+//     }
+//     description += names.back() + ":\n\t" + option->getDescription() + "\n\n";
+//     displayed_options.insert(option);
+//   }
+//   const std::string name = "NAME:\n\t" + getExecutableName() + "\n";
+//   const std::string author = "AUTHOR:\n\tWritten by " + getAuthor() + "\n";
+//   std::cout << name << "\n" << synopsis << "\n" << description << "\n" << author << "\n";
+// }
 
 void Parser::displayUsage(void) const {
   std::string usage = "Usage: ./exec_name";

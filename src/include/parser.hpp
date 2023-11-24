@@ -21,7 +21,7 @@ class Parser {
    * @param create_option A function that returns the option.
    * @return The instance of the object that called this method.
    */
-  Parser& addOption(const std::function<Option()>& create_option);
+  Parser& addOption(const std::function<Option*()>& create_option);
 
   /**
    * @brief Adds a basic help option to the parser.

@@ -170,71 +170,28 @@ class Option {
   // ----------------------- Common transformations ----------------------- //
 
   /**
-   * @brief If the option is a single option, transforms the value of the
-   * option to an integer. If the option is a multiple option, transforms all
-   * the values of the option to integers.
+   * @brief Defines a transformation function that transforms the value of the
+   * option to an integer. Must be implemented by the derived classes.
    *
    * @return The instance of the object that called this method.
    */
-  Option& toInt(void);
+  virtual Option& toInt(void) = 0;
 
   /**
-   * @brief If the option is a single option, transforms the value of the
-   * option to an double. If the option is a multiple option, transforms all
-   * the values of the option to doubles.
+   * @brief Defines a transformation function that transforms the value of the
+   * option to a double. Must be implemented by the derived classes.
    *
    * @return The instance of the object that called this method.
    */
-  Option& toDouble(void);
+  virtual Option& toDouble(void) = 0;
 
   /**
-   * @brief If the option is a single option, transforms the value of the
-   * option to an float. If the option is a multiple option, transforms all
-   * the values of the option to floats.
+   * @brief Defines a transformation function that transforms the value of the
+   * option to a float. Must be implemented by the derived classes.
    *
    * @return The instance of the object that called this method.
    */
-  Option& toFloat(void);
-
-  /**
-   * @brief Transforms the value of the option using the provided function.
-   * The function must take a const std::string& as argument and return the
-   * type provided as template argument.
-   *
-   * Only works for single options.
-   *
-   * @tparam T The type to transform the value to.
-   * @param transformation The function that transforms the value of the option
-   * @return The instance of the object that called this method.
-   */
-  template <class T>
-  Option& to(const std::function<T(const std::string&)>& transformation);
-
-  /**
-   * @brief Transform the vector that contains the option's values using the
-   * provided function. The function must take a const std::vector<std::string>&
-   * as argument and return the type provided as template argument.
-   *
-   * Only works for multiple options.
-   *
-   * @tparam T The type to transform the vector to.
-   * @param transformation The function that transforms the vector of values
-   * @return The instance of the object that called this method.
-   */
-  template <class T>
-  Option& to(const std::function<T(const std::vector<std::string>&)>& transformation);
-
-  /**
-   * @brief Transform each option value using the provided function.
-   * The function must take a const std::string& as argument and return the
-   * type provided as template argument.
-   *
-   * @tparam T The type to transform the values to.
-   * @param transformation The function that transforms the values of the option
-   * @return The instance of the object that called this method.
-   */
-  template <class T>
-  Option& elementsTo(const std::function<T(const std::string&)>& transformation);
+  virtual Option& toFloat(void) = 0;
 
   // ---------------------------- Other methods ---------------------------- //
 
@@ -255,7 +212,7 @@ class Option {
    */
   Option& beRequired(const bool required = true);
 
- private:
+ protected:
   // The type of the option
   const OptionType type_;
   // The value of the option
@@ -294,16 +251,6 @@ class Option {
    * @param value The value to check
    */
   void checkConstraints(const std::any& value) const;
-
-  /**
-   * @brief Depending on the type of the option, converts the value to a
-   * string.
-   *  If the option is multiple, the values will be separated by a space.
-   *
-   * @param value The value to convert
-   * @return The string representation of the value
-   */
-  const std::string valueToString(const std::any& value) const;
 };
 
 template <class... Ts>
@@ -326,37 +273,6 @@ template <class T>
 const T Option::getValue(void) const {
   if (!hasValue()) return std::any_cast<T>(default_value_);
   return std::any_cast<T>(value_);
-}
-
-template <class T>
-Option& Option::to(const std::function<T(const std::string&)>& transformation) {
-  transformation_ = [transformation](const std::any& value) -> auto {
-    return Transformation::to<T>(value, transformation);
-  };
-  return *this;
-}
-
-template <class T>
-Option& Option::to(
-  const std::function<T(const std::vector<std::string>&)>& transformation) {
-  transformation_ = [transformation](const std::any& value) -> auto {
-    return Transformation::to<T>(value, transformation);
-  };
-  return *this;
-}
-
-template <class T>
-Option& Option::elementsTo(const std::function<T(const std::string&)>& transformation) {
-  if (isMultiple()) {
-    transformation_ = [transformation](const std::any& value) -> auto {
-      return Transformation::elementsTo<T>(value, transformation);
-    };
-  } else {
-    transformation_ = [transformation](const std::any& value) -> auto {
-      return Transformation::to<T>(value, transformation);
-    };
-  }
-  return *this;
 }
 
 } // namespace input
