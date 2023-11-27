@@ -1,3 +1,17 @@
+/**
+ * @file parser.hpp
+ * @author Gian Luis Bolivar Diana (gianluisbolivar1@gmail.com)
+ * @version 0.1
+ * @date November 27, 2023
+ * @copyright Copyright (c) 2023
+ *
+ * @brief File containing the implementation of a c++ command line parser
+ * that uses the Option class to represent the options that can be parsed
+ * and the ParsingError class to represent the errors that can be generated
+ * when parsing the arguments provided.
+ *
+ */
+
 #include <iostream>
 #include <set>
 
