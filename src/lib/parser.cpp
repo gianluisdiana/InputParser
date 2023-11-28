@@ -33,7 +33,7 @@ Parser& Parser::addHelpOption(void) {
     return Option(OptionType::Flag)
       .addNames("-h", "--help")
       .addDescription("Shows how to use the program.")
-      .beRequired(false);
+      .addDefaultValue(false);
   });
 }
 

@@ -21,7 +21,7 @@ Option::Option(const OptionType& type) : type_{type}, value_{}, default_value_{}
 
 Option& Option::addDefaultValue(const std::any& default_value) {
   default_value_ = default_value;
-  return *this;
+  return beRequired(false);
 }
 
 Option& Option::addDescription(const std::string& description) {

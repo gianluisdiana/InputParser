@@ -79,7 +79,8 @@ class Option {
   // ------------------------------- Adders ------------------------------- //
 
   /**
-   * @brief Assigns a default value to the option
+   * @brief Assigns a default value to the option.
+   *  It also makes the option not required.
    *
    * @param value The default value to assign to the option
    * @return The instance of the object that called this method
