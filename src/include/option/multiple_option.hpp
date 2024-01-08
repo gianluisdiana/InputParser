@@ -16,7 +16,16 @@ namespace input {
  */
 class MultipleOption : public Option {
  public:
-  MultipleOption(void) : Option(OptionType::Multiple) {}
+  MultipleOption(void) : Option() {}
+
+  /**
+   * @brief Indicates if the option is a multiple option.
+   *
+   * @return True.
+   */
+  inline bool isMultiple(void) const override {
+    return true;
+  }
 
   /**
    * @brief Transform the vector that contains the option's values using the

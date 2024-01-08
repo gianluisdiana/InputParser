@@ -15,47 +15,13 @@ template <class T>
 constexpr const bool
 is_string_type = std::is_same_v<T, std::string> || std::is_same_v<T, const char*>;
 
-/** @brief The type of an option */
-enum class OptionType {
-  /**
-   *  @brief A flag option is an option that must be placed alone. Represents a
-   * boolean value.
-   *
-   * @example
-   *   <-d>
-   *    └─> The name of the flag.
-   */
-  Flag,
-  /**
-   * @brief A single option is an option that requires one more argument.
-   *
-   * @example
-   *  <-f> <file_name>
-   *    │       └─> The extra required argument.
-   *    └─> The name of the option.
-   */
-  Single,
-  /**
-   * @brief A multiple option is an option that requires at least one more
-   * argument.
-   *
-   * @example
-   *   <-c> <chain1 chain2 chain3 ...>
-   *    │            └─> The extra required arguments.
-   *    └─> The name of the option.
-   */
-  Multiple
-};
-
 /** @brief A class that represents a command line option */
 class Option {
  public:
   /**
    * @brief Constructs an empty option
-   *
-   * @param type The type of the option
    */
-  Option(const OptionType& type);
+  Option();
 
   // ------------------------------- Adders ------------------------------- //
 
@@ -138,18 +104,18 @@ class Option {
   // ------------------------------- Checks ------------------------------- //
 
   /** @brief Checks if the option is a flag */
-  inline bool isFlag() const {
-    return type_ == OptionType::Flag;
+  virtual inline bool isFlag() const {
+    return false;
   }
 
   /** @brief Checks if the option will require an extra parameter */
-  inline bool isSingle() const {
-    return type_ == OptionType::Single;
+  virtual inline bool isSingle() const {
+    return false;
   }
 
   /** @brief Checks if the option will require at least one extra parameter */
-  inline bool isMultiple() const {
-    return type_ == OptionType::Multiple;
+  virtual inline bool isMultiple() const {
+    return false;
   }
 
   /** @brief Checks if the option is required */
@@ -213,8 +179,6 @@ class Option {
   Option& beRequired(const bool required = true);
 
  protected:
-  // The type of the option
-  const OptionType type_;
   // The value of the option
   std::any value_;
   // The default value of the option

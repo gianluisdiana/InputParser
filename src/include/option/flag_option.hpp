@@ -15,7 +15,16 @@ namespace input {
  */
 class FlagOption : public Option {
  public:
-  FlagOption(void) : Option(OptionType::Flag) {}
+  FlagOption(void) : Option() {}
+
+  /**
+   * @brief Indicates if the option is a flag.
+   *
+   * @return True.
+   */
+  inline bool isFlag() const override {
+    return true;
+  }
 
   /**
    * @brief Transforms the value of the option using the provided function.

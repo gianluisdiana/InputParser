@@ -15,7 +15,16 @@ namespace input {
  */
 class SingleOption : public Option {
  public:
-  SingleOption(void) : Option(OptionType::Single) {}
+  SingleOption(void) : Option() {}
+
+  /**
+   * @brief Indicates if the option is a single option.
+   *
+   * @return True.
+   */
+  inline bool isSingle(void) const override {
+    return true;
+  }
 
   /**
    * @brief Transforms the value of the option using the provided function.
