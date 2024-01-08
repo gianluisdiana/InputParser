@@ -6,7 +6,7 @@
  * @copyright Copyright (c) 2023
  *
  * @brief File containing the implementation of a common option used by the
- * parser, that can be a flag, a single value or multiple values.
+ * parser, that can be a flag, a single value or compound values.
  *
  */
 

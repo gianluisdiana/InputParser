@@ -18,13 +18,13 @@
 
 #include "./parsing_error.hpp"
 #include "../include/option/flag_option.hpp"
-#include "../include/option/multiple_option.hpp"
+#include "../include/option/compound_option.hpp"
 #include "../include/option/single_option.hpp"
 
 namespace input {
 
 /** @brief The type of an option */
-using Option = std::variant<FlagOption, MultipleOption, SingleOption>;
+using Option = std::variant<FlagOption, CompoundOption, SingleOption>;
 
 /**
  * @brief Represents a parser of the arguments provided when the program is
@@ -34,7 +34,7 @@ class Parser {
   public:
   /**
    * @brief Adds an option to be parsed. The option must be a flag, single or
-   * multiple option.
+   * compound option.
    *
    * @param create_option A function that returns the option.
    * @return The instance of the object that called this method.
@@ -115,7 +115,7 @@ class Parser {
   bool hasSingle(const std::string& name) const;
 
   /**
-   * @brief Tells if the parser has a multiple option with the name provided.
+   * @brief Tells if the parser has a compound option with the name provided.
    *
    * @param name The name of the possible option.
    * @return Whether the parser registered the option or not.
@@ -170,11 +170,11 @@ class Parser {
     const unsigned int index);
 
   /**
-   * @brief Reads all the extra arguments provided after the multiple option.
+   * @brief Reads all the extra arguments provided after the compound option.
    *   Checks if the arguments were supplied and are not another option specified.
    *
    * @param arguments All the arguments provided by command line.
-   * @param index The index of the multiple option to parse.
+   * @param index The index of the compound option to parse.
    * @return How many arguments have been read.
    */
   int parseMultiple(const std::vector<std::string>& arguments,

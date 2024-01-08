@@ -82,7 +82,7 @@ class Transformation {
     });
   }
 
-  // ------------------- Multiple values transformations ------------------- //
+  // ------------------- Compound values transformations ------------------- //
 
   /**
    * @brief Transforma all the elements of a string vector to the type T using

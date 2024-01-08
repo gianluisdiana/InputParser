@@ -119,7 +119,7 @@ void Parser::checkMissingOptions(void) const {
  *  ./exec_name
  *
  * SYNOPSIS:
- *  ./exec_name [-f, --flag] [-s, --single <extra_argument>] [-m, --multiple <extra_argument1> <extra_argument2> ...]
+ *  ./exec_name [-f, --flag] [-s, --single <extra_argument>] [-c, --compound <extra_argument1> <extra_argument2> ...]
  *
  * DESCRIPTION:
  * Program description.
@@ -133,8 +133,8 @@ void Parser::checkMissingOptions(void) const {
  * -s, --single <extra_argument>
  *   Single description.
  *
- * -m, --multiple <extra_argument1> <extra_argument2> ...
- *   Multiple description.
+ * -c, --compound <extra_argument1> <extra_argument2> ...
+ *   Compound description.
  *
  * AUTHOR:
  *   Written by ...
@@ -172,7 +172,7 @@ void Parser::displayUsage(void) const {
       using T = std::decay_t<decltype(opt)>;
       if constexpr (std::is_same_v<T, SingleOption>) {
         usage += " extra_argument";
-      } else if constexpr (std::is_same_v<T, MultipleOption>) {
+      } else if constexpr (std::is_same_v<T, CompoundOption>) {
         usage += " extra_argument1 extra_argument2 ...";
       }
       usage += brackets_or_not.second;

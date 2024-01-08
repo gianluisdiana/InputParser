@@ -12,7 +12,7 @@
  * represented by a boolean value.
  *  - A single option: An option that requires one extra parameter. It is
  * represented by a value of any type.
- *  - A multiple option: An option that requires at least one extra parameter.
+ *  - A compound option: An option that requires at least one extra parameter.
  * It is represented by a vector of values of any type.
  *
  */
