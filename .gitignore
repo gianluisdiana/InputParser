@@ -7,3 +7,6 @@
 
 # Object files
 /*.o
+
+# CMake generated files
+build/
