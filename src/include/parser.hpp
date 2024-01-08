@@ -1,3 +1,14 @@
+/**
+ * @file parser.hpp
+ * @author Gian Luis Bolivar Diana (gianluisbolivar1@gmail.com)
+ * @version 0.1
+ * @date November 27, 2023
+ * @copyright Copyright (c) 2023
+ *
+ * @brief File containing the description of a c++ command line parser.
+ *
+ */
+
 #ifndef _INPUT_PARSER_HPP_
 #define _INPUT_PARSER_HPP_
 

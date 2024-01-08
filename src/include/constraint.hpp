@@ -1,3 +1,17 @@
+/**
+ * @file constraint.hpp
+ * @author Gian Luis Bolivar Diana (gianluisbolivar1@gmail.com)
+ * @version 0.1
+ * @date November 27, 2023
+ * @copyright Copyright (c) 2023
+ *
+ * @brief File containing the description of a constraint that can be used
+ * to validate the arguments provided to the parser.
+ *   The constraint is a function that must return a boolean value, if the
+ * function returns false, an error message is displayed.
+ *
+ */
+
 #ifndef _INPUT_CONSTRAINT_HPP_
 #define _INPUT_CONSTRAINT_HPP_
 

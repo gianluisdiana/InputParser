@@ -1,3 +1,22 @@
+/**
+ * @file parser.hpp
+ * @author Gian Luis Bolivar Diana (gianluisbolivar1@gmail.com)
+ * @version 0.1
+ * @date November 27, 2023
+ * @copyright Copyright (c) 2023
+ *
+ * @brief File containing the description of a common option used by the
+ * parser.
+ *   An option can be:
+ *  - A flag: An option that does not require any extra parameter. It is
+ * represented by a boolean value.
+ *  - A single option: An option that requires one extra parameter. It is
+ * represented by a value of any type.
+ *  - A multiple option: An option that requires at least one extra parameter.
+ * It is represented by a vector of values of any type.
+ *
+ */
+
 #ifndef _INPUT_OPTION_HPP_
 #define _INPUT_OPTION_HPP_
 
@@ -26,7 +45,8 @@ class Option {
   // ------------------------------- Adders ------------------------------- //
 
   /**
-   * @brief Assigns a default value to the option
+   * @brief Assigns a default value to the option.
+   *  It also makes the option not required.
    *
    * @param value The default value to assign to the option
    * @return The instance of the object that called this method
