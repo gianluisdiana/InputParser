@@ -1,7 +1,7 @@
 #ifndef _INPUT_OPTION_SINGLE_OPTION_HPP_
 #define _INPUT_OPTION_SINGLE_OPTION_HPP_
 
-#include "../option.hpp" // #include "./base_option.hpp"
+#include "./base_option.hpp"
 
 namespace input {
 
@@ -13,9 +13,9 @@ namespace input {
  *    │       └─> The extra required argument.
  *    └─> The name of the option.
  */
-class SingleOption : public Option {
+class SingleOption : public BaseOption {
  public:
-  SingleOption(void) : Option() {}
+  SingleOption(void) : BaseOption() {}
 
   /**
    * @brief Indicates if the option is a single option.
@@ -83,31 +83,31 @@ class SingleOption : public Option {
   // ------------------------ Static casted methods ------------------------ //
 
   inline SingleOption& addDefaultValue(const std::any& value) {
-    return static_cast<SingleOption&>(Option::addDefaultValue(value));
+    return static_cast<SingleOption&>(BaseOption::addDefaultValue(value));
   }
 
   inline SingleOption& addDescription(const std::string& description) {
-    return static_cast<SingleOption&>(Option::addDescription(description));
+    return static_cast<SingleOption&>(BaseOption::addDescription(description));
   }
 
   template <class... Ts>
   std::enable_if_t<(is_string_type<Ts> && ...), SingleOption&>
   inline addNames(const Ts... names) {
-    return static_cast<SingleOption&>(Option::addNames(names...));
+    return static_cast<SingleOption&>(BaseOption::addNames(names...));
   }
 
   template <class T> inline SingleOption&
   addConstraint(const std::function<bool(const T&)>& constraint,
     const std::string& error_message) {
-    return static_cast<SingleOption&>(Option::addConstraint(constraint, error_message));
+    return static_cast<SingleOption&>(BaseOption::addConstraint(constraint, error_message));
   }
 
   inline SingleOption& transformBeforeCheck(void) {
-    return static_cast<SingleOption&>(Option::transformBeforeCheck());
+    return static_cast<SingleOption&>(BaseOption::transformBeforeCheck());
   }
 
   inline SingleOption& beRequired(const bool& required = true) {
-    return static_cast<SingleOption&>(Option::beRequired(required));
+    return static_cast<SingleOption&>(BaseOption::beRequired(required));
   }
 };
 

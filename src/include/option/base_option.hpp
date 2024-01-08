@@ -17,11 +17,11 @@
  *
  */
 
-#ifndef _INPUT_OPTION_HPP_
-#define _INPUT_OPTION_HPP_
+#ifndef _INPUT_BASE_OPTION_HPP_
+#define _INPUT_BASE_OPTION_HPP_
 
-#include "./transformation.hpp"
-#include "./constraint.hpp"
+#include "../transformation.hpp"
+#include "../constraint.hpp"
 
 namespace input {
 
@@ -35,12 +35,12 @@ constexpr const bool
 is_string_type = std::is_same_v<T, std::string> || std::is_same_v<T, const char*>;
 
 /** @brief A class that represents a command line option */
-class Option {
+class BaseOption {
  public:
   /**
    * @brief Constructs an empty option
    */
-  Option();
+  BaseOption();
 
   // ------------------------------- Adders ------------------------------- //
 
@@ -51,7 +51,7 @@ class Option {
    * @param value The default value to assign to the option
    * @return The instance of the object that called this method
    */
-  Option& addDefaultValue(const std::any& value);
+  BaseOption& addDefaultValue(const std::any& value);
 
   /**
    * @brief Assigns a list of names to the option
@@ -61,7 +61,7 @@ class Option {
    * @return The instance of the object that called this method.
    */
   template <class... Ts>
-  std::enable_if_t<(is_string_type<Ts> && ...), Option&>
+  std::enable_if_t<(is_string_type<Ts> && ...), BaseOption&>
   addNames(const Ts... names);
 
   /**
@@ -70,7 +70,7 @@ class Option {
    * @param description The new description
    * @return The instance of the object that called this method.
    */
-  Option& addDescription(const std::string& description);
+  BaseOption& addDescription(const std::string& description);
 
   /**
    * @brief Adds a constraint to the option.
@@ -85,7 +85,7 @@ class Option {
    * @return The instance of the object that called this method.
   */
   template <class T>
-  Option& addConstraint(const std::function<bool(const T&)>& constraint,
+  BaseOption& addConstraint(const std::function<bool(const T&)>& constraint,
     const std::string& error_message = "");
 
   // ------------------------------- Getters ------------------------------- //
@@ -161,7 +161,7 @@ class Option {
    *
    * @return The instance of the object that called this method.
    */
-  virtual Option& toInt(void) = 0;
+  virtual BaseOption& toInt(void) = 0;
 
   /**
    * @brief Defines a transformation function that transforms the value of the
@@ -169,7 +169,7 @@ class Option {
    *
    * @return The instance of the object that called this method.
    */
-  virtual Option& toDouble(void) = 0;
+  virtual BaseOption& toDouble(void) = 0;
 
   /**
    * @brief Defines a transformation function that transforms the value of the
@@ -177,7 +177,7 @@ class Option {
    *
    * @return The instance of the object that called this method.
    */
-  virtual Option& toFloat(void) = 0;
+  virtual BaseOption& toFloat(void) = 0;
 
   // ---------------------------- Other methods ---------------------------- //
 
@@ -187,7 +187,7 @@ class Option {
    *
    * @return The instance of the object that called this method.
    */
-  Option& transformBeforeCheck(void);
+  BaseOption& transformBeforeCheck(void);
 
   /**
    * @brief Makes the option required or not.
@@ -196,7 +196,7 @@ class Option {
    * default.
    * @return The instance of the object that called this method.
    */
-  Option& beRequired(const bool required = true);
+  BaseOption& beRequired(const bool required = true);
 
  protected:
   // The value of the option
@@ -238,14 +238,14 @@ class Option {
 };
 
 template <class... Ts>
-std::enable_if_t<(is_string_type<Ts> && ...), Option&>
-Option::addNames(const Ts... names) {
+std::enable_if_t<(is_string_type<Ts> && ...), BaseOption&>
+BaseOption::addNames(const Ts... names) {
   names_ = std::vector<std::string>{names...};
   return *this;
 }
 
 template <class T>
-Option& Option::addConstraint(const std::function<bool(const T&)>& constraint,
+BaseOption& BaseOption::addConstraint(const std::function<bool(const T&)>& constraint,
   const std::string& error_message) {
   constraints_.emplace_back([constraint](const std::any& value) -> bool {
     return constraint(std::any_cast<T>(value));
@@ -254,11 +254,11 @@ Option& Option::addConstraint(const std::function<bool(const T&)>& constraint,
 }
 
 template <class T>
-const T Option::getValue(void) const {
+const T BaseOption::getValue(void) const {
   if (!hasValue()) return std::any_cast<T>(default_value_);
   return std::any_cast<T>(value_);
 }
 
 } // namespace input
 
-#endif // _INPUT_OPTION_HPP_
+#endif // _INPUT_BASE_OPTION_HPP_

@@ -6,7 +6,7 @@
  * @copyright Copyright (c) 2023
  *
  * @brief File containing the implementation of a c++ command line parser
- * that uses the Option class to represent the options that can be parsed
+ * that uses the BaseOption class to represent the options that can be parsed
  * and the ParsingError class to represent the errors that can be generated
  * when parsing the arguments provided.
  *
@@ -19,8 +19,8 @@
 
 namespace input {
 
-Parser& Parser::addOption(const std::function<Options()>& create_option) {
-  auto option = std::make_shared<Options>(create_option());
+Parser& Parser::addOption(const std::function<Option()>& create_option) {
+  auto option = std::make_shared<Option>(create_option());
   std::visit([this, option](auto&& opt) {
     for (const auto& name : opt.getNames()) {
       if (this->hasOption(name)) throw std::invalid_argument("Option already exists!");
@@ -72,7 +72,7 @@ bool Parser::hasMultiple(const std::string& name) const {
   }, *options.at(name));
 }
 
-void Parser::setOptionValue(Options& option, const std::any& value) {
+void Parser::setOptionValue(Option& option, const std::any& value) {
   std::visit([&value](auto&& opt) {
     opt.setValue(value);
   }, option);
@@ -161,7 +161,7 @@ void Parser::checkMissingOptions(void) const {
 void Parser::displayUsage(void) const {
   std::string usage = "Usage: ./exec_name";
   std::string description = "";
-  std::set<std::shared_ptr<Options>> options_displayed;
+  std::set<std::shared_ptr<Option>> options_displayed;
   for (const auto& [option_name, option] : options) {
     if (options_displayed.contains(option)) continue;
     std::visit([&usage, option_name, &description](auto&& opt) {

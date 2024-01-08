@@ -11,8 +11,8 @@ namespace input {
 /** @brief A collection of functions that transform values.*/
 class Transformation {
  private:
-  // Allow Option to access private members
-  friend class Option;
+  // Allow BaseOption to access private members
+  friend class BaseOption;
   // -------------------- Single value transformations -------------------- //
 
   /**

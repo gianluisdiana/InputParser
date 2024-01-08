@@ -1,7 +1,7 @@
 #ifndef _INPUT_OPTION_MULTIPLE_OPTION_HPP_
 #define _INPUT_OPTION_MULTIPLE_OPTION_HPP_
 
-#include "../option.hpp" // #include "./base_option.hpp"
+#include "./base_option.hpp"
 
 namespace input {
 
@@ -14,9 +14,9 @@ namespace input {
  *    │            └─> The extra required arguments.
  *    └─> The name of the option.
  */
-class MultipleOption : public Option {
+class MultipleOption : public BaseOption {
  public:
-  MultipleOption(void) : Option() {}
+  MultipleOption(void) : BaseOption() {}
 
   /**
    * @brief Indicates if the option is a multiple option.
@@ -92,31 +92,31 @@ class MultipleOption : public Option {
   // ------------------------ Static casted methods ------------------------ //
 
   inline MultipleOption& addDefaultValue(const std::any& value) {
-    return static_cast<MultipleOption&>(Option::addDefaultValue(value));
+    return static_cast<MultipleOption&>(BaseOption::addDefaultValue(value));
   }
 
   inline MultipleOption& addDescription(const std::string& description) {
-    return static_cast<MultipleOption&>(Option::addDescription(description));
+    return static_cast<MultipleOption&>(BaseOption::addDescription(description));
   }
 
   template <class... Ts>
   std::enable_if_t<(is_string_type<Ts> && ...), MultipleOption&>
   inline addNames(const Ts... names) {
-    return static_cast<MultipleOption&>(Option::addNames(names...));
+    return static_cast<MultipleOption&>(BaseOption::addNames(names...));
   }
 
   template <class T> inline MultipleOption&
   addConstraint(const std::function<bool(const T&)>& constraint,
     const std::string& error_message) {
-    return static_cast<MultipleOption&>(Option::addConstraint(constraint, error_message));
+    return static_cast<MultipleOption&>(BaseOption::addConstraint(constraint, error_message));
   }
 
   inline MultipleOption& transformBeforeCheck(void) {
-    return static_cast<MultipleOption&>(Option::transformBeforeCheck());
+    return static_cast<MultipleOption&>(BaseOption::transformBeforeCheck());
   }
 
   inline MultipleOption& beRequired(const bool& required = true) {
-    return static_cast<MultipleOption&>(Option::beRequired(required));
+    return static_cast<MultipleOption&>(BaseOption::beRequired(required));
   }
 };
 

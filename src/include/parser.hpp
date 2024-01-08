@@ -24,7 +24,7 @@
 namespace input {
 
 /** @brief The type of an option */
-using Options = std::variant<FlagOption, MultipleOption, SingleOption>;
+using Option = std::variant<FlagOption, MultipleOption, SingleOption>;
 
 /**
  * @brief Represents a parser of the arguments provided when the program is
@@ -39,7 +39,7 @@ class Parser {
    * @param create_option A function that returns the option.
    * @return The instance of the object that called this method.
    */
-  Parser& addOption(const std::function<Options()>& create_option);
+  Parser& addOption(const std::function<Option()>& create_option);
 
   /**
    * @brief Adds a basic help option to the parser.
@@ -86,7 +86,7 @@ class Parser {
 
  private:
   // All the options registered.
-  std::unordered_map<std::string, std::shared_ptr<Options>> options;
+  std::unordered_map<std::string, std::shared_ptr<Option>> options;
 
   /**
    * @brief Tells if the parser has an option with the name provided.
@@ -147,7 +147,7 @@ class Parser {
    * @param option The option to be changed.
    * @param value The value to be assigned to the option.
    */
-  void setOptionValue(Options& option, const std::any& value);
+  void setOptionValue(Option& option, const std::any& value);
 
   /**
    * @brief Changes the flag option provided to true.

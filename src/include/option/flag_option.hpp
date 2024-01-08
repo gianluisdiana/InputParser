@@ -1,7 +1,7 @@
 #ifndef _INPUT_FLAG_OPTION_HPP_
 #define _INPUT_FLAG_OPTION_HPP_
 
-#include "../option.hpp" // #include "./base_option.hpp"
+#include "./base_option.hpp"
 
 namespace input {
 
@@ -13,9 +13,9 @@ namespace input {
  *   <-d>
  *    └─> The name of the flag.
  */
-class FlagOption : public Option {
+class FlagOption : public BaseOption {
  public:
-  FlagOption(void) : Option() {}
+  FlagOption(void) : BaseOption() {}
 
   /**
    * @brief Indicates if the option is a flag.
@@ -74,31 +74,31 @@ class FlagOption : public Option {
   // ------------------------ Static casted methods ------------------------ //
 
   inline FlagOption& addDefaultValue(const std::any& value) {
-    return static_cast<FlagOption&>(Option::addDefaultValue(value));
+    return static_cast<FlagOption&>(BaseOption::addDefaultValue(value));
   }
 
   inline FlagOption& addDescription(const std::string& description) {
-    return static_cast<FlagOption&>(Option::addDescription(description));
+    return static_cast<FlagOption&>(BaseOption::addDescription(description));
   }
 
   template <class... Ts>
   std::enable_if_t<(is_string_type<Ts> && ...), FlagOption&>
   inline addNames(const Ts... names) {
-    return static_cast<FlagOption&>(Option::addNames(names...));
+    return static_cast<FlagOption&>(BaseOption::addNames(names...));
   }
 
   template <class T> inline FlagOption&
   addConstraint(const std::function<bool(const T&)>& constraint,
     const std::string& error_message) {
-    return static_cast<FlagOption&>(Option::addConstraint(constraint, error_message));
+    return static_cast<FlagOption&>(BaseOption::addConstraint(constraint, error_message));
   }
 
   inline FlagOption& transformBeforeCheck(void) {
-    return static_cast<FlagOption&>(Option::transformBeforeCheck());
+    return static_cast<FlagOption&>(BaseOption::transformBeforeCheck());
   }
 
   inline FlagOption& beRequired(const bool& required = true) {
-    return static_cast<FlagOption&>(Option::beRequired(required));
+    return static_cast<FlagOption&>(BaseOption::beRequired(required));
   }
 };
 
