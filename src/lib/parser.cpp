@@ -161,24 +161,27 @@ void Parser::checkMissingOptions(void) const {
 void Parser::displayUsage(void) const {
   std::string usage = "Usage: ./exec_name";
   std::string description = "";
-  std::set<Option*> option_names;
-  // for (const auto& [option_name, option] : options) {
-  //   if (option_names.contains(option)) continue;
-  //   const std::pair<std::string, std::string> brackets_or_not =
-  //     option->isRequired() ? std::make_pair("<", ">") : std::make_pair("[", "]");
-  //   usage += " " + brackets_or_not.first + option_name;
-  //   if (option->isSingle()) {
-  //     usage += " extra_argument";
-  //   } else if (option->isMultiple()) {
-  //     usage += " extra_argument1 extra_argument2 ...";
-  //   }
-  //   usage += brackets_or_not.second;
-  //   if (option->getDescription() != "") {
-  //     description += option_name + " -> " + option->getDescription() + "\n";
-  //   }
-
-  //   option_names.insert(option);
-  // }
+  std::set<std::shared_ptr<Options>> options_displayed;
+  for (const auto& [option_name, option] : options) {
+    if (options_displayed.contains(option)) continue;
+    std::visit([&usage, option_name, &description](auto&& opt) {
+      const std::pair<std::string, std::string> brackets_or_not = opt.isRequired() ?
+        std::make_pair("<", ">") : std::make_pair("[", "]");
+      usage += " " + brackets_or_not.first + option_name;
+      // + opt.getExtraArgumentName() + brackets_or_not.second;
+      using T = std::decay_t<decltype(opt)>;
+      if constexpr (std::is_same_v<T, SingleOption>) {
+        usage += " extra_argument";
+      } else if constexpr (std::is_same_v<T, MultipleOption>) {
+        usage += " extra_argument1 extra_argument2 ...";
+      }
+      usage += brackets_or_not.second;
+      if (opt.getDescription() != "") {
+        description += option_name + " -> " + opt.getDescription() + "\n";
+      }
+    }, *option);
+    options_displayed.insert(option);
+  }
   std::cout << usage << "\n\n" << description << "\n";
 }
 
