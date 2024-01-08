@@ -20,6 +20,8 @@
 #ifndef _INPUT_BASE_OPTION_HPP_
 #define _INPUT_BASE_OPTION_HPP_
 
+#include <stdexcept>
+
 #include "../transformation.hpp"
 #include "../constraint.hpp"
 
@@ -102,6 +104,16 @@ class BaseOption {
   template <class T>
   const T getValue(void) const;
 
+  /**
+   * @brief Gets the default value of the option.
+   *   If no default value was provided, an exception will be thrown.
+   *
+   * @tparam T The type of the value to be returned.
+   * @return The default value of the option casted to the specified type.
+   */
+  template <class T>
+  const T getDefaultValue(void) const;
+
   /** @brief Gets the names of the option */
   inline const std::vector<std::string>& getNames(void) const {
     return names_;
@@ -111,6 +123,8 @@ class BaseOption {
   inline const std::string& getDescription(void) const {
     return description_;
   }
+
+  // ------------------------------- Setters ------------------------------- //
 
   /**
    * @brief Sets the value of the option.
@@ -257,6 +271,12 @@ template <class T>
 const T BaseOption::getValue(void) const {
   if (!hasValue()) return std::any_cast<T>(applyTransformation(default_value_));
   return std::any_cast<T>(value_);
+}
+
+template <class T>
+const T BaseOption::getDefaultValue(void) const {
+  if (!hasDefaultValue()) throw std::invalid_argument("No default value");
+  return std::any_cast<T>(default_value_);
 }
 
 } // namespace input

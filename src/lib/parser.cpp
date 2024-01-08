@@ -78,6 +78,13 @@ void Parser::setOptionValue(Option& option, const std::any& value) {
   }, option);
 }
 
+void Parser::parseFlag(const std::string& flag_name) {
+  std::visit([this](auto&& opt) {
+    opt.hasDefaultValue() ? opt.setValue(!opt.template getDefaultValue<bool>()) :
+      opt.setValue(true);
+  }, *options[flag_name]);
+}
+
 int Parser::parseSingle(const std::vector<std::string>& arguments,
   const unsigned int index) {
   if (index + 1 >= arguments.size() || hasOption(arguments[index + 1])) {
