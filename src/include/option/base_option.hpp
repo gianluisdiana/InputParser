@@ -1,19 +1,19 @@
 /**
- * @file parser.hpp
+ * @file base_option.hpp
  * @author Gian Luis Bolivar Diana (gianluisbolivar1@gmail.com)
- * @version 0.1
- * @date November 27, 2023
- * @copyright Copyright (c) 2023
+ * @version 0.3
+ * @date January 08, 2024
+ * @copyright Copyright (c) 2024
  *
  * @brief File containing the description of a common option used by the
  * parser.
  *   An option can be:
+ *  - A compound option: An option that requires at least one extra parameter.
+ * It is represented by a vector of values of any type.
  *  - A flag: An option that does not require any extra parameter. It is
  * represented by a boolean value.
  *  - A single option: An option that requires one extra parameter. It is
  * represented by a value of any type.
- *  - A compound option: An option that requires at least one extra parameter.
- * It is represented by a vector of values of any type.
  *
  */
 

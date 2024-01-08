@@ -1,3 +1,16 @@
+/**
+ * @file flag_option.hpp
+ * @author Gian Luis Bolivar Diana (gianluisbolivar1@gmail.com)
+ * @version 0.3
+ * @date January 08, 2024
+ * @copyright Copyright (c) 2024
+ *
+ * @brief File containing the description of a flag option used by the
+ * parser, it can be describe as an option that does not require any extra
+ * parameter (it is represented by a boolean value).
+ *
+ */
+
 #ifndef _INPUT_FLAG_OPTION_HPP_
 #define _INPUT_FLAG_OPTION_HPP_
 

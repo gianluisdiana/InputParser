@@ -1,5 +1,18 @@
-#ifndef _INPUT_OPTION_COMPOUND_OPTION_HPP_
-#define _INPUT_OPTION_COMPOUND_OPTION_HPP_
+/**
+ * @file compound_option.hpp
+ * @author Gian Luis Bolivar Diana (gianluisbolivar1@gmail.com)
+ * @version 0.3
+ * @date January 08, 2024
+ * @copyright Copyright (c) 2024
+ *
+ * @brief File containing the description of a compound option used by the
+ * parser, it can be describe as an option that requires at least one extra
+ * parameter (it is represented by a vector of values of any type).
+ *
+ */
+
+#ifndef _INPUT_COMPOUND_OPTION_HPP_
+#define _INPUT_COMPOUND_OPTION_HPP_
 
 #include "./base_option.hpp"
 
@@ -144,4 +157,4 @@ CompoundOption::elementsTo(const std::function<T(const std::string&)>& transform
 
 } // namespace input
 
-#endif // _INPUT_OPTION_COMPOUND_OPTION_HPP_
+#endif // _INPUT_COMPOUND_OPTION_HPP_

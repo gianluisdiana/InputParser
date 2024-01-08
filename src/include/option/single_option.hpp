@@ -1,5 +1,18 @@
-#ifndef _INPUT_OPTION_SINGLE_OPTION_HPP_
-#define _INPUT_OPTION_SINGLE_OPTION_HPP_
+/**
+ * @file single_option.hpp
+ * @author Gian Luis Bolivar Diana (gianluisbolivar1@gmail.com)
+ * @version 0.3
+ * @date January 08, 2024
+ * @copyright Copyright (c) 2024
+ *
+ * @brief File containing the description of a flag option used by the
+ * parser, it can be described as an option that requires one extra parameter
+ * (it is represented by a value of any type).
+ *
+ */
+
+#ifndef _INPUT_SINGLE_OPTION_HPP_
+#define _INPUT_SINGLE_OPTION_HPP_
 
 #include "./base_option.hpp"
 
@@ -121,4 +134,4 @@ SingleOption::to(const std::function<T(const std::string&)>& transformation) {
 
 } // namespace input
 
-#endif // _INPUT_OPTION_SINGLE_OPTION_HPP_
+#endif // _INPUT_SINGLE_OPTION_HPP_
