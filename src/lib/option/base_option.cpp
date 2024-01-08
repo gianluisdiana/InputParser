@@ -16,8 +16,8 @@
 namespace input {
 
 BaseOption::BaseOption() : value_{}, default_value_{}, names_{}, description_{},
-  required_{true}, transformation_{nullptr}, constraints_{},
-  transform_before_check_{false} {}
+  required_{true}, transform_before_check_{false}, transformation_{nullptr},
+  constraints_{} {}
 
 BaseOption& BaseOption::addDefaultValue(const std::any& default_value) {
   default_value_ = default_value;
