@@ -151,12 +151,12 @@ class Parser {
 
   /**
    * @brief Changes the flag option provided to true.
+   * If the option has a default value, the value will be changed to the opposite
+   * of the default value.
    *
    * @param flag_name The name of the option to give the value of true.
    */
-  inline void parseFlag(const std::string& flag_name) {
-    setOptionValue(*options[flag_name], true);
-  }
+  void parseFlag(const std::string& flag_name);
 
   /**
    * @brief Saves the extra argument after the single option.
