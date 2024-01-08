@@ -225,7 +225,7 @@ class BaseOption {
    * @return The transformed value (or the original value if no transformation
    * function was provided).
    */
-  inline const std::any applyTransformation(const std::any& value) {
+  inline const std::any applyTransformation(const std::any& value) const {
     return transformation_ == nullptr ? value : transformation_(value);
   }
 
@@ -255,7 +255,7 @@ BaseOption& BaseOption::addConstraint(const std::function<bool(const T&)>& const
 
 template <class T>
 const T BaseOption::getValue(void) const {
-  if (!hasValue()) return std::any_cast<T>(default_value_);
+  if (!hasValue()) return std::any_cast<T>(applyTransformation(default_value_));
   return std::any_cast<T>(value_);
 }
 
