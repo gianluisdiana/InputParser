@@ -2,26 +2,26 @@
 #include <set>
 
 #include "../include/parser.hpp"
-#include "../include/option/flag_option.hpp"
 
 namespace input {
 
-Parser& Parser::addOption(const std::function<Option*()>& create_option) {
-  Option* option = create_option();
-  for (const auto& name : option->getNames()) {
-    if (hasOption(name)) throw std::invalid_argument("Option already exists!");
-    std::cout << name << "\n";
-    options[name] = option;
-  }
+Parser& Parser::addOption(const std::function<Options()>& create_option) {
+  auto option = std::make_shared<Options>(create_option());
+  std::visit([this, option](auto&& opt) {
+    for (const auto& name : opt.getNames()) {
+      if (this->hasOption(name)) throw std::invalid_argument("Option already exists!");
+      this->options[name] = option;
+    }
+  }, *option);
   return *this;
 }
 
 Parser& Parser::addHelpOption(void) {
   return addOption([] -> auto {
-    return &FlagOption()
+    return FlagOption()
       .addNames("-h", "--help")
       .addDescription("Shows how to use the program.")
-      .beRequired(false);
+      .addDefaultValue(false);
   });
 }
 
@@ -41,18 +41,27 @@ void Parser::parse(int argc, char* raw_argv[]) {
 }
 
 bool Parser::hasFlag(const std::string& name) const {
-  if (options.contains(name)) return options.at(name)->isFlag();
-  return false;
+  return hasOption(name) && std::visit([](auto&& opt) {
+    return opt.isFlag();
+  }, *options.at(name));
 }
 
 bool Parser::hasSingle(const std::string& name) const {
-  if (options.contains(name)) return options.at(name)->isSingle();
-  return false;
+  return hasOption(name) && std::visit([](auto&& opt) {
+    return opt.isSingle();
+  }, *options.at(name));
 }
 
 bool Parser::hasMultiple(const std::string& name) const {
-  if (options.contains(name)) return options.at(name)->isMultiple();
-  return false;
+  return hasOption(name) && std::visit([](auto&& opt) {
+    return opt.isMultiple();
+  }, *options.at(name));
+}
+
+void Parser::setOptionValue(Options& option, const std::any& value) {
+  std::visit([&value](auto&& opt) {
+    opt.setValue(value);
+  }, option);
 }
 
 int Parser::parseSingle(const std::vector<std::string>& arguments,
@@ -61,30 +70,32 @@ int Parser::parseSingle(const std::vector<std::string>& arguments,
     throw ParsingError(
       "After the " + arguments[index] + " option should be an extra argument!");
   }
-  options[arguments[index]]->setValue(arguments[index + 1]);
+  setOptionValue(*options[arguments[index]], arguments[index + 1]);
   return 1;
 }
 
 int Parser::parseMultiple(const std::vector<std::string>& arguments,
   const unsigned int index) {
-  unsigned int local_index = index + 1;
   std::vector<std::string> values{};
+  auto local_index = index + 1;
   while (local_index < arguments.size() && !hasOption(arguments[local_index])) {
     values.push_back(arguments[local_index]);
-    local_index++;
+    ++local_index;
   }
   if (local_index == index + 1) {
     throw ParsingError("After the " +
       arguments[index] + " option should be at least an extra argument!");
   }
-  options[arguments[index]]->setValue(values);
+  setOptionValue(*options[arguments[index]], values);
   return local_index - index - 1;
 }
 
 void Parser::checkMissingOptions(void) const {
   for (const auto& [option_name, option] : options) {
-    if (option->isRequired() && !option->hasValue() && !option->hasDefaultValue())
-      throw ParsingError("Missing option " + option_name);
+    std::visit([](auto&& opt) {
+      if (opt.isRequired() && !opt.hasValue() && !opt.hasDefaultValue())
+        throw ParsingError("Missing option " + opt.getNames()[0]);
+    }, *option);
   }
 }
 
@@ -137,23 +148,23 @@ void Parser::displayUsage(void) const {
   std::string usage = "Usage: ./exec_name";
   std::string description = "";
   std::set<Option*> option_names;
-  for (const auto& [option_name, option] : options) {
-    if (option_names.contains(option)) continue;
-    const std::pair<std::string, std::string> brackets_or_not =
-      option->isRequired() ? std::make_pair("<", ">") : std::make_pair("[", "]");
-    usage += " " + brackets_or_not.first + option_name;
-    if (option->isSingle()) {
-      usage += " extra_argument";
-    } else if (option->isMultiple()) {
-      usage += " extra_argument1 extra_argument2 ...";
-    }
-    usage += brackets_or_not.second;
-    if (option->getDescription() != "") {
-      description += option_name + " -> " + option->getDescription() + "\n";
-    }
+  // for (const auto& [option_name, option] : options) {
+  //   if (option_names.contains(option)) continue;
+  //   const std::pair<std::string, std::string> brackets_or_not =
+  //     option->isRequired() ? std::make_pair("<", ">") : std::make_pair("[", "]");
+  //   usage += " " + brackets_or_not.first + option_name;
+  //   if (option->isSingle()) {
+  //     usage += " extra_argument";
+  //   } else if (option->isMultiple()) {
+  //     usage += " extra_argument1 extra_argument2 ...";
+  //   }
+  //   usage += brackets_or_not.second;
+  //   if (option->getDescription() != "") {
+  //     description += option_name + " -> " + option->getDescription() + "\n";
+  //   }
 
-    option_names.insert(option);
-  }
+  //   option_names.insert(option);
+  // }
   std::cout << usage << "\n\n" << description << "\n";
 }
 

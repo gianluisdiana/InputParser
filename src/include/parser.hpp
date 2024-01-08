@@ -1,12 +1,19 @@
 #ifndef _INPUT_PARSER_HPP_
 #define _INPUT_PARSER_HPP_
 
+#include <memory>
 #include <unordered_map>
+#include <variant>
 
-#include "./option.hpp"
 #include "./parsing_error.hpp"
+#include "../include/option/flag_option.hpp"
+#include "../include/option/multiple_option.hpp"
+#include "../include/option/single_option.hpp"
 
 namespace input {
+
+/** @brief The type of an option */
+using Options = std::variant<FlagOption, MultipleOption, SingleOption>;
 
 /**
  * @brief Represents a parser of the arguments provided when the program is
@@ -15,13 +22,13 @@ namespace input {
 class Parser {
   public:
   /**
-   * @brief Adds an option to be parsed. The option type will be determined by
-   * the enum OptionType.
+   * @brief Adds an option to be parsed. The option must be a flag, single or
+   * multiple option.
    *
    * @param create_option A function that returns the option.
    * @return The instance of the object that called this method.
    */
-  Parser& addOption(const std::function<Option*()>& create_option);
+  Parser& addOption(const std::function<Options()>& create_option);
 
   /**
    * @brief Adds a basic help option to the parser.
@@ -29,10 +36,10 @@ class Parser {
    *
    *  Shortcut for:
    * ```cpp
-   *    addOption([] -> auto { return Option(OptionType::Flag)
+   *    addOption([] -> auto { return FlagOption()
    *      .addNames("-h", "--help")
    *      .addDescription("Shows how to use the program.")
-   *      .beRequired(false);
+   *      .addDefaultValue(false);
    *    });
    * ```
    *
@@ -40,11 +47,12 @@ class Parser {
    */
   Parser& addHelpOption(void);
 
-    /**
+  /**
    * @brief Gets the value from an option.
    *
    * @param name The name of the option.
    * @tparam T The type of the value to be returned.
+   * @return The value of the option casted to the type provided.
    */
   template <class T = std::string>
   const T getValue(const std::string& name) const;
@@ -52,8 +60,8 @@ class Parser {
   /**
    * @brief Parses command line input to provide values ​​for previously added
    * options.
-   *   If an option is omitted (it was not specified), a std::invalid_argument
-   * error will be thrown.
+   *   If an option is omitted (it was not specified), a ParsingError exception
+   * will be thrown.
    *
    * @param argc The amount of arguments provided when executing the program.
    * @param raw_argv A vector of strings with the arguments.
@@ -67,7 +75,7 @@ class Parser {
 
  private:
   // All the options registered.
-  std::unordered_map<std::string, Option*> options;
+  std::unordered_map<std::string, std::shared_ptr<Options>> options;
 
   /**
    * @brief Tells if the parser has an option with the name provided.
@@ -123,12 +131,20 @@ class Parser {
   }
 
   /**
+   * @brief Sets the value of an option.
+   *
+   * @param option The option to be changed.
+   * @param value The value to be assigned to the option.
+   */
+  void setOptionValue(Options& option, const std::any& value);
+
+  /**
    * @brief Changes the flag option provided to true.
    *
    * @param flag_name The name of the option to give the value of true.
    */
   inline void parseFlag(const std::string& flag_name) {
-    options[flag_name]->setValue(true);
+    setOptionValue(*options[flag_name], true);
   }
 
   /**
@@ -162,10 +178,12 @@ class Parser {
 
 template <class T>
 const T Parser::getValue(const std::string& name) const {
-  if (!options.contains(name)) {
+  if (!hasOption(name)) {
     throw ParsingError("The option " + name + " was not assigned at the parser");
   }
-  return options.at(name)->getValue<T>();
+  return std::visit([](auto&& opt) {
+    return opt.template getValue<T>();
+  }, *options.at(name));
 }
 
 } // namespace input
