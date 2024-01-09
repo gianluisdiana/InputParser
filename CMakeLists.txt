@@ -24,7 +24,6 @@ add_library(${PROJECT_NAME} STATIC
 target_include_directories(${PROJECT_NAME}
   PRIVATE
     ${PROJECT_SOURCE_DIR}/src/include
-    ${PROJECT_SOURCE_DIR}/src/include/option
 )
 
 # ------------------------------ Compile options ------------------------------- #

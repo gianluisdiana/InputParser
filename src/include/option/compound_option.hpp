@@ -14,7 +14,7 @@
 #ifndef _INPUT_COMPOUND_OPTION_HPP_
 #define _INPUT_COMPOUND_OPTION_HPP_
 
-#include "./base_option.hpp"
+#include "option/base_option.hpp"
 
 namespace input {
 

@@ -1,4 +1,4 @@
-#include "../../include/option/single_option.hpp"
+#include "option/single_option.hpp"
 
 namespace input {
 

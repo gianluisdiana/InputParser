@@ -22,8 +22,7 @@
 
 #include <stdexcept>
 
-#include "../transformation.hpp"
-#include "../constraint.hpp"
+#include "constraint.hpp"
 
 namespace input {
 

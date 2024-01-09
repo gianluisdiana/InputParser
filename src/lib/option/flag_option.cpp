@@ -1,4 +1,4 @@
-#include "../../include/option/flag_option.hpp"
+#include "option/flag_option.hpp"
 
 namespace input {
 

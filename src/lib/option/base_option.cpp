@@ -10,8 +10,8 @@
  *
  */
 
-#include "../../include/option/base_option.hpp"
-#include "../../include/parsing_error.hpp"
+#include "option/base_option.hpp"
+#include "parsing_error.hpp"
 
 namespace input {
 
