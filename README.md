@@ -132,7 +132,7 @@ Hello World!
   ```
 
 ### Singles
-A single optino is an option that must be placed with an extra argument. Originally is stored as a _std::string_.
+A single option is an option that must be placed with an extra argument. Originally is stored as a _std::string_.
 For example:
 
 ```cpp
@@ -163,6 +163,103 @@ $ ./a.out -n Luke
 Luke is using this program!
 ```
 
+### Compounds
+A compound option is an option that must be placed with at least one extra argument. It stores its values on a _std::vector<std::string>_.
+Here's an example:
+
+```cpp
+auto parser = input::Parser()
+  .addOption([] -> auto {
+    return input::CompoundOption()
+      .addNames("-n", "--numbers")
+      .addDescription("The numbers to be added together")
+      .toDouble();
+  });
+
+parser.parse(argc, argv);
+
+double result = 0;
+for (auto& number : parser.getValue<std::vector<double>>("-n")) {
+  result += number;
+}
+std::cout << "The sum of the number is: " << result << '\n';
+```
+
+And when executed, we get the following output:
+```bash
+$ ./a.out
+terminate called after throwing an instance of 'input::ParsingError'
+  what():  Missing option -n
+Aborted
+
+$ ./a.out -n
+terminate called after throwing an instance of 'input::ParsingError'
+  what():  After the -n option should be at least an extra argument!
+Aborted
+
+$ ./a.out -n 1 2
+The sum of the number is: 3
+
+$ ./a.out -n 1 2 3.4
+The sum of the number is: 6.4
+
+$ ./a.out -n 1 2.201 3.4 -4
+The sum of the number is: 2.601
+
+$ ./a.out -n 1 2.201 3.4 -0.123
+The sum of the number is: 6.478
+```
+
+- __Transformation (each element)__
+
+  This options allows the user to provide a callback function that will be applied to each of the elements stored using the _elementsTo_ method. The callback provided must have one _std::string_ parameter and return variable with the type desired.
+
+  ```cpp
+  auto parser = input::Parser()
+    .addOption([] -> auto {
+      return input::CompoundOption()
+        .addNames("--approves")
+        .addDescription("A group of y's and n's that will be counted")
+        .elementsTo<bool>([](const std::string& element) {
+          return element == "y" || element == "Y";
+        });
+    });
+
+  parser.parse(argc, argv);
+
+  int amount = 0;
+  for (const auto approve : parser.getValue<std::vector<bool>>("--approves")) {
+    amount += (approve ? 1 : 0);
+  }
+  std::cout << "There are " << amount << " people that aproves\n";
+  ```
+
+- __Transformation (all vector)__
+
+  It also brings the possibility of transforming all the set calling the _to_ method.
+
+  ```cpp
+  struct Coordinate {
+    int x;
+    int y;
+  };
+
+  auto parser = input::Parser()
+    .addOption([] -> auto {
+      return input::CompoundOption()
+        .addNames("-c", "--coordinate")
+        .addDescription("The coordinate of a point (x, y)")
+        .to<Coordinate>([](const std::vector<std::string>& value) {
+          return Coordinate{
+            std::stoi(value[0]), std::stoi(value[1])
+          };
+        });
+    });
+
+  parser.parse(argc, argv);
+  auto [x, y] = parser.getValue<Coordinate>("-c");
+  std::cout << "The coordinate is (" << x << ", " << y << ")\n";
+  ```
 
 ## CMake Integration
 
