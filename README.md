@@ -3,8 +3,12 @@
 - Author: Gian Luis Bolivar Diana
 - Email: _gianluisbolivar1@gmail.com_
 
+# Highlights
+- Requires C++23
+- MIT License
+
 ## Parser
-In order to create a parser we must include the folder _"include/parser.hpp"_. To start parsing arguments create  __Parser__ object:
+In order to create a parser we must include the folder _"include/parser.hpp>_. To start parsing arguments create  __Parser__ object:
 
 ```cpp
 auto parser = input::Parser();
@@ -124,3 +128,16 @@ Hello World!
   ./a.out --greeting
   Hi!
   ```
+
+## CMake Integration
+
+Just clone the repository and add this lines to your _CMakeLists.txt_ file.
+```cmake
+cmake_minimum_required(VERSION 3.22)
+
+PROJECT(my_project)
+add_executable(my_project src/main.cpp)
+
+target_link_libraries(${PROJECT_NAME} input_parser)
+add_subdirectory(InputParser)
+```
