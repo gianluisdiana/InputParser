@@ -68,7 +68,7 @@ bool Parser::hasSingle(const std::string& name) const {
 
 bool Parser::hasMultiple(const std::string& name) const {
   return hasOption(name) && std::visit([](auto&& opt) {
-    return opt.isMultiple();
+    return opt.isCompound();
   }, *options.at(name));
 }
 

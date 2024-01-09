@@ -147,7 +147,7 @@ class BaseOption {
   }
 
   /** @brief Checks if the option will require at least one extra parameter */
-  virtual inline bool isMultiple() const {
+  virtual inline bool isCompound() const {
     return false;
   }
 

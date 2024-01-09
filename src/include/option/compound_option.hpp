@@ -36,7 +36,7 @@ class CompoundOption : public BaseOption {
    *
    * @return True.
    */
-  inline bool isMultiple(void) const override {
+  inline bool isCompound(void) const override {
     return true;
   }
 
