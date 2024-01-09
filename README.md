@@ -3,14 +3,16 @@
 - Author: Gian Luis Bolivar Diana
 - Email: _gianluisbolivar1@gmail.com_
 
-# Highlights
+## Highlights
 - Requires C++23
 - MIT License
 
 ## Parser
-In order to create a parser we must include the folder _"include/parser.hpp>_. To start parsing arguments create  __Parser__ object:
+In order to create a parser we must include the folder _<parser.hpp>_. To start parsing arguments create  __Parser__ object:
 
 ```cpp
+#include <parser.hpp>
+
 auto parser = input::Parser();
 ```
 
@@ -65,12 +67,12 @@ if (verbose) std::cout << "Hello World!\n";
 
 And we can execute the code:
 ```bash
-./a.exe
+$ ./a.out
 
-./a.exe -v
+$ ./a.out -v
 Hello World!
 
-./a.exe --verbose
+$ ./a.out --verbose
 Hello World!
 ```
 
@@ -91,10 +93,10 @@ Hello World!
 
   We can call the program like this:
   ```bash
-  ./a.out
+  $ ./a.out
   Really important information!
 
-  ./a.out -v
+  $ ./a.out -v
 
   ```
 
@@ -119,19 +121,52 @@ Hello World!
   When executing the code, the string displayed will depend:
 
   ```bash
-  ./a.out
+  $ ./a.out
   Bye!
 
-  ./a.out -g
+  $ ./a.out -g
   Hi!
 
-  ./a.out --greeting
+  $ ./a.out --greeting
   Hi!
   ```
 
+### Singles
+A single optino is an option that must be placed with an extra argument. Originally is stored as a _std::string_.
+For example:
+
+```cpp
+auto parser = input::Parser()
+  .addOption([] -> auto {
+    return input::SingleOption()
+      .addNames("-n")
+      .addDescription("The name of the person using this program");
+  });
+
+parser.parse(argc, argv);
+std::cout << parser.getValue<std::string>("-n") << " is using this program!\n";
+```
+
+And we can execute the code:
+```bash
+$ ./a.out
+terminate called after throwing an instance of 'input::ParsingError'
+  what():  Missing option -n
+Aborted
+
+$ ./a.out -n
+terminate called after throwing an instance of 'input::ParsingError'
+  what():  After the -n option should be an extra argument!
+Aborted
+
+$ ./a.out -n Luke
+Luke is using this program!
+```
+
+
 ## CMake Integration
 
-Just clone the repository and add this lines to your _CMakeLists.txt_ file.
+Just clone the repository and add these lines to your _CMakeLists.txt_ file.
 ```cmake
 cmake_minimum_required(VERSION 3.22)
 
