@@ -1,12 +1,12 @@
 # VSCode configuration files
-./.vscode
+.vscode
 
 # Executables
-./*.exe
-./*.out
+*.exe
+*.out
 
 # Object files
-./*.o
+*.o
 
 # CMake generated files
 build/
