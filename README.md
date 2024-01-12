@@ -200,14 +200,8 @@ Aborted
 $ ./a.out -n 1 2
 The sum of the number is: 3
 
-$ ./a.out -n 1 2 3.4
-The sum of the number is: 6.4
-
 $ ./a.out -n 1 2.201 3.4 -4
 The sum of the number is: 2.601
-
-$ ./a.out -n 1 2.201 3.4 -0.123
-The sum of the number is: 6.478
 ```
 
 - __Transformation (each element)__
@@ -234,6 +228,12 @@ The sum of the number is: 6.478
   std::cout << "There are " << amount << " people that aproves\n";
   ```
 
+  We can execute the code and get the following results:
+  ```bash
+  $ ./a.out --approves y n y y n n Y
+  There are 4 people that aproves
+  ```
+
 - __Transformation (all vector)__
 
   It also brings the possibility of transforming all the set calling the _to_ method.
@@ -258,7 +258,17 @@ The sum of the number is: 6.478
 
   parser.parse(argc, argv);
   auto [x, y] = parser.getValue<Coordinate>("-c");
-  std::cout << "The coordinate is (" << x << ", " << y << ")\n";
+  std::cout << "The coordinates are (" << x << ", " << y << ")\n";
+  ```
+
+  And as we can see, the Coordinate struct is created:
+
+  ```bash
+  $ ./my_project -c 1.3 3
+  The coordinate are (1, 3)
+
+  $ ./my_project -c -213 123
+  The coordinate are (-213, 123)
   ```
 
 ## CMake Integration
