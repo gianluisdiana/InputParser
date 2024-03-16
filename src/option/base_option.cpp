@@ -35,7 +35,7 @@ void BaseOption::setValue(const std::any &value) {
   }
 }
 
-BaseOption &BaseOption::transformBeforeCheck(void) {
+BaseOption &BaseOption::transformBeforeCheck() {
   transform_before_check_ = true;
   return *this;
 }

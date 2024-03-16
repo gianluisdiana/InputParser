@@ -42,7 +42,7 @@ class Constraint {
     error_message_ {error_message} {}
 
   /** @brief Gives read-only access to the error message */
-  inline const std::string &getErrorMessage(void) const {
+  inline const std::string &getErrorMessage() const {
     return error_message_;
   }
 

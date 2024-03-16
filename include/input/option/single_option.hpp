@@ -48,7 +48,7 @@ class SingleOption : public BaseOption {
    *
    * @return True.
    */
-  inline bool isSingle(void) const override {
+  inline bool isSingle() const override {
     return true;
   }
 
@@ -76,7 +76,7 @@ class SingleOption : public BaseOption {
    *
    * @return The option itself.
    */
-  SingleOption &toInt(void) override;
+  SingleOption &toInt() override;
 
   /**
    * @brief Transform the string value to a double.
@@ -90,7 +90,7 @@ class SingleOption : public BaseOption {
    *
    * @return The option itself.
    */
-  SingleOption &toDouble(void) override;
+  SingleOption &toDouble() override;
 
   /**
    * @brief Transform the string value to a float.
@@ -104,7 +104,7 @@ class SingleOption : public BaseOption {
    *
    * @return The option itself.
    */
-  SingleOption &toFloat(void) override;
+  SingleOption &toFloat() override;
 
   // ------------------------ Static casted methods ------------------------ //
 
@@ -126,7 +126,7 @@ class SingleOption : public BaseOption {
     );
   }
 
-  inline SingleOption &transformBeforeCheck(void) {
+  inline SingleOption &transformBeforeCheck() {
     return static_cast<SingleOption &>(BaseOption::transformBeforeCheck());
   }
 

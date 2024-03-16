@@ -73,7 +73,7 @@ class FlagOption : public BaseOption {
    *  return value ? 1 : 0;
    * });
    */
-  FlagOption &toInt(void) override;
+  FlagOption &toInt() override;
 
   /**
    * @brief Converts the value of the option to a double.
@@ -84,7 +84,7 @@ class FlagOption : public BaseOption {
    *  return value ? 1.0 : 0.0;
    * });
    */
-  FlagOption &toDouble(void) override;
+  FlagOption &toDouble() override;
 
   /**
    * @brief Converts the value of the option to a float.
@@ -95,7 +95,7 @@ class FlagOption : public BaseOption {
    *  return value ? 1.0f : 0.0f;
    * });
    */
-  FlagOption &toFloat(void) override;
+  FlagOption &toFloat() override;
 
   // ------------------------ Static casted methods ------------------------ //
 
@@ -117,7 +117,7 @@ class FlagOption : public BaseOption {
     );
   }
 
-  inline FlagOption &transformBeforeCheck(void) {
+  inline FlagOption &transformBeforeCheck() {
     return static_cast<FlagOption &>(BaseOption::transformBeforeCheck());
   }
 

@@ -49,7 +49,7 @@ class CompoundOption : public BaseOption {
    *
    * @return True.
    */
-  inline bool isCompound(void) const override {
+  inline bool isCompound() const override {
     return true;
   }
 
@@ -91,7 +91,7 @@ class CompoundOption : public BaseOption {
    * });
    * ```
    */
-  CompoundOption &toInt(void) override;
+  CompoundOption &toInt() override;
 
   /**
    * @brief Converts all the elements of the option to doubles.
@@ -103,7 +103,7 @@ class CompoundOption : public BaseOption {
    * });
    * ```
    */
-  CompoundOption &toDouble(void) override;
+  CompoundOption &toDouble() override;
 
   /**
    * @brief Converts all the elements of the option to floats.
@@ -115,7 +115,7 @@ class CompoundOption : public BaseOption {
    * });
    * ```
    */
-  CompoundOption &toFloat(void) override;
+  CompoundOption &toFloat() override;
 
   // ------------------------ Static casted methods ------------------------ //
 
@@ -138,7 +138,7 @@ class CompoundOption : public BaseOption {
     );
   }
 
-  inline CompoundOption &transformBeforeCheck(void) {
+  inline CompoundOption &transformBeforeCheck() {
     return static_cast<CompoundOption &>(BaseOption::transformBeforeCheck());
   }
 

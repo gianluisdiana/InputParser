@@ -93,7 +93,7 @@ class BaseOption {
    * @return The value of the option casted to the specified type.
    */
   template <class T>
-  const T getValue(void) const;
+  const T getValue() const;
 
   /**
    * @brief Gets the default value of the option.
@@ -103,15 +103,15 @@ class BaseOption {
    * @return The default value of the option casted to the specified type.
    */
   template <class T>
-  const T getDefaultValue(void) const;
+  const T getDefaultValue() const;
 
   /** @brief Gets the names of the option */
-  inline const std::vector<std::string> &getNames(void) const {
+  inline const std::vector<std::string> &getNames() const {
     return names_;
   }
 
   /** @brief Gets the description of the option */
-  inline const std::string &getDescription(void) const {
+  inline const std::string &getDescription() const {
     return description_;
   }
 
@@ -166,7 +166,7 @@ class BaseOption {
    *
    * @return The instance of the object that called this method.
    */
-  virtual BaseOption &toInt(void) = 0;
+  virtual BaseOption &toInt() = 0;
 
   /**
    * @brief Defines a transformation function that transforms the value of the
@@ -174,7 +174,7 @@ class BaseOption {
    *
    * @return The instance of the object that called this method.
    */
-  virtual BaseOption &toDouble(void) = 0;
+  virtual BaseOption &toDouble() = 0;
 
   /**
    * @brief Defines a transformation function that transforms the value of the
@@ -182,7 +182,7 @@ class BaseOption {
    *
    * @return The instance of the object that called this method.
    */
-  virtual BaseOption &toFloat(void) = 0;
+  virtual BaseOption &toFloat() = 0;
 
   // ---------------------------- Other methods ---------------------------- //
 
@@ -192,7 +192,7 @@ class BaseOption {
    *
    * @return The instance of the object that called this method.
    */
-  BaseOption &transformBeforeCheck(void);
+  BaseOption &transformBeforeCheck();
 
   /**
    * @brief Makes the option required or not.
@@ -267,13 +267,13 @@ BaseOption &BaseOption::addConstraint(
 }
 
 template <class T>
-const T BaseOption::getValue(void) const {
+const T BaseOption::getValue() const {
   if (!hasValue()) return std::any_cast<T>(applyTransformation(default_value_));
   return std::any_cast<T>(value_);
 }
 
 template <class T>
-const T BaseOption::getDefaultValue(void) const {
+const T BaseOption::getDefaultValue() const {
   if (!hasDefaultValue()) throw std::invalid_argument("No default value");
   return std::any_cast<T>(default_value_);
 }

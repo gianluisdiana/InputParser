@@ -34,7 +34,7 @@ Parser &Parser::addOption(const std::function<Option()> &create_option) {
   return *this;
 }
 
-Parser &Parser::addHelpOption(void) {
+Parser &Parser::addHelpOption() {
   return addOption([] -> auto {
     return FlagOption("-h", "--help")
       .addDescription("Shows how to use the program.")
@@ -45,10 +45,6 @@ Parser &Parser::addHelpOption(void) {
 void Parser::parse(int argc, char *raw_argv[]) {
   std::vector<std::string> argv(raw_argv, raw_argv + argc);
   for (int index = 1; index < argc; ++index) {
-    if (hasHelpOption() && isHelpOption(argv[index])) {
-      displayUsage();
-      exit(0);
-    }
     if (hasFlag(argv[index]))
       parseFlag(argv[index]);
     else if (hasSingle(argv[index]))
@@ -86,10 +82,10 @@ void Parser::setOptionValue(Option &option, const std::any &value) {
 
 void Parser::parseFlag(const std::string &flag_name) {
   std::visit(
-    [this](auto &&opt) {
-      opt.hasDefaultValue()
-        ? opt.setValue(!opt.template getDefaultValue<bool>())
-        : opt.setValue(true);
+    [](auto &&opt) {
+      opt.setValue(
+        opt.hasDefaultValue() ? !opt.template getDefaultValue<bool>() : true
+      );
     },
     *options[flag_name]
   );
@@ -126,8 +122,8 @@ int Parser::parseMultiple(
   return local_index - index - 1;
 }
 
-void Parser::checkMissingOptions(void) const {
-  for (const auto &[option_name, option] : options) {
+void Parser::checkMissingOptions() const {
+  for (const auto &[_, option] : options) {
     std::visit(
       [](auto &&opt) {
         if (opt.isRequired() && !opt.hasValue() && !opt.hasDefaultValue())
@@ -165,7 +161,7 @@ void Parser::checkMissingOptions(void) const {
  * AUTHOR:
  *   Written by ...
  */
-// void Parser::displayManual(void) const {
+// void Parser::displayManual() const {
 //   std::string synopsis = "SYNOPSIS:\n\t" + getExecutableName() + " ";
 //   std::string description = "DESCRIPTION:\n\t" + getDescription() + "\n";
 // std::set<Option*> displayed_options;
@@ -184,7 +180,7 @@ void Parser::checkMissingOptions(void) const {
 // author << "\n";
 //
 
-void Parser::displayUsage(void) const {
+void Parser::displayUsage() const {
   std::string usage = "Usage: ./exec_name";
   std::string description = "";
   std::set<std::shared_ptr<Option>> options_displayed;
