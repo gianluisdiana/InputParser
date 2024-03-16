@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.22)
 
 # Set the project name
 project(input_parser
-  VERSION 0.3.1
+  VERSION 0.4.0
   DESCRIPTION "An argument parser for C++23"
   HOMEPAGE_URL "https://github.com/gianluisdiana/InputParser"
   LANGUAGES CXX
@@ -19,12 +19,17 @@ include(CMakePackageConfigHelpers)
 # ---------------------------------- Sources ----------------------------------- #
 
 # Create a sources variable with a link to all cpp files to compile
-add_library(${PROJECT_NAME} STATIC
+set(SOURCE
   src/parser.cpp
   src/option/base_option.cpp
   src/option/flag_option.cpp
   src/option/compound_option.cpp
   src/option/single_option.cpp
+)
+
+# Add all the sources to the library
+add_library(${PROJECT_NAME} STATIC
+  ${SOURCE}
 )
 
 # -------------------------------- Header files -------------------------------- #
@@ -38,7 +43,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 # ------------------------------ Compile options ------------------------------- #
 
 # Set the C++ standard we will use to compile the library
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
+set(CMAKE_CXX_STANDARD 23)
 
 # Add flags to the compiler
 target_compile_options(${PROJECT_NAME} PRIVATE

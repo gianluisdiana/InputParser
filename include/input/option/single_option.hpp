@@ -28,14 +28,27 @@ namespace input {
  */
 class SingleOption : public BaseOption {
  public:
-  SingleOption(void) : BaseOption() {}
+  /**
+   * @brief Constructs an empty option with the provided names.
+   *
+   * @tparam T Type of the mandatory name (must be strings or const char*)
+   * @tparam Ts Types of the names (same type as T)
+   * @param name The name of the option
+   * @param extra_names Extra names that the option can be recognized by
+   */
+  template <
+    typename T, typename... Ts,
+    typename = typename std::enable_if_t<
+      is_string_type<T> && (is_string_type<Ts> && ...)>>
+  SingleOption(const T name, const Ts... extra_names) :
+    BaseOption(name, extra_names...) {}
 
   /**
    * @brief Indicates if the option is a single option.
    *
    * @return True.
    */
-  inline bool isSingle(void) const override {
+  inline bool isSingle() const override {
     return true;
   }
 
@@ -49,7 +62,7 @@ class SingleOption : public BaseOption {
    * @return The instance of the object that called this method.
    */
   template <class T>
-  SingleOption& to(const std::function<T(const std::string&)>& transformation);
+  SingleOption &to(const std::function<T(const std::string &)> &transformation);
 
   /**
    * @brief Transform the string value to an integer.
@@ -63,7 +76,7 @@ class SingleOption : public BaseOption {
    *
    * @return The option itself.
    */
-  SingleOption& toInt(void) override;
+  SingleOption &toInt() override;
 
   /**
    * @brief Transform the string value to a double.
@@ -77,7 +90,7 @@ class SingleOption : public BaseOption {
    *
    * @return The option itself.
    */
-  SingleOption& toDouble(void) override;
+  SingleOption &toDouble() override;
 
   /**
    * @brief Transform the string value to a float.
@@ -91,47 +104,46 @@ class SingleOption : public BaseOption {
    *
    * @return The option itself.
    */
-  SingleOption& toFloat(void) override;
+  SingleOption &toFloat() override;
 
   // ------------------------ Static casted methods ------------------------ //
 
-  inline SingleOption& addDefaultValue(const std::any& value) {
-    return static_cast<SingleOption&>(BaseOption::addDefaultValue(value));
+  inline SingleOption &addDefaultValue(const std::any &value) {
+    return static_cast<SingleOption &>(BaseOption::addDefaultValue(value));
   }
 
-  inline SingleOption& addDescription(const std::string& description) {
-    return static_cast<SingleOption&>(BaseOption::addDescription(description));
+  inline SingleOption &addDescription(const std::string &description) {
+    return static_cast<SingleOption &>(BaseOption::addDescription(description));
   }
 
-  template <class... Ts>
-  std::enable_if_t<(is_string_type<Ts> && ...), SingleOption&>
-  inline addNames(const Ts... names) {
-    return static_cast<SingleOption&>(BaseOption::addNames(names...));
+  template <class T>
+  inline SingleOption &addConstraint(
+    const std::function<bool(const T &)> &constraint,
+    const std::string &error_message
+  ) {
+    return static_cast<SingleOption &>(
+      BaseOption::addConstraint(constraint, error_message)
+    );
   }
 
-  template <class T> inline SingleOption&
-  addConstraint(const std::function<bool(const T&)>& constraint,
-    const std::string& error_message) {
-    return static_cast<SingleOption&>(BaseOption::addConstraint(constraint, error_message));
+  inline SingleOption &transformBeforeCheck() {
+    return static_cast<SingleOption &>(BaseOption::transformBeforeCheck());
   }
 
-  inline SingleOption& transformBeforeCheck(void) {
-    return static_cast<SingleOption&>(BaseOption::transformBeforeCheck());
-  }
-
-  inline SingleOption& beRequired(const bool& required = true) {
-    return static_cast<SingleOption&>(BaseOption::beRequired(required));
+  inline SingleOption &beRequired(const bool &required = true) {
+    return static_cast<SingleOption &>(BaseOption::beRequired(required));
   }
 };
 
-template <class T> SingleOption&
-SingleOption::to(const std::function<T(const std::string&)>& transformation) {
-  transformation_ = [transformation](const std::any& value) -> auto {
+template <class T>
+SingleOption &
+SingleOption::to(const std::function<T(const std::string &)> &transformation) {
+  transformation_ = [transformation](const std::any &value) -> auto{
     return transformation(std::any_cast<std::string>(value));
   };
   return *this;
 }
 
-} // namespace input
+}  // namespace input
 
-#endif // _INPUT_SINGLE_OPTION_HPP_
+#endif  // _INPUT_SINGLE_OPTION_HPP_

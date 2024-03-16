@@ -15,21 +15,17 @@
 
 namespace input {
 
-BaseOption::BaseOption() : value_{}, default_value_{}, names_{}, description_{},
-  required_{true}, transform_before_check_{false}, transformation_{nullptr},
-  constraints_{} {}
-
-BaseOption& BaseOption::addDefaultValue(const std::any& default_value) {
+BaseOption &BaseOption::addDefaultValue(const std::any &default_value) {
   default_value_ = default_value;
   return beRequired(false);
 }
 
-BaseOption& BaseOption::addDescription(const std::string& description) {
+BaseOption &BaseOption::addDescription(const std::string &description) {
   description_ = description;
   return *this;
 }
 
-void BaseOption::setValue(const std::any& value) {
+void BaseOption::setValue(const std::any &value) {
   if (transform_before_check_) {
     value_ = applyTransformation(value);
     checkConstraints(value_);
@@ -39,27 +35,27 @@ void BaseOption::setValue(const std::any& value) {
   }
 }
 
-
-BaseOption& BaseOption::transformBeforeCheck(void) {
+BaseOption &BaseOption::transformBeforeCheck() {
   transform_before_check_ = true;
   return *this;
 }
 
-BaseOption& BaseOption::beRequired(const bool required) {
+BaseOption &BaseOption::beRequired(const bool required) {
   required_ = required;
   return *this;
 }
 
 // ---------------------------- Private methods ---------------------------- //
 
-void BaseOption::checkConstraints(const std::any& value) const {
-  for (const auto& constraint : constraints_) {
+void BaseOption::checkConstraints(const std::any &value) const {
+  for (const auto &constraint : constraints_) {
     if (!constraint.call(value)) {
       const std::string error_message = constraint.getErrorMessage();
-      throw ParsingError(error_message == "" ?
-        "Constraint not satisfied." : error_message);
+      throw ParsingError(
+        error_message == "" ? "Constraint not satisfied." : error_message
+      );
     }
   }
 }
 
-} // namespace input
+}  // namespace input

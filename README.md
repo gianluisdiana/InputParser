@@ -11,7 +11,7 @@
 In order to create a parser we must include the folder _<parser.hpp>_. To start parsing arguments create  __Parser__ object:
 
 ```cpp
-#include <parser.hpp>
+#include <input/parser.hpp>
 
 auto parser = input::Parser();
 ```
@@ -46,8 +46,7 @@ A flag option is an option that must be placed alone. Represents a boolean value
 For example:
 
 ```cpp
-auto flag_option = input::FlagOption()
-  .addNames("-v", "--verbose")
+auto flag_option = input::FlagOption("-v", "--verbose")
   .addDescription("Whether if the program will display the output or not")
   .addDefaultValue(false);
 auto parser = input::Parser()
@@ -82,8 +81,7 @@ Hello World!
 
   ```cpp
   auto parser = input::Parser()
-    .addOption([] -> auto { return input::FlagOption()
-      .addNames("-v", "--verbose")
+    .addOption([] -> auto { return input::FlagOption("-v", "--verbose")
       .addDescription("Whether if the program will display information or not")
       .addDefaultValue(true);
     });
@@ -106,8 +104,7 @@ Hello World!
 
   ```cpp
   auto parser = input::Parser()
-    .addOption([] -> auto { return input::FlagOption()
-      .addNames("-g", "--greeting")
+    .addOption([] -> auto { return input::FlagOption("-g", "--greeting")
       .addDescription("Whether if the program will say hi or bye")
       .addDefaultValue(false)
       .to<std::string>([](const bool& value) -> std::string {
@@ -138,8 +135,7 @@ For example:
 ```cpp
 auto parser = input::Parser()
   .addOption([] -> auto {
-    return input::SingleOption()
-      .addNames("-n")
+    return input::SingleOption("-n")
       .addDescription("The name of the person using this program");
   });
 
@@ -170,8 +166,7 @@ Here's an example:
 ```cpp
 auto parser = input::Parser()
   .addOption([] -> auto {
-    return input::CompoundOption()
-      .addNames("-n", "--numbers")
+    return input::CompoundOption("-n", "--numbers")
       .addDescription("The numbers to be added together")
       .toDouble();
   });
@@ -211,8 +206,7 @@ The sum of the number is: 2.601
   ```cpp
   auto parser = input::Parser()
     .addOption([] -> auto {
-      return input::CompoundOption()
-        .addNames("--approves")
+      return input::CompoundOption("--approves")
         .addDescription("A group of y's and n's that will be counted")
         .elementsTo<bool>([](const std::string& element) {
           return element == "y" || element == "Y";
@@ -225,13 +219,13 @@ The sum of the number is: 2.601
   for (const auto approve : parser.getValue<std::vector<bool>>("--approves")) {
     amount += (approve ? 1 : 0);
   }
-  std::cout << "There are " << amount << " people that aproves\n";
+  std::cout << "There are " << amount << " people that approves\n";
   ```
 
   We can execute the code and get the following results:
   ```bash
   $ ./a.out --approves y n y y n n Y
-  There are 4 people that aproves
+  There are 4 people that approves
   ```
 
 - __Transformation (all vector)__
@@ -246,8 +240,7 @@ The sum of the number is: 2.601
 
   auto parser = input::Parser()
     .addOption([] -> auto {
-      return input::CompoundOption()
-        .addNames("-c", "--coordinate")
+      return input::CompoundOption("-c", "--coordinate")
         .addDescription("The coordinate of a point (x, y)")
         .to<Coordinate>([](const std::vector<std::string>& value) {
           return Coordinate{

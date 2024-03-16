@@ -34,12 +34,15 @@ class Constraint {
    * @param error_message The error message to be displayed if the function
    * returns false.
    */
-  Constraint(const std::function<bool(const std::any&)>& call,
-    const std::string& error_message) : call_{call},
-    error_message_{error_message} {}
+  Constraint(
+    const std::function<bool(const std::any &)> &call,
+    const std::string &error_message
+  ) :
+    call_ {call},
+    error_message_ {error_message} {}
 
   /** @brief Gives read-only access to the error message */
-  inline const std::string& getErrorMessage(void) const {
+  inline const std::string &getErrorMessage() const {
     return error_message_;
   }
 
@@ -49,17 +52,17 @@ class Constraint {
    * @param value The value to be passed to the constraint function.
    * @return Whether the constraint function returns true or false.
    */
-  inline bool call(const std::any& value) const {
+  inline bool call(const std::any &value) const {
     return call_(value);
   }
 
  private:
   // The function that must be satisfied.
-  const std::function<bool(const std::any&)> call_;
+  const std::function<bool(const std::any &)> call_;
   // The error message to be displayed if the function returns false.
   const std::string error_message_;
 };
 
-} // namespace input
+}  // namespace input
 
-#endif // _INPUT_CONSTRAINT_HPP_
+#endif  // _INPUT_CONSTRAINT_HPP_

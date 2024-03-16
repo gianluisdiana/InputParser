@@ -1,0 +1,292 @@
+---
+# BasedOnStyle: Google
+AccessModifierOffset: -1
+# Always break after an open bracket, if the parameters don't fit on a single line. Closing brackets will be placed on a new line.
+AlignAfterOpenBracket: BlockIndent
+# When using initialization for an array of structs aligns the fields into columns
+AlignArrayOfStructures: None
+# Style of aligning consecutive assignments.
+AlignConsecutiveAssignments: None
+# Style of aligning consecutive bit fields.
+AlignConsecutiveBitFields: None
+# Style of aligning consecutive declarations.
+AlignConsecutiveDeclarations: None
+# Style of aligning consecutive macro definitions.
+AlignConsecutiveMacros: None
+# Options for aligning backslashes in escaped newlines.
+AlignEscapedNewlines: Right
+# Horizontally align operands of binary and ternary expressions.
+AlignOperands: Align
+# Control of trailing comments
+AlignTrailingComments: true
+# If a function call or braced initializer list doesn’t fit on a line, allow putting all arguments onto the next line, even if BinPackArguments is false.
+AllowAllArgumentsOnNextLine: true
+# This option is deprecated. Same as PackConstructorInitializers: NextLine
+AllowAllConstructorInitializersOnNextLine: true
+# If the function declaration doesn’t fit on a line, allow putting all parameters of a function declaration onto the next line even if BinPackParameters is false.
+AllowAllParametersOfDeclarationOnNextLine: true
+# Dependent on the value, while (true) { continue; } can be put on a single line.
+AllowShortBlocksOnASingleLine: Always
+# If true, short case labels will be contracted to a single line.
+AllowShortCaseLabelsOnASingleLine: true
+# Allow short enums on a single line.
+AllowShortEnumsOnASingleLine: true
+# Dependent on the value, int f() { return 0; } can be put on a single line.
+AllowShortFunctionsOnASingleLine: Empty
+# Dependent on the value, if (a) return; can be put on a single line.
+AllowShortIfStatementsOnASingleLine: WithoutElse
+# Dependent on the value, auto lambda []() { return 0; } can be put on a single line.
+AllowShortLambdasOnASingleLine: All
+# If true, while (true) continue; can be put on a single line.
+AllowShortLoopsOnASingleLine: true
+# The function definition return type breaking style to use. This option is deprecated and is retained for backwards compatibility.
+AlwaysBreakAfterDefinitionReturnType: None
+# The function declaration return type breaking style to use.
+AlwaysBreakAfterReturnType: None
+# If true, always break before multiline string literals.
+AlwaysBreakBeforeMultilineStrings: false
+# The template declaration breaking style to use.
+AlwaysBreakTemplateDeclarations: Yes
+# A vector of strings that should be interpreted as attributes/qualifiers instead of identifiers. This can be useful for language extensions or static analyzer annotations.
+AttributeMacros:
+  - __capability
+# If false, a function call’s arguments will either be all on the same line or will have one line each.
+BinPackArguments: true
+# If false, a function declaration’s or function definition’s parameters will either all be on the same line or will have one line each.
+BinPackParameters: true
+# Control of individual brace wrapping cases.
+BraceWrapping:
+  AfterCaseLabel:  false
+  AfterClass:      false
+  AfterControlStatement: Never
+  AfterEnum:       false
+  AfterFunction:   false
+  AfterNamespace:  false
+  AfterObjCDeclaration: false
+  AfterStruct:     false
+  AfterUnion:      false
+  AfterExternBlock: false
+  BeforeCatch:     false
+  BeforeElse:      false
+  BeforeLambdaBody: false
+  BeforeWhile:     false
+  IndentBraces:    false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+# Break after each annotation on a field in Java files.
+BreakAfterJavaFieldAnnotations: false
+# The way to wrap binary operators.
+BreakBeforeBinaryOperators: None
+# The brace breaking style to use.
+BreakBeforeBraces: Attach
+# The concept declaration style to use.
+BreakBeforeConceptDeclarations: true
+BreakBeforeInheritanceComma: false
+# If true, ternary operators will be placed after line breaks.
+BreakBeforeTernaryOperators: true
+# The break constructor initializers style to use.
+BreakConstructorInitializers: AfterColon
+BreakConstructorInitializersBeforeComma: false
+# The inheritance list style to use.
+BreakInheritanceList: AfterColon
+# Allow breaking string literals when formatting.
+BreakStringLiterals: true
+# The BitFieldColonSpacingStyle to use for bitfields.
+BitFieldColonSpacing: Both
+# The column limit.
+ColumnLimit: 80
+# A regular expression that describes comments with special meaning, which should not be split into lines or otherwise changed.
+CommentPragmas:  '^ PRAGMA: '
+# If true, consecutive namespace declarations will be on the same line. If false, each namespace is declared on a new line.
+CompactNamespaces: false
+# This option is deprecated
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+# The number of characters to use for indentation of constructor initializer lists as well as inheritance lists.
+ConstructorInitializerIndentWidth: 2
+# Indent width for line continuations.
+ContinuationIndentWidth: 2
+# If true, format braced lists as best suited for C++11 braced lists.
+Cpp11BracedListStyle: true
+DeriveLineEnding: true
+# If true, analyze the formatted file for the most common alignment of & and *. Pointer and reference alignment styles are going to be updated according to the preferences found in the file. PointerAlignment is then used only as fallback.
+DerivePointerAlignment: false
+# Disables formatting completely.
+DisableFormat: false
+# Defines when to put an empty line after access modifiers. EmptyLineBeforeAccessModifier configuration handles the number of empty lines between two access modifiers.
+EmptyLineAfterAccessModifier: Never
+# Defines in which cases to put empty line before access modifiers.
+EmptyLineBeforeAccessModifier: Always
+# If true, clang-format detects whether function calls and definitions are formatted with one parameter per line.
+ExperimentalAutoDetectBinPacking: false
+# If true, clang-format adds missing namespace end comments for namespaces and fixes invalid existing ones. This doesn’t affect short namespaces, which are controlled by ShortNamespaceLines.
+FixNamespaceComments: true
+# A vector of macros that should be interpreted as foreach loops instead of as function calls.
+ForEachMacros: []
+# A vector of macros that should be interpreted as conditionals instead of as function calls.
+IfMacros: []
+# Dependent on the value, multiple #include blocks can be sorted as one and divided based on category.
+IncludeBlocks: Regroup
+# Regular expressions denoting the different #include categories used for ordering #includes.
+IncludeCategories:
+  - Regex:           '<.*\.hpp>'
+    Priority:        3
+    SortPriority:    0
+  - Regex:           '<.*\.h>'
+    Priority:        2
+    SortPriority:    0
+  - Regex:           '^<.*>$'
+    Priority:        1
+    SortPriority:    0
+# Specify a regular expression of suffixes that are allowed in the file-to-main-include mapping
+IncludeIsMainRegex: '(Test)?$'
+# Specify a regular expression for files being formatted that are allowed to be considered “main” in the file-to-main-include mapping.
+IncludeIsMainSourceRegex: ''
+# Specify whether access modifiers should have their own indentation level.
+IndentAccessModifiers: false
+# Indent case label blocks one level from the case label.
+IndentCaseBlocks: false
+# Indent case labels one level from the switch statement.
+IndentCaseLabels: true
+# IndentExternBlockStyle is the type of indenting of extern blocks.
+IndentExternBlock: Indent
+# Indent goto labels.
+IndentGotoLabels: true
+# The preprocessor directive indenting style to use.
+IndentPPDirectives: None
+# Indent the requires clause in a template
+IndentRequires: false
+# The number of columns to use for indentation.
+IndentWidth: 2
+# Indent if a function definition or declaration is wrapped after the type.
+IndentWrappedFunctionNames: false
+# If set to TCS_Wrapped will insert trailing commas in container literals (arrays and objects) that wrap across multiple lines. It is currently only available for JavaScript and disabled by default TCS_None. InsertTrailingCommas cannot be used together with BinPackArguments as inserting the comma disables bin-packing.
+InsertTrailingCommas: None
+# The JavaScriptQuoteStyle to use for JavaScript strings.
+JavaScriptQuotes: Double
+# Whether to wrap JavaScript import/export statements.
+JavaScriptWrapImports: true
+# If true, the empty line at the start of blocks is kept.
+KeepEmptyLinesAtTheStartOfBlocks: false
+# Language, this format style is targeted at.
+Language: Cpp
+# The indentation style of lambda bodies. Signature (the default) causes the lambda body to be indented one additional level relative to the indentation level of the signature. OuterScope forces the lambda body to be indented one additional level relative to the parent scope containing the lambda signature.
+LambdaBodyIndentation: Signature
+# A regular expression matching macros that start a block.
+MacroBlockBegin: ''
+# A regular expression matching macros that end a block.
+MacroBlockEnd:   ''
+# The maximum number of consecutive empty lines to keep.
+MaxEmptyLinesToKeep: 1
+# The indentation used for namespaces.
+NamespaceIndentation: None
+ObjCBinPackProtocolList: Auto
+ObjCBlockIndentWidth: 2
+ObjCBreakBeforeNestedBlockParam: true
+ObjCSpaceAfterProperty: false
+ObjCSpaceBeforeProtocolList: true
+# The number of columns to use for indentation of preprocessor statements. When set to -1 (default) IndentWidth is used also for preprocessor statements.
+PPIndentWidth: -1
+# The pack constructor initializers style to use.
+PackConstructorInitializers: BinPack
+# The penalty for breaking around an assignment operator.
+PenaltyBreakAssignment: 2
+# The penalty for breaking a function call after call(.
+PenaltyBreakBeforeFirstCallParameter: 19
+# The penalty for each line break introduced inside a comment.
+PenaltyBreakComment: 300
+# The penalty for breaking before the first <<.
+PenaltyBreakFirstLessLess: 120
+# The penalty for breaking after (.
+PenaltyBreakOpenParenthesis: 0
+# The penalty for each line break introduced inside a string literal
+PenaltyBreakString: 10
+# The penalty for breaking after template declaration.
+PenaltyBreakTemplateDeclaration: 0
+# The penalty for each character outside of the column limit.
+PenaltyExcessCharacter: 1000000
+# Penalty for each character of whitespace indentation (counted relative to leading non-whitespace column).
+PenaltyIndentedWhitespace: 0
+# Penalty for putting the return type of a function onto its own line.
+PenaltyReturnTypeOnItsOwnLine: 0
+# Pointer and reference alignment style.
+PointerAlignment: Right
+# Different ways to arrange specifiers and qualifiers (e.g. const/volatile).
+QualifierAlignment: Leave
+# Reference alignment style (overrides PointerAlignment for references).
+ReferenceAlignment: Pointer
+# If true, clang-format will attempt to re-flow comments. That is it will touch a comment and reflow long comments into new lines, trying to obey the ColumnLimit.
+ReflowComments:  true
+# Remove optional braces of control statements (if, else, for, and while) in C++ according to the LLVM coding style.
+RemoveBracesLLVM: false
+# Specifies the use of empty lines to separate definition blocks, including classes, structs, enums, and functions.
+SeparateDefinitionBlocks: Always
+# The maximal number of unwrapped lines that a short namespace spans. Defaults to 1.
+ShortNamespaceLines: 0
+# Controls if and how clang-format will sort #includes.
+SortIncludes:    CaseSensitive
+# When sorting Java imports, by default static imports are placed before non-static imports. If JavaStaticImportAfterImport is After, static imports are placed after non-static imports.
+SortJavaStaticImport: Before
+# Controls if and how clang-format will sort using declarations.
+SortUsingDeclarations: true
+# If true, a space is inserted after C style casts.
+SpaceAfterCStyleCast: false
+# If true, a space is inserted after the logical not operator (!).
+SpaceAfterLogicalNot: false
+# If true, a space will be inserted after the ‘template’ keyword.
+SpaceAfterTemplateKeyword: true
+# Defines in which cases to put a space before or after pointer qualifiers
+SpaceAroundPointerQualifiers: Default
+# If false, spaces will be removed before assignment operators.
+SpaceBeforeAssignmentOperators: true
+# If false, spaces will be removed before case colon.
+SpaceBeforeCaseColon: false
+# If true, a space will be inserted before a C++11 braced list used to initialize an object (after the preceding identifier or type).
+SpaceBeforeCpp11BracedList: true
+# If false, spaces will be removed before constructor initializer colon.
+SpaceBeforeCtorInitializerColon: true
+# If false, spaces will be removed before inheritance colon.
+SpaceBeforeInheritanceColon: true
+# Defines in which cases to put a space before opening parentheses.
+SpaceBeforeParens: ControlStatements
+# If false, spaces will be removed before range-based for loop colon.
+SpaceBeforeRangeBasedForLoopColon: true
+# If true, spaces will be before [. Lambdas will not be affected. Only the first [ will get a space added.
+SpaceBeforeSquareBrackets: false
+# If true, spaces will be inserted into {}.
+SpaceInEmptyBlock: false
+# If true, spaces may be inserted into ().
+SpaceInEmptyParentheses: false
+# The number of spaces before trailing line comments (// - comments).
+SpacesBeforeTrailingComments: 2
+# The SpacesInAnglesStyle to use for template argument lists.
+SpacesInAngles: Never
+# If true, spaces may be inserted into C style casts. This option is deprecated. See InCStyleCasts of SpacesInParensOptions.
+SpacesInCStyleCastParentheses: false
+# If true, spaces will be inserted around if/for/switch/while conditions. This option is deprecated. See InConditionalStatements of SpacesInParensOptions.
+SpacesInConditionalStatement: false
+# If true, spaces are inserted inside container literals (e.g. ObjC and Javascript array and dict literals). For JSON, use SpaceBeforeJsonColon instead.
+SpacesInContainerLiterals: false
+# How many spaces are allowed at the start of a line comment. To disable the maximum set it to -1, apart from that the maximum takes precedence over the minimum.
+SpacesInLineCommentPrefix:
+  Minimum:         1
+  Maximum:         1
+# If true, spaces will be inserted after ( and before ). This option is deprecated. The previous behavior is preserved by using SpacesInParens with Custom and by setting all SpacesInParensOptions to true except for InCStyleCasts and InEmptyParentheses.
+SpacesInParentheses: false
+# If true, spaces will be inserted after [ and before ]. Lambdas without arguments or unspecified size array declarations will not be affected
+SpacesInSquareBrackets: false
+# Parse and format C++ constructs compatible with this standard.
+Standard: Latest
+# Macros which are ignored in front of a statement, as if they were an attribute. So that they are not parsed as identifier, for example for Qts emit.
+StatementAttributeLikeMacros: []
+# A vector of macros that should be interpreted as complete statements.
+StatementMacros: []
+# The number of columns used for tab stops.
+TabWidth: 2
+# This option is deprecated. See LF and CRLF of LineEnding
+UseCRLF: false
+# The way to use tab characters in the resulting file.
+UseTab: Never
+# A vector of macros which are whitespace-sensitive and should not be touched.
+WhitespaceSensitiveMacros: []
+...
