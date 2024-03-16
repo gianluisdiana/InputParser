@@ -14,7 +14,7 @@
 #ifndef _INPUT_FLAG_OPTION_HPP_
 #define _INPUT_FLAG_OPTION_HPP_
 
-#include <option/base_option.hpp>
+#include <input/option/base_option.hpp>
 
 namespace input {
 

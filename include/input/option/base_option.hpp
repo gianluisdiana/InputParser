@@ -22,7 +22,7 @@
 
 #include <stdexcept>
 
-#include <constraint.hpp>
+#include <input/constraint.hpp>
 
 namespace input {
 

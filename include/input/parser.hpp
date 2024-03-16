@@ -16,10 +16,10 @@
 #include <unordered_map>
 #include <variant>
 
-#include <parsing_error.hpp>
-#include <option/flag_option.hpp>
-#include <option/compound_option.hpp>
-#include <option/single_option.hpp>
+#include <input/parsing_error.hpp>
+#include <input/option/flag_option.hpp>
+#include <input/option/compound_option.hpp>
+#include <input/option/single_option.hpp>
 
 namespace input {
 

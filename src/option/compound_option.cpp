@@ -1,4 +1,4 @@
-#include <option/compound_option.hpp>
+#include <input/option/compound_option.hpp>
 
 namespace input {
 

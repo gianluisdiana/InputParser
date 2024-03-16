@@ -20,11 +20,11 @@ include(CMakePackageConfigHelpers)
 
 # Create a sources variable with a link to all cpp files to compile
 add_library(${PROJECT_NAME} STATIC
-  src/lib/parser.cpp
-  src/lib/option/base_option.cpp
-  src/lib/option/flag_option.cpp
-  src/lib/option/compound_option.cpp
-  src/lib/option/single_option.cpp
+  src/parser.cpp
+  src/option/base_option.cpp
+  src/option/flag_option.cpp
+  src/option/compound_option.cpp
+  src/option/single_option.cpp
 )
 
 # -------------------------------- Header files -------------------------------- #
@@ -32,7 +32,7 @@ add_library(${PROJECT_NAME} STATIC
 # Set the directories that should be included in the build command for this target
 # when running g++ these will be included as -I/directory/path/
 target_include_directories(${PROJECT_NAME} PUBLIC
-  ${PROJECT_SOURCE_DIR}/src/include
+  ${PROJECT_SOURCE_DIR}/include
 )
 
 # ------------------------------ Compile options ------------------------------- #

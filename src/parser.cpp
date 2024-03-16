@@ -15,7 +15,7 @@
 #include <iostream>
 #include <set>
 
-#include <parser.hpp>
+#include <input/parser.hpp>
 
 namespace input {
 
