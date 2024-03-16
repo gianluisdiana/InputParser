@@ -23,17 +23,9 @@
 #include <stdexcept>
 
 #include <input/constraint.hpp>
+#include <input/local_type_traits.hpp>
 
 namespace input {
-
-/**
- * @brief A type trait that checks if a type is a string (const char* is also
- * considered a string).
- * @tparam T The type to check
- */
-template <class T>
-constexpr const bool is_string_type =
-  std::is_same_v<T, std::string> || std::is_same_v<T, const char *>;
 
 /** @brief A class that represents a command line option */
 class BaseOption {
