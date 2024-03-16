@@ -28,7 +28,6 @@ namespace input {
  */
 class FlagOption : public BaseOption {
  public:
-
   /**
    * @brief Constructs an empty option with the provided names.
    *
@@ -37,9 +36,12 @@ class FlagOption : public BaseOption {
    * @param name The name of the option
    * @param extra_names Extra names that the option can be recognized by
    */
-  template <typename T, typename... Ts,
-    typename = typename std::enable_if_t<is_string_type<T> && (is_string_type<Ts> && ...)>>
-  FlagOption(const T name, const Ts... names) : BaseOption(name, names...) {}
+  template <
+    typename T, typename... Ts,
+    typename = typename std::enable_if_t<
+      is_string_type<T> && (is_string_type<Ts> && ...)>>
+  FlagOption(const T name, const Ts... extra_names) :
+    BaseOption(name, extra_names...) {}
 
   /**
    * @brief Indicates if the option is a flag.
@@ -60,7 +62,7 @@ class FlagOption : public BaseOption {
    * @return The instance of the object that called this method.
    */
   template <class T>
-  FlagOption& to(const std::function<T(const bool&)>& transformation);
+  FlagOption &to(const std::function<T(const bool &)> &transformation);
 
   /**
    * @brief Converts the value of the option to an integer.
@@ -71,7 +73,7 @@ class FlagOption : public BaseOption {
    *  return value ? 1 : 0;
    * });
    */
-  FlagOption& toInt(void) override;
+  FlagOption &toInt(void) override;
 
   /**
    * @brief Converts the value of the option to a double.
@@ -82,7 +84,7 @@ class FlagOption : public BaseOption {
    *  return value ? 1.0 : 0.0;
    * });
    */
-  FlagOption& toDouble(void) override;
+  FlagOption &toDouble(void) override;
 
   /**
    * @brief Converts the value of the option to a float.
@@ -93,41 +95,46 @@ class FlagOption : public BaseOption {
    *  return value ? 1.0f : 0.0f;
    * });
    */
-  FlagOption& toFloat(void) override;
+  FlagOption &toFloat(void) override;
 
   // ------------------------ Static casted methods ------------------------ //
 
-  inline FlagOption& addDefaultValue(const std::any& value) {
-    return static_cast<FlagOption&>(BaseOption::addDefaultValue(value));
+  inline FlagOption &addDefaultValue(const std::any &value) {
+    return static_cast<FlagOption &>(BaseOption::addDefaultValue(value));
   }
 
-  inline FlagOption& addDescription(const std::string& description) {
-    return static_cast<FlagOption&>(BaseOption::addDescription(description));
+  inline FlagOption &addDescription(const std::string &description) {
+    return static_cast<FlagOption &>(BaseOption::addDescription(description));
   }
 
-  template <class T> inline FlagOption&
-  addConstraint(const std::function<bool(const T&)>& constraint,
-    const std::string& error_message) {
-    return static_cast<FlagOption&>(BaseOption::addConstraint(constraint, error_message));
+  template <class T>
+  inline FlagOption &addConstraint(
+    const std::function<bool(const T &)> &constraint,
+    const std::string &error_message
+  ) {
+    return static_cast<FlagOption &>(
+      BaseOption::addConstraint(constraint, error_message)
+    );
   }
 
-  inline FlagOption& transformBeforeCheck(void) {
-    return static_cast<FlagOption&>(BaseOption::transformBeforeCheck());
+  inline FlagOption &transformBeforeCheck(void) {
+    return static_cast<FlagOption &>(BaseOption::transformBeforeCheck());
   }
 
-  inline FlagOption& beRequired(const bool& required = true) {
-    return static_cast<FlagOption&>(BaseOption::beRequired(required));
+  inline FlagOption &beRequired(const bool &required = true) {
+    return static_cast<FlagOption &>(BaseOption::beRequired(required));
   }
 };
 
-template <class T> FlagOption&
-FlagOption::to(const std::function<T(const bool&)>& transformation) {
-  transformation_ = [transformation](const std::any& value) -> std::any {
+template <class T>
+FlagOption &
+FlagOption::to(const std::function<T(const bool &)> &transformation) {
+  transformation_ = [transformation](const std::any &value) -> std::any {
     return transformation(std::any_cast<bool>(value));
   };
   return *this;
 }
 
-} // namespace input
+}  // namespace input
 
-#endif // _INPUT_FLAG_OPTION_HPP_
+#endif  // _INPUT_FLAG_OPTION_HPP_

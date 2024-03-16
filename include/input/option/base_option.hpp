@@ -32,8 +32,8 @@ namespace input {
  * @tparam T The type to check
  */
 template <class T>
-constexpr const bool
-is_string_type = std::is_same_v<T, std::string> || std::is_same_v<T, const char*>;
+constexpr const bool is_string_type =
+  std::is_same_v<T, std::string> || std::is_same_v<T, const char *>;
 
 /** @brief A class that represents a command line option */
 class BaseOption {
@@ -46,8 +46,10 @@ class BaseOption {
    * @param name The name of the option
    * @param extra_names Extra names that the option can be recognized by
    */
-  template <typename T, typename... Ts,
-    typename = typename std::enable_if_t<is_string_type<T> && (is_string_type<Ts> && ...)>>
+  template <
+    typename T, typename... Ts,
+    typename = typename std::enable_if_t<
+      is_string_type<T> && (is_string_type<Ts> && ...)>>
   BaseOption(const T name, const Ts... extra_names);
 
   // ------------------------------- Adders ------------------------------- //
@@ -59,7 +61,7 @@ class BaseOption {
    * @param value The default value to assign to the option
    * @return The instance of the object that called this method
    */
-  BaseOption& addDefaultValue(const std::any& value);
+  BaseOption &addDefaultValue(const std::any &value);
 
   /**
    * @brief Assigns a value to the description of the option
@@ -67,7 +69,7 @@ class BaseOption {
    * @param description The new description
    * @return The instance of the object that called this method.
    */
-  BaseOption& addDescription(const std::string& description);
+  BaseOption &addDescription(const std::string &description);
 
   /**
    * @brief Adds a constraint to the option.
@@ -80,10 +82,12 @@ class BaseOption {
    * @param error_message The error message to be displayed if the constraint
    * fails.
    * @return The instance of the object that called this method.
-  */
+   */
   template <class T>
-  BaseOption& addConstraint(const std::function<bool(const T&)>& constraint,
-    const std::string& error_message = "");
+  BaseOption &addConstraint(
+    const std::function<bool(const T &)> &constraint,
+    const std::string &error_message = ""
+  );
 
   // ------------------------------- Getters ------------------------------- //
 
@@ -110,12 +114,12 @@ class BaseOption {
   const T getDefaultValue(void) const;
 
   /** @brief Gets the names of the option */
-  inline const std::vector<std::string>& getNames(void) const {
+  inline const std::vector<std::string> &getNames(void) const {
     return names_;
   }
 
   /** @brief Gets the description of the option */
-  inline const std::string& getDescription(void) const {
+  inline const std::string &getDescription(void) const {
     return description_;
   }
 
@@ -128,7 +132,7 @@ class BaseOption {
    *
    * @param value The value to set to the option
    */
-  void setValue(const std::any& value);
+  void setValue(const std::any &value);
 
   // ------------------------------- Checks ------------------------------- //
 
@@ -170,7 +174,7 @@ class BaseOption {
    *
    * @return The instance of the object that called this method.
    */
-  virtual BaseOption& toInt(void) = 0;
+  virtual BaseOption &toInt(void) = 0;
 
   /**
    * @brief Defines a transformation function that transforms the value of the
@@ -178,7 +182,7 @@ class BaseOption {
    *
    * @return The instance of the object that called this method.
    */
-  virtual BaseOption& toDouble(void) = 0;
+  virtual BaseOption &toDouble(void) = 0;
 
   /**
    * @brief Defines a transformation function that transforms the value of the
@@ -186,7 +190,7 @@ class BaseOption {
    *
    * @return The instance of the object that called this method.
    */
-  virtual BaseOption& toFloat(void) = 0;
+  virtual BaseOption &toFloat(void) = 0;
 
   // ---------------------------- Other methods ---------------------------- //
 
@@ -196,7 +200,7 @@ class BaseOption {
    *
    * @return The instance of the object that called this method.
    */
-  BaseOption& transformBeforeCheck(void);
+  BaseOption &transformBeforeCheck(void);
 
   /**
    * @brief Makes the option required or not.
@@ -205,7 +209,7 @@ class BaseOption {
    * default.
    * @return The instance of the object that called this method.
    */
-  BaseOption& beRequired(const bool required = true);
+  BaseOption &beRequired(const bool required = true);
 
  protected:
   // The value of the option
@@ -222,7 +226,7 @@ class BaseOption {
   // the constraints
   bool transform_before_check_;
   // A function that transforms the value of the option
-  std::function<std::any(const std::any&)> transformation_;
+  std::function<std::any(const std::any &)> transformation_;
   // A list of constraints that the value of the option must satisfy
   std::vector<Constraint> constraints_;
 
@@ -234,7 +238,7 @@ class BaseOption {
    * @return The transformed value (or the original value if no transformation
    * function was provided).
    */
-  inline const std::any applyTransformation(const std::any& value) const {
+  inline const std::any applyTransformation(const std::any &value) const {
     return transformation_ == nullptr ? value : transformation_(value);
   }
 
@@ -243,21 +247,30 @@ class BaseOption {
    *
    * @param value The value to check
    */
-  void checkConstraints(const std::any& value) const;
+  void checkConstraints(const std::any &value) const;
 };
 
-template <typename T, typename... Ts,
-  typename = typename std::enable_if_t<is_string_type<T> && (is_string_type<Ts> && ...)>>
-BaseOption::BaseOption(const T name, const Ts... names) : value_{}, default_value_{},
-  names_{std::vector<std::string>{name, names...}}, description_{}, required_{true},
-  transform_before_check_{false}, transformation_{nullptr}, constraints_{} {}
+template <
+  typename T, typename... Ts,
+  typename =
+    typename std::enable_if_t<is_string_type<T> && (is_string_type<Ts> && ...)>>
+BaseOption::BaseOption(const T name, const Ts... extra_names) :
+  value_ {}, default_value_ {}, names_ {std::vector<std::string> {
+                                  name, extra_names...}},
+  description_ {}, required_ {true}, transform_before_check_ {false},
+  transformation_ {nullptr}, constraints_ {} {}
 
 template <class T>
-BaseOption& BaseOption::addConstraint(const std::function<bool(const T&)>& constraint,
-  const std::string& error_message) {
-  constraints_.emplace_back([constraint](const std::any& value) -> bool {
-    return constraint(std::any_cast<T>(value));
-  }, error_message);
+BaseOption &BaseOption::addConstraint(
+  const std::function<bool(const T &)> &constraint,
+  const std::string &error_message
+) {
+  constraints_.emplace_back(
+    [constraint](const std::any &value) -> bool {
+      return constraint(std::any_cast<T>(value));
+    },
+    error_message
+  );
   return *this;
 }
 
@@ -273,6 +286,6 @@ const T BaseOption::getDefaultValue(void) const {
   return std::any_cast<T>(default_value_);
 }
 
-} // namespace input
+}  // namespace input
 
-#endif // _INPUT_BASE_OPTION_HPP_
+#endif  // _INPUT_BASE_OPTION_HPP_
