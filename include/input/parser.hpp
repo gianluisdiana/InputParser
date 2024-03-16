@@ -32,14 +32,22 @@ using Option = std::variant<FlagOption, CompoundOption, SingleOption>;
  */
 class Parser {
  public:
+  /** @brief Create an empty parser with no options */
+  Parser();
+
+  // -------------------------------- Adders ------------------------------- //
+
   /**
-   * @brief Adds an option to be parsed. The option must be a flag, single or
-   * compound option.
+   * @brief Adds an option to be parsed.
    *
+   * @tparam T The type of the option to be added, must be a subclass of
+   * BaseOption.
    * @param create_option A function that returns the option.
    * @return The instance of the object that called this method.
    */
-  Parser &addOption(const std::function<Option()> &create_option);
+  template <
+    typename T, typename = std::enable_if_t<std::is_base_of_v<BaseOption, T>>>
+  Parser &addOption(const std::function<const T()> &create_option);
 
   /**
    * @brief Adds a basic help option to the parser.
@@ -58,6 +66,8 @@ class Parser {
    */
   Parser &addHelpOption();
 
+  // ------------------------------- Getters ------------------------------- //
+
   /**
    * @brief Gets the value from an option.
    *
@@ -67,6 +77,8 @@ class Parser {
    */
   template <class T = std::string>
   const T getValue(const std::string &name) const;
+
+  // -------------------------------- Utility ------------------------------ //
 
   /**
    * @brief Parses command line input to provide values ​​for previously
@@ -85,7 +97,33 @@ class Parser {
 
  private:
   // All the options registered.
-  std::unordered_map<std::string, std::shared_ptr<Option>> options;
+  std::unordered_map<std::string, Option> options_;
+  // Helper map to get the option by name.
+  std::unordered_map<std::string, std::string> names_;
+
+  // ------------------------------- Getters ------------------------------- //
+
+  /** @brief Gives readonly access to the option with the provided name */
+  inline const Option &getOption(const std::string &name) const {
+    return options_.at(names_.at(name));
+  }
+
+  /** @brief Gives read-write access to the option with the provided name */
+  inline Option &getOption(const std::string &name) {
+    return options_.at(names_.at(name));
+  }
+
+  // ------------------------------- Setters ------------------------------- //
+
+  /**
+   * @brief Sets the value of an option.
+   *
+   * @param option The option to be changed.
+   * @param value The value to be assigned to the option.
+   */
+  void setOptionValue(Option &option, const std::any &value);
+
+  // ------------------------------- Checks ------------------------------- //
 
   /**
    * @brief Tells if the parser has an option with the name provided.
@@ -94,7 +132,7 @@ class Parser {
    * @return Whether the parser registered the option or not.
    */
   inline bool hasOption(const std::string &name) const {
-    return options.contains(name);
+    return names_.find(name) != names_.end();
   }
 
   /**
@@ -119,15 +157,15 @@ class Parser {
    * @param name The name of the possible option.
    * @return Whether the parser registered the option or not.
    */
-  bool hasMultiple(const std::string &name) const;
+  bool hasCompound(const std::string &name) const;
 
   /**
-   * @brief Sets the value of an option.
-   *
-   * @param option The option to be changed.
-   * @param value The value to be assigned to the option.
+   * @brief Check if there are options that have not been specified.
+   *  If so, a std::invalid_argument error will be thrown.
    */
-  void setOptionValue(Option &option, const std::any &value);
+  void checkMissingOptions() const;
+
+  // ------------------------- Individual parsers -------------------------- //
 
   /**
    * @brief Changes the flag option provided to true.
@@ -162,13 +200,20 @@ class Parser {
   int parseMultiple(
     const std::vector<std::string> &arguments, const unsigned int index
   );
-
-  /**
-   * @brief Check if there are options that have not been specified.
-   *  If so, a std::invalid_argument error will be thrown.
-   */
-  void checkMissingOptions() const;
 };
+
+template <
+  typename T, typename = std::enable_if_t<std::is_base_of_v<BaseOption, T>>>
+Parser &Parser::addOption(const std::function<const T()> &create_option) {
+  const auto option = create_option();
+  const auto &reference_name = option.getNames()[0];
+  for (const auto &name : option.getNames()) {
+    if (hasOption(name)) throw std::invalid_argument("Option already exists!");
+    names_[name] = reference_name;
+  }
+  options_.emplace(reference_name, option);
+  return *this;
+}
 
 template <class T>
 const T Parser::getValue(const std::string &name) const {
@@ -178,7 +223,7 @@ const T Parser::getValue(const std::string &name) const {
     );
   }
   return std::visit(
-    [](auto &&opt) { return opt.template getValue<T>(); }, *options.at(name)
+    [](auto &&opt) { return opt.template getValue<T>(); }, getOption(name)
   );
 }
 

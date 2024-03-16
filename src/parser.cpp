@@ -19,23 +19,10 @@
 
 namespace input {
 
-Parser &Parser::addOption(const std::function<Option()> &create_option) {
-  auto option = std::make_shared<Option>(create_option());
-  std::visit(
-    [this, option](auto &&opt) {
-      for (const auto &name : opt.getNames()) {
-        if (this->hasOption(name))
-          throw std::invalid_argument("Option already exists!");
-        this->options[name] = option;
-      }
-    },
-    *option
-  );
-  return *this;
-}
+Parser::Parser() : options_ {}, names_ {} {}
 
 Parser &Parser::addHelpOption() {
-  return addOption([] -> auto {
+  return addOption<FlagOption>([] {
     return FlagOption("-h", "--help")
       .addDescription("Shows how to use the program.")
       .addDefaultValue(false);
@@ -43,13 +30,13 @@ Parser &Parser::addHelpOption() {
 }
 
 void Parser::parse(int argc, char *raw_argv[]) {
-  std::vector<std::string> argv(raw_argv, raw_argv + argc);
+  const std::vector<std::string> argv(raw_argv, raw_argv + argc);
   for (int index = 1; index < argc; ++index) {
     if (hasFlag(argv[index]))
       parseFlag(argv[index]);
     else if (hasSingle(argv[index]))
       index += parseSingle(argv, index);
-    else if (hasMultiple(argv[index]))
+    else if (hasCompound(argv[index]))
       index += parseMultiple(argv, index);
     else
       throw ParsingError("Invalid arguments provided!");
@@ -59,20 +46,18 @@ void Parser::parse(int argc, char *raw_argv[]) {
 
 bool Parser::hasFlag(const std::string &name) const {
   return hasOption(name) &&
-         std::visit([](auto &&opt) { return opt.isFlag(); }, *options.at(name));
+         std::visit([](auto &&opt) { return opt.isFlag(); }, getOption(name));
 }
 
 bool Parser::hasSingle(const std::string &name) const {
   return hasOption(name) &&
-         std::visit(
-           [](auto &&opt) { return opt.isSingle(); }, *options.at(name)
-         );
+         std::visit([](auto &&opt) { return opt.isSingle(); }, getOption(name));
 }
 
-bool Parser::hasMultiple(const std::string &name) const {
+bool Parser::hasCompound(const std::string &name) const {
   return hasOption(name) &&
          std::visit(
-           [](auto &&opt) { return opt.isCompound(); }, *options.at(name)
+           [](auto &&opt) { return opt.isCompound(); }, getOption(name)
          );
 }
 
@@ -87,7 +72,7 @@ void Parser::parseFlag(const std::string &flag_name) {
         opt.hasDefaultValue() ? !opt.template getDefaultValue<bool>() : true
       );
     },
-    *options[flag_name]
+    getOption(flag_name)
   );
 }
 
@@ -99,7 +84,7 @@ int Parser::parseSingle(
       "After the " + arguments[index] + " option should be an extra argument!"
     );
   }
-  setOptionValue(*options[arguments[index]], arguments[index + 1]);
+  setOptionValue(getOption(arguments[index]), arguments[index + 1]);
   return 1;
 }
 
@@ -118,18 +103,18 @@ int Parser::parseMultiple(
       " option should be at least an extra argument!"
     );
   }
-  setOptionValue(*options[arguments[index]], values);
+  setOptionValue(getOption(arguments[index]), values);
   return local_index - index - 1;
 }
 
 void Parser::checkMissingOptions() const {
-  for (const auto &[_, option] : options) {
+  for (const auto &[_, option] : options_) {
     std::visit(
       [](auto &&opt) {
         if (opt.isRequired() && !opt.hasValue() && !opt.hasDefaultValue())
           throw ParsingError("Missing option " + opt.getNames()[0]);
       },
-      *option
+      option
     );
   }
 }
@@ -183,9 +168,9 @@ void Parser::checkMissingOptions() const {
 void Parser::displayUsage() const {
   std::string usage = "Usage: ./exec_name";
   std::string description = "";
-  std::set<std::shared_ptr<Option>> options_displayed;
-  for (const auto &[option_name, option] : options) {
-    if (options_displayed.contains(option)) continue;
+  std::set<Option> options_displayed;
+  for (const auto &[option_name, option] : options_) {
+    // if (options_displayed.contains(option)) continue;
     std::visit(
       [&usage, option_name, &description](auto &&opt) {
         const std::pair<std::string, std::string> brackets_or_not =
@@ -204,9 +189,9 @@ void Parser::displayUsage() const {
           description += option_name + " -> " + opt.getDescription() + "\n";
         }
       },
-      *option
+      option
     );
-    options_displayed.insert(option);
+    // options_displayed.insert(option);
   }
   std::cout << usage << "\n\n" << description << "\n";
 }
