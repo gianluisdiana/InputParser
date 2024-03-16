@@ -29,7 +29,17 @@ namespace input {
  */
 class CompoundOption : public BaseOption {
  public:
-  CompoundOption(void) : BaseOption() {}
+  /**
+   * @brief Constructs an empty option with the provided names.
+   *
+   * @tparam T Type of the mandatory name (must be strings or const char*)
+   * @tparam Ts Types of the names (same type as T)
+   * @param name The name of the option
+   * @param extra_names Extra names that the option can be recognized by
+   */
+  template <typename... Ts,
+    typename = typename std::enable_if_t<(is_string_type<Ts> && ...)>>
+  CompoundOption(const Ts... names) : BaseOption(names...) {}
 
   /**
    * @brief Indicates if the option is a compound option.
@@ -110,12 +120,6 @@ class CompoundOption : public BaseOption {
 
   inline CompoundOption& addDescription(const std::string& description) {
     return static_cast<CompoundOption&>(BaseOption::addDescription(description));
-  }
-
-  template <class... Ts>
-  std::enable_if_t<(is_string_type<Ts> && ...), CompoundOption&>
-  inline addNames(const Ts... names) {
-    return static_cast<CompoundOption&>(BaseOption::addNames(names...));
   }
 
   template <class T> inline CompoundOption&

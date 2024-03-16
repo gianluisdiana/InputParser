@@ -32,8 +32,7 @@ Parser& Parser::addOption(const std::function<Option()>& create_option) {
 
 Parser& Parser::addHelpOption(void) {
   return addOption([] -> auto {
-    return FlagOption()
-      .addNames("-h", "--help")
+    return FlagOption("-h", "--help")
       .addDescription("Shows how to use the program.")
       .addDefaultValue(false);
   });

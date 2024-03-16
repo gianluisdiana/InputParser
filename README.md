@@ -11,7 +11,7 @@
 In order to create a parser we must include the folder _<parser.hpp>_. To start parsing arguments create  __Parser__ object:
 
 ```cpp
-#include <parser.hpp>
+#include <input/parser.hpp>
 
 auto parser = input::Parser();
 ```
@@ -46,8 +46,7 @@ A flag option is an option that must be placed alone. Represents a boolean value
 For example:
 
 ```cpp
-auto flag_option = input::FlagOption()
-  .addNames("-v", "--verbose")
+auto flag_option = input::FlagOption("-v", "--verbose")
   .addDescription("Whether if the program will display the output or not")
   .addDefaultValue(false);
 auto parser = input::Parser()

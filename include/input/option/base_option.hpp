@@ -39,9 +39,16 @@ is_string_type = std::is_same_v<T, std::string> || std::is_same_v<T, const char*
 class BaseOption {
  public:
   /**
-   * @brief Constructs an empty option
+   * @brief Constructs an empty option with the provided names.
+   *
+   * @tparam T Type of the mandatory name (must be strings or const char*)
+   * @tparam Ts Types of the names (same type as T)
+   * @param name The name of the option
+   * @param extra_names Extra names that the option can be recognized by
    */
-  BaseOption();
+  template <typename T, typename... Ts,
+    typename = typename std::enable_if_t<is_string_type<T> && (is_string_type<Ts> && ...)>>
+  BaseOption(const T name, const Ts... extra_names);
 
   // ------------------------------- Adders ------------------------------- //
 
@@ -53,17 +60,6 @@ class BaseOption {
    * @return The instance of the object that called this method
    */
   BaseOption& addDefaultValue(const std::any& value);
-
-  /**
-   * @brief Assigns a list of names to the option
-   *
-   * @tparam Ts Types of the names (must be strings or const char*)
-   * @param names The names to assign to the option
-   * @return The instance of the object that called this method.
-   */
-  template <class... Ts>
-  std::enable_if_t<(is_string_type<Ts> && ...), BaseOption&>
-  addNames(const Ts... names);
 
   /**
    * @brief Assigns a value to the description of the option
@@ -250,12 +246,11 @@ class BaseOption {
   void checkConstraints(const std::any& value) const;
 };
 
-template <class... Ts>
-std::enable_if_t<(is_string_type<Ts> && ...), BaseOption&>
-BaseOption::addNames(const Ts... names) {
-  names_ = std::vector<std::string>{names...};
-  return *this;
-}
+template <typename T, typename... Ts,
+  typename = typename std::enable_if_t<is_string_type<T> && (is_string_type<Ts> && ...)>>
+BaseOption::BaseOption(const T name, const Ts... names) : value_{}, default_value_{},
+  names_{std::vector<std::string>{name, names...}}, description_{}, required_{true},
+  transform_before_check_{false}, transformation_{nullptr}, constraints_{} {}
 
 template <class T>
 BaseOption& BaseOption::addConstraint(const std::function<bool(const T&)>& constraint,
