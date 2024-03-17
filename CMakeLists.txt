@@ -40,7 +40,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${PROJECT_SOURCE_DIR}/include
 )
 
-# ------------------------------ Compile options ------------------------------- #
+# ----------------------------- Compile options ----------------------------- #
 
 # Set the C++ standard we will use to compile the library
 set(CMAKE_CXX_STANDARD 23)
@@ -52,3 +52,11 @@ target_compile_options(${PROJECT_NAME} PRIVATE
   -Wshadow
   -O3
 )
+
+# ---------------------------------- Tests ---------------------------------- #
+
+# Only add the tests directory if the BUILD_INPUT_PARSER_TESTS option is turned on
+# cmake -DBUILD_INPUT_PARSER_TESTS=ON ..
+if(BUILD_INPUT_PARSER_TESTS)
+  add_subdirectory(test)
+endif()
