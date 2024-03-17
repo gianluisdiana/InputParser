@@ -1,6 +1,6 @@
-#include <input/option/single_option.hpp>
+#include <input_parser/option/single_option.hpp>
 
-namespace input {
+namespace input_parser {
 
 SingleOption &SingleOption::toInt() {
   return to<int>([](const std::string &value) -> int {
@@ -20,4 +20,4 @@ SingleOption &SingleOption::toFloat() {
   });
 }
 
-}  // namespace input
+}  // namespace input_parser

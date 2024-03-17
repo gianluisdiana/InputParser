@@ -22,10 +22,10 @@
 
 #include <stdexcept>
 
-#include <input/constraint.hpp>
-#include <input/local_type_traits.hpp>
+#include <input_parser/constraint.hpp>
+#include <input_parser/local_type_traits.hpp>
 
-namespace input {
+namespace input_parser {
 
 /** @brief A class that represents a command line option */
 class BaseOption {
@@ -278,6 +278,6 @@ const T BaseOption::getDefaultValue() const {
   return std::any_cast<T>(default_value_);
 }
 
-}  // namespace input
+}  // namespace input_parser
 
 #endif  // _INPUT_BASE_OPTION_HPP_

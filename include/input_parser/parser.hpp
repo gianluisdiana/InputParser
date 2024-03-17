@@ -16,12 +16,12 @@
 #include <unordered_map>
 #include <variant>
 
-#include <input/option/compound_option.hpp>
-#include <input/option/flag_option.hpp>
-#include <input/option/single_option.hpp>
-#include <input/parsing_error.hpp>
+#include <input_parser/option/compound_option.hpp>
+#include <input_parser/option/flag_option.hpp>
+#include <input_parser/option/single_option.hpp>
+#include <input_parser/parsing_error.hpp>
 
-namespace input {
+namespace input_parser {
 
 /** @brief The type of an option */
 using Option = std::variant<FlagOption, CompoundOption, SingleOption>;
@@ -227,6 +227,6 @@ const T Parser::getValue(const std::string &name) const {
   );
 }
 
-}  // namespace input
+}  // namespace input_parser
 
 #endif  // _INPUT_PARSER_HPP_

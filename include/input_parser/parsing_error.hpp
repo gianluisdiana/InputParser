@@ -15,7 +15,7 @@
 
 #include <stdexcept>
 
-namespace input {
+namespace input_parser {
 
 /** @brief Represents an error ocurred parsing a program arguments */
 class ParsingError : public std::invalid_argument {
@@ -30,6 +30,6 @@ class ParsingError : public std::invalid_argument {
     std::invalid_argument(message) {}
 };
 
-}  // namespace input
+}  // namespace input_parser
 
 #endif  // _PARSING_ERROR_HPP_

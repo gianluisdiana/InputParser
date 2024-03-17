@@ -15,9 +15,9 @@
 #include <iostream>
 #include <set>
 
-#include <input/parser.hpp>
+#include <input_parser/parser.hpp>
 
-namespace input {
+namespace input_parser {
 
 Parser::Parser() : options_ {}, names_ {} {}
 
@@ -196,4 +196,4 @@ void Parser::displayUsage() const {
   std::cout << usage << "\n\n" << description << "\n";
 }
 
-}  // namespace input
+}  // namespace input_parser

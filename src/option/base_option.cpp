@@ -10,10 +10,10 @@
  *
  */
 
-#include <input/option/base_option.hpp>
-#include <input/parsing_error.hpp>
+#include <input_parser/option/base_option.hpp>
+#include <input_parser/parsing_error.hpp>
 
-namespace input {
+namespace input_parser {
 
 BaseOption &BaseOption::addDefaultValue(const std::any &default_value) {
   default_value_ = default_value;
@@ -58,4 +58,4 @@ void BaseOption::checkConstraints(const std::any &value) const {
   }
 }
 
-}  // namespace input
+}  // namespace input_parser

@@ -1,6 +1,6 @@
-#include <input/option/compound_option.hpp>
+#include <input_parser/option/compound_option.hpp>
 
-namespace input {
+namespace input_parser {
 
 CompoundOption &CompoundOption::toInt() {
   return elementsTo<int>([](const std::string &str) -> int {
@@ -20,4 +20,4 @@ CompoundOption &CompoundOption::toFloat() {
   });
 }
 
-}  // namespace input
+}  // namespace input_parser
