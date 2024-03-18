@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <input_parser/option/base_option.hpp>
+#include <input_parser/parsing_error.hpp>
 
 namespace input_parser {
 
@@ -35,7 +36,27 @@ class MockOption : public BaseOption {
   }
 };
 
-// ------------------------------- Constructors ------------------------------- //
+struct MyStruct {
+  int value;
+
+  bool operator==(const MyStruct &other) const {
+    return value == other.value;
+  }
+};
+
+class MyClass {
+ public:
+  MyClass(int value) : value_(value) {}
+
+  bool operator==(const MyClass &other) const {
+    return value_ == other.value_;
+  }
+
+ private:
+  int value_;
+};
+
+// ----------------------------- Constructors ----------------------------- //
 
 TEST(BaseOptionConstructorTests, ShouldReceiveStringOrConstCharPointer) {
   std::string name = "string";
@@ -65,7 +86,49 @@ TEST(BaseOptionGettersTests, ShouldStartWithoutDescription) {
   EXPECT_EQ(option.getDescription(), "");
 }
 
-TEST(BaseOptionGettersTests, ShouldAssignAValue) {
+TEST(BaseOptionGettersTests, ShouldReturnDescription) {
+  auto option = MockOption("name");
+  const auto description = "My cool looking description";
+  option.addDescription(description);
+  EXPECT_EQ(option.getDescription(), description);
+}
+
+TEST(BaseOptionGettersTests, ShouldThrowInvalidArgumentIfNoDefaultValue) {
+  const auto option = MockOption("name");
+  EXPECT_THROW(option.getDefaultValue<int>(), std::invalid_argument);
+  EXPECT_THROW(option.getDefaultValue<double>(), std::invalid_argument);
+  EXPECT_THROW(option.getDefaultValue<MyClass>(), std::invalid_argument);
+}
+
+TEST(BaseOptionGettersTests, ShouldReturnDefaultValueIfNoValue) {
+  auto option = MockOption("name");
+  const int expected = 20;
+  option.addDefaultValue(expected);
+  EXPECT_EQ(option.getValue<decltype(expected)>(), expected);
+}
+
+TEST(BaseOptionGettersTests, ShouldReturnDefaultValueTransformedIfNoValue) {
+  class MyOption : public MockOption {
+   public:
+    MyOption() : MockOption("name") {}
+
+    BaseOption &negates() {
+      transformation_ = [](const std::any &value) {
+        return !std::any_cast<bool>(value);
+      };
+      return *this;
+    }
+  };
+
+  auto option = MyOption();
+  option.negates().addDefaultValue(true);
+  EXPECT_FALSE(option.getValue<bool>());
+  EXPECT_FALSE(option.getDefaultValue<bool>());
+}
+
+// ------------------------------- Setters ------------------------------- //
+
+TEST(BaseOptionSettersTests, ShouldAssignAPrimitiveToTheValue) {
   auto option = MockOption("name");
   const int expected = 22;
   option.setValue(expected);
@@ -73,12 +136,20 @@ TEST(BaseOptionGettersTests, ShouldAssignAValue) {
   EXPECT_EQ(option.getValue<decltype(expected)>(), expected);
 }
 
-TEST(BaseOptionGettersTests, ShouldAssignADefaultValue) {
+TEST(BaseOptionSettersTests, ShouldAssignAnStructToTheValue) {
   auto option = MockOption("name");
-  const int expected = 20;
-  option.addDefaultValue(expected);
-  EXPECT_TRUE(option.hasDefaultValue());
-  EXPECT_EQ(option.getDefaultValue<decltype(expected)>(), expected);
+  const auto expected = MyStruct(22);
+  option.setValue(expected);
+  EXPECT_TRUE(option.hasValue());
+  EXPECT_EQ(option.getValue<decltype(expected)>(), expected);
+}
+
+TEST(BaseOptionSettersTests, ShouldAssignAClassObjectToTheValue) {
+  auto option = MockOption("name");
+  const auto expected = MyClass(-4);
+  option.setValue(expected);
+  EXPECT_TRUE(option.hasValue());
+  EXPECT_EQ(option.getValue<decltype(expected)>(), expected);
 }
 
 // -------------------------------- Checks -------------------------------- //
@@ -122,13 +193,132 @@ TEST(BaseOptionAddersTest, ShouldAddDescription) {
   EXPECT_EQ(option.getDescription(), description);
 }
 
-TEST(BaseOptionAddersTest, ShouldAddDefaultValue) {
-  auto option = MockOption("");
-  const auto expected = "my_value";
+TEST(BaseOptionAddersTests, ShouldAddDefaultValue) {
+  auto option = MockOption("name");
+  const int expected = 20;
   option.addDefaultValue(expected);
   EXPECT_TRUE(option.hasDefaultValue());
   EXPECT_EQ(option.getDefaultValue<decltype(expected)>(), expected);
 }
-// TEST(BaseOptionAddersTest, ) {}
+
+TEST(BaseOptionAddersTests, ShouldAddStructToTheDefaultValue) {
+  auto option = MockOption("name");
+  const auto expected = MyStruct(22);
+  option.addDefaultValue(expected);
+  EXPECT_TRUE(option.hasDefaultValue());
+  EXPECT_FALSE(option.hasValue());
+  EXPECT_EQ(option.getDefaultValue<decltype(expected)>(), expected);
+}
+
+TEST(BaseOptionAddersTests, ShouldAddClassObjectToTheDefaultValue) {
+  auto option = MockOption("name");
+  const auto expected = MyClass(-4);
+  option.addDefaultValue(expected);
+  EXPECT_FALSE(option.hasValue());
+  EXPECT_TRUE(option.hasDefaultValue());
+  EXPECT_EQ(option.getDefaultValue<decltype(expected)>(), expected);
+}
+
+TEST(BaseOptionAddersTest, ShouldAddConstraint) {
+  auto option = MockOption("name");
+  const auto isZero = [](const auto &value) { return value == 0; };
+  option.addConstraint<int>(isZero, "Value must be 0");
+  EXPECT_THROW(option.setValue(1), ParsingError);
+}
+
+TEST(BaseOptionAddersTest, ShouldThrowParsingErrorFailingConstraint) {
+  auto option = MockOption("name");
+  const auto isEven = [](const auto &value) { return value % 2 == 0; };
+  option.addConstraint<int>(isEven, "Value must be even");
+  EXPECT_THROW(option.setValue(1), ParsingError);
+}
+
+TEST(BaseOptionAddersTest, ShouldStoreErrorMessageAtParsingError) {
+  auto option = MockOption("name");
+  const auto isOdd = [](const int &value) { return value % 2 == 1; };
+  const auto error_message = "Value must be odd";
+  option.addConstraint<int>(isOdd, error_message);
+  EXPECT_THROW(
+    {
+      try {
+        option.setValue(2);
+      } catch (const ParsingError &error) {
+        EXPECT_STREQ(error.what(), error_message);
+        throw;
+      }
+    },
+    ParsingError
+  );
+}
+
+TEST(BaseOptionAddersTest, ShouldAddConstraintWithStruct) {
+  auto option = MockOption("name");
+  const auto isZero = [](const MyStruct &value) { return value.value == 0; };
+  option.addConstraint<MyStruct>(isZero, "Value must be 0");
+  EXPECT_NO_THROW(option.setValue(MyStruct(0)));
+  EXPECT_THROW(option.setValue(MyStruct(10)), ParsingError);
+}
+
+TEST(BaseOptionAddersTest, ShouldAddConstraintWithClass) {
+  auto option = MockOption("name");
+  const auto isZero = [](const MyClass &value) { return value == MyClass(0); };
+  option.addConstraint<MyClass>(isZero, "Value must be 0");
+  EXPECT_NO_THROW(option.setValue(MyClass(0)));
+  EXPECT_THROW(option.setValue(MyClass(10)), ParsingError);
+}
+
+TEST(BaseOptionAddersTests, ConstraintShouldNotAffectDefaultValue) {
+  auto option = MockOption("name");
+  const auto isGreaterThanAMillion = [](const int &value) {
+    return value > 1'000'000;
+  };
+  option.addConstraint<int>(isGreaterThanAMillion, "Value must be 0");
+  const int expected = 20;
+  EXPECT_NO_THROW(option.addDefaultValue(expected));
+  EXPECT_TRUE(option.hasDefaultValue());
+  EXPECT_EQ(option.getDefaultValue<decltype(expected)>(), expected);
+}
+
+// ---------------------------- Transformations ---------------------------- //
+
+TEST(BaseOptionTransformationTests, ShouldNotImplementToInt) {
+  auto option = MockOption("name");
+  EXPECT_THROW(option.toInt(), std::runtime_error);
+}
+
+TEST(BaseOptionTransformationTests, ShouldNotImplementToDouble) {
+  auto option = MockOption("name");
+  EXPECT_THROW(option.toDouble(), std::runtime_error);
+}
+
+TEST(BaseOptionTransformationTests, ShouldNotImplementToFloat) {
+  auto option = MockOption("name");
+  EXPECT_THROW(option.toFloat(), std::runtime_error);
+}
+
+TEST(BaseOptionTransformationTests, ShouldApplyTransformationBeforeCheck) {
+  class MyOption : public MockOption {
+   public:
+    MyOption() : MockOption("name") {}
+
+    BaseOption &doubles() {
+      transformation_ = [](const std::any &value) {
+        return std::any_cast<int>(value) * 2;
+      };
+      return *this;
+    }
+  };
+
+  auto option = MyOption();
+  option.doubles()
+    .addConstraint<int>(
+      [](const int &value) { return value < 10; }, "Value must be lower than 10"
+    )
+    .transformBeforeCheck();
+  const int expected = 4;
+  EXPECT_NO_THROW(option.setValue(expected));
+  EXPECT_EQ(option.getValue<int>(), expected * 2);
+  EXPECT_THROW(option.setValue(expected * 2), ParsingError);
+}
 
 }  // namespace input_parser

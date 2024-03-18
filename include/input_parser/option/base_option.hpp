@@ -268,14 +268,14 @@ BaseOption &BaseOption::addConstraint(
 
 template <class T>
 const T BaseOption::getValue() const {
-  if (!hasValue()) return std::any_cast<T>(applyTransformation(default_value_));
+  if (!hasValue()) return getDefaultValue<T>();
   return std::any_cast<T>(value_);
 }
 
 template <class T>
 const T BaseOption::getDefaultValue() const {
   if (!hasDefaultValue()) throw std::invalid_argument("No default value");
-  return std::any_cast<T>(default_value_);
+  return std::any_cast<T>(applyTransformation(default_value_));
 }
 
 }  // namespace input_parser
