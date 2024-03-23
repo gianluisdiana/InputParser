@@ -19,7 +19,7 @@ auto parser = input_parser::Parser();
 To add new options, simply call `addOption`. This method receives a function that doesn't receives parameter and returns an `BaseOption` child (see [Option Types](#options)).
 
 ```cpp
-parser.addOption([] -> auto {
+parser.addOption<input_parser::FlagOption>([] {
   return input_parser::FlagOption();
 });
 ```
@@ -50,7 +50,7 @@ auto flag_option = input_parser::FlagOption("-v", "--verbose")
   .addDescription("Whether if the program will display the output or not")
   .addDefaultValue(false);
 auto parser = input_parser::Parser()
-  .addOption<input_parser::FlagOption>([flag_option] -> auto {
+  .addOption<input_parser::FlagOption>([flag_option] {
     return flag_option;
   });
 
@@ -83,7 +83,7 @@ Hello World!
 
   ```cpp
   auto parser = input_parser::Parser()
-    .addOption<input_parser::FlagOption>([] -> auto {
+    .addOption<input_parser::FlagOption>([] {
       return input_parser::FlagOption("-v", "--verbose")
         .addDescription("Whether if the program will display information or not")
         .addDefaultValue(true);
@@ -107,7 +107,7 @@ Hello World!
 
   ```cpp
   auto parser = input_parser::Parser()
-    .addOption<input_parser::FlagOption>([] -> auto {
+    .addOption<input_parser::FlagOption>([] {
       return input_parser::FlagOption("-g", "--greeting")
         .addDescription("Whether if the program will say hi or bye")
         .addDefaultValue(false)
@@ -138,7 +138,7 @@ For example:
 
 ```cpp
 auto parser = input_parser::Parser()
-  .addOption<input_parser::SingleOption>([] -> auto {
+  .addOption<input_parser::SingleOption>([] {
     return input_parser::SingleOption("-n")
       .addDescription("The name of the person using this program");
   });
@@ -169,7 +169,7 @@ Here's an example:
 
 ```cpp
 auto parser = input_parser::Parser()
-  .addOption<input_parser::CompoundOption>([] -> auto {
+  .addOption<input_parser::CompoundOption>([] {
     return input_parser::CompoundOption("-n", "--numbers")
       .addDescription("The numbers to be added together")
       .toDouble();
@@ -209,7 +209,7 @@ The sum of the number is: 2.601
 
   ```cpp
   auto parser = input_parser::Parser()
-    .addOption<input_parser::CompoundOption>([] -> auto {
+    .addOption<input_parser::CompoundOption>([] {
       return input_parser::CompoundOption("--approves")
         .addDescription("A group of y's and n's that will be counted")
         .elementsTo<bool>([](const std::string& element) {
@@ -243,7 +243,7 @@ The sum of the number is: 2.601
   };
 
   auto parser = input_parser::Parser()
-    .addOption<input_parser::CompoundOption>([] -> auto {
+    .addOption<input_parser::CompoundOption>([] {
       return input_parser::CompoundOption("-c", "--coordinate")
         .addDescription("The coordinate of a point (x, y)")
         .to<Coordinate>([](const std::vector<std::string>& value) {
@@ -279,4 +279,25 @@ add_executable(my_project src/main.cpp)
 
 target_link_libraries(${PROJECT_NAME} input_parser)
 add_subdirectory(InputParser)
+```
+
+### Fetching the repository
+
+Another way to integrate this library is by using the _FetchContent_ module. Just add these lines to your _CMakeLists.txt_ file.
+
+```cmake
+cmake_minimum_required(VERSION 3.22)
+
+PROJECT(my_project)
+
+include(FetchContent)
+
+FetchContent_Declare(
+  input_parser
+  URL https://github.com/gianluisdiana/InputParser/releases/download/0.4.1/InputParser.zip)
+FetchContent_MakeAvailable(input_parser)
+
+add_executable(my_project src/main.cpp)
+
+target_link_libraries(${PROJECT_NAME} input_parser)
 ```
