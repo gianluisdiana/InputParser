@@ -3,6 +3,8 @@
 
 #include <input_parser/parser.hpp>
 
+namespace input_parser {
+
 // ------------------------------- AddOption ------------------------------- //
 
 TEST(Parser_addOption, ThrowsErrorWithOptionsWithSameName) {
@@ -247,3 +249,5 @@ TEST(Parser_parse, ThrowsErrorExpectingNotProvidedOption) {
     input_parser::ParsingError
   );
 }
+
+}  // namespace input_parser

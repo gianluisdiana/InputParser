@@ -56,58 +56,58 @@ class MyClass {
   int value_;
 };
 
-// ----------------------------- Constructors ----------------------------- //
+// ----------------------------- Constructor ----------------------------- //
 
-TEST(BaseOptionConstructorTests, ShouldReceiveStringOrConstCharPointer) {
+TEST(BaseOption_constructor, ShouldReceiveStringOrConstCharPointer) {
   std::string name = "string";
   const char *name2 = "const char pointer";
   EXPECT_NO_THROW(MockOption(name));
   EXPECT_NO_THROW(MockOption(name2));
 }
 
-TEST(BaseOptionConstructorTests, ShouldReceiveOneName) {
+TEST(BaseOption_constructor, ShouldReceiveOneName) {
   EXPECT_NO_THROW(MockOption("name"));
 }
 
-TEST(BaseOptionConstructorTests, ShouldReceiveMultipleNames) {
+TEST(BaseOption_constructor, ShouldReceiveMultipleNames) {
   EXPECT_NO_THROW(MockOption("name", "n", "nm"));
 }
 
 // ------------------------------- Getters ------------------------------- //
 
-TEST(BaseOptionGettersTests, ShouldReturnArrayWithNames) {
+TEST(BaseOption_getters, ShouldReturnArrayWithNames) {
   const auto option = MockOption("-v", "--version", "-V");
   const auto expected = std::vector<std::string>({"-v", "--version", "-V"});
   EXPECT_THAT(option.getNames(), ::testing::ContainerEq(expected));
 }
 
-TEST(BaseOptionGettersTests, ShouldStartWithoutDescription) {
+TEST(BaseOption_getters, ShouldStartWithoutDescription) {
   const auto option = MockOption("name");
   EXPECT_EQ(option.getDescription(), "");
 }
 
-TEST(BaseOptionGettersTests, ShouldReturnDescription) {
+TEST(BaseOption_getters, ShouldReturnDescription) {
   auto option = MockOption("name");
   const auto description = "My cool looking description";
   option.addDescription(description);
   EXPECT_EQ(option.getDescription(), description);
 }
 
-TEST(BaseOptionGettersTests, ShouldThrowInvalidArgumentIfNoDefaultValue) {
+TEST(BaseOption_getters, ShouldThrowInvalidArgumentIfNoDefaultValue) {
   const auto option = MockOption("name");
   EXPECT_THROW(option.getDefaultValue<int>(), std::invalid_argument);
   EXPECT_THROW(option.getDefaultValue<double>(), std::invalid_argument);
   EXPECT_THROW(option.getDefaultValue<MyClass>(), std::invalid_argument);
 }
 
-TEST(BaseOptionGettersTests, ShouldReturnDefaultValueIfNoValue) {
+TEST(BaseOption_getters, ShouldReturnDefaultValueIfNoValue) {
   auto option = MockOption("name");
   const int expected = 20;
   option.addDefaultValue(expected);
   EXPECT_EQ(option.getValue<decltype(expected)>(), expected);
 }
 
-TEST(BaseOptionGettersTests, ShouldReturnDefaultValueTransformedIfNoValue) {
+TEST(BaseOption_getters, ShouldReturnDefaultValueTransformedIfNoValue) {
   class MyOption : public MockOption {
    public:
     MyOption() : MockOption("name") {}
@@ -128,7 +128,7 @@ TEST(BaseOptionGettersTests, ShouldReturnDefaultValueTransformedIfNoValue) {
 
 // ------------------------------- Setters ------------------------------- //
 
-TEST(BaseOptionSettersTests, ShouldAssignAPrimitiveToTheValue) {
+TEST(BaseOption_setters, ShouldAssignAPrimitiveToTheValue) {
   auto option = MockOption("name");
   const int expected = 22;
   option.setValue(expected);
@@ -136,7 +136,7 @@ TEST(BaseOptionSettersTests, ShouldAssignAPrimitiveToTheValue) {
   EXPECT_EQ(option.getValue<decltype(expected)>(), expected);
 }
 
-TEST(BaseOptionSettersTests, ShouldAssignAnStructToTheValue) {
+TEST(BaseOption_setters, ShouldAssignAnStructToTheValue) {
   auto option = MockOption("name");
   const auto expected = MyStruct(22);
   option.setValue(expected);
@@ -144,7 +144,7 @@ TEST(BaseOptionSettersTests, ShouldAssignAnStructToTheValue) {
   EXPECT_EQ(option.getValue<decltype(expected)>(), expected);
 }
 
-TEST(BaseOptionSettersTests, ShouldAssignAClassObjectToTheValue) {
+TEST(BaseOption_setters, ShouldAssignAClassObjectToTheValue) {
   auto option = MockOption("name");
   const auto expected = MyClass(-4);
   option.setValue(expected);
@@ -154,46 +154,46 @@ TEST(BaseOptionSettersTests, ShouldAssignAClassObjectToTheValue) {
 
 // -------------------------------- Checks -------------------------------- //
 
-TEST(BaseOptionChecksTests, ShouldNotBeAFlagOption) {
+TEST(BaseOption_checks, ShouldNotBeAFlagOption) {
   const auto option = MockOption("notAFlagOption");
   EXPECT_FALSE(option.isFlag());
 }
 
-TEST(BaseOptionChecksTests, ShouldNotBeASingleOption) {
+TEST(BaseOption_checks, ShouldNotBeASingleOption) {
   const auto option = MockOption("notASingleOption");
   EXPECT_FALSE(option.isSingle());
 }
 
-TEST(BaseOptionChecksTests, ShouldNotBeACompoundOption) {
+TEST(BaseOption_checks, ShouldNotBeACompoundOption) {
   const auto option = MockOption("notACompoundOption");
   EXPECT_FALSE(option.isCompound());
 }
 
-TEST(BaseOptionChecksTests, ShouldBeRequiredByDefault) {
+TEST(BaseOption_checks, ShouldBeRequiredByDefault) {
   const auto option = MockOption("option");
   EXPECT_TRUE(option.isRequired());
 }
 
-TEST(BaseOptionChecksTests, ShouldStartWithoutValue) {
+TEST(BaseOption_checks, ShouldStartWithoutValue) {
   const auto option = MockOption("name");
   EXPECT_FALSE(option.hasValue());
 }
 
-TEST(BaseOptionChecksTests, ShouldStartWithoutDefaultValue) {
+TEST(BaseOption_checks, ShouldStartWithoutDefaultValue) {
   const auto option = MockOption("name");
   EXPECT_FALSE(option.hasDefaultValue());
 }
 
 // -------------------------------- Adders -------------------------------- //
 
-TEST(BaseOptionAddersTest, ShouldAddDescription) {
+TEST(BaseOption_adders, ShouldAddDescription) {
   auto option = MockOption("name");
   const auto description = "description";
   option.addDescription(description);
   EXPECT_EQ(option.getDescription(), description);
 }
 
-TEST(BaseOptionAddersTests, ShouldAddDefaultValue) {
+TEST(BaseOption_adders, ShouldAddDefaultValue) {
   auto option = MockOption("name");
   const int expected = 20;
   option.addDefaultValue(expected);
@@ -201,7 +201,7 @@ TEST(BaseOptionAddersTests, ShouldAddDefaultValue) {
   EXPECT_EQ(option.getDefaultValue<decltype(expected)>(), expected);
 }
 
-TEST(BaseOptionAddersTests, ShouldAddStructToTheDefaultValue) {
+TEST(BaseOption_adders, ShouldAddStructToTheDefaultValue) {
   auto option = MockOption("name");
   const auto expected = MyStruct(22);
   option.addDefaultValue(expected);
@@ -210,7 +210,7 @@ TEST(BaseOptionAddersTests, ShouldAddStructToTheDefaultValue) {
   EXPECT_EQ(option.getDefaultValue<decltype(expected)>(), expected);
 }
 
-TEST(BaseOptionAddersTests, ShouldAddClassObjectToTheDefaultValue) {
+TEST(BaseOption_adders, ShouldAddClassObjectToTheDefaultValue) {
   auto option = MockOption("name");
   const auto expected = MyClass(-4);
   option.addDefaultValue(expected);
@@ -219,21 +219,21 @@ TEST(BaseOptionAddersTests, ShouldAddClassObjectToTheDefaultValue) {
   EXPECT_EQ(option.getDefaultValue<decltype(expected)>(), expected);
 }
 
-TEST(BaseOptionAddersTest, ShouldAddConstraint) {
+TEST(BaseOption_adders, ShouldAddConstraint) {
   auto option = MockOption("name");
   const auto isZero = [](const auto &value) { return value == 0; };
   option.addConstraint<int>(isZero, "Value must be 0");
   EXPECT_THROW(option.setValue(1), ParsingError);
 }
 
-TEST(BaseOptionAddersTest, ShouldThrowParsingErrorFailingConstraint) {
+TEST(BaseOption_adders, ShouldThrowParsingErrorFailingConstraint) {
   auto option = MockOption("name");
   const auto isEven = [](const auto &value) { return value % 2 == 0; };
   option.addConstraint<int>(isEven, "Value must be even");
   EXPECT_THROW(option.setValue(1), ParsingError);
 }
 
-TEST(BaseOptionAddersTest, ShouldStoreErrorMessageAtParsingError) {
+TEST(BaseOption_adders, ShouldStoreErrorMessageAtParsingError) {
   auto option = MockOption("name");
   const auto isOdd = [](const int &value) { return value % 2 == 1; };
   const auto error_message = "Value must be odd";
@@ -251,7 +251,7 @@ TEST(BaseOptionAddersTest, ShouldStoreErrorMessageAtParsingError) {
   );
 }
 
-TEST(BaseOptionAddersTest, ShouldAddConstraintWithStruct) {
+TEST(BaseOption_adders, ShouldAddConstraintWithStruct) {
   auto option = MockOption("name");
   const auto isZero = [](const MyStruct &value) { return value.value == 0; };
   option.addConstraint<MyStruct>(isZero, "Value must be 0");
@@ -259,7 +259,7 @@ TEST(BaseOptionAddersTest, ShouldAddConstraintWithStruct) {
   EXPECT_THROW(option.setValue(MyStruct(10)), ParsingError);
 }
 
-TEST(BaseOptionAddersTest, ShouldAddConstraintWithClass) {
+TEST(BaseOption_adders, ShouldAddConstraintWithClass) {
   auto option = MockOption("name");
   const auto isZero = [](const MyClass &value) { return value == MyClass(0); };
   option.addConstraint<MyClass>(isZero, "Value must be 0");
@@ -267,7 +267,7 @@ TEST(BaseOptionAddersTest, ShouldAddConstraintWithClass) {
   EXPECT_THROW(option.setValue(MyClass(10)), ParsingError);
 }
 
-TEST(BaseOptionAddersTests, ConstraintShouldNotAffectDefaultValue) {
+TEST(BaseOption_adders, ConstraintShouldNotAffectDefaultValue) {
   auto option = MockOption("name");
   const auto isGreaterThanAMillion = [](const int &value) {
     return value > 1'000'000;
@@ -281,22 +281,22 @@ TEST(BaseOptionAddersTests, ConstraintShouldNotAffectDefaultValue) {
 
 // ---------------------------- Transformations ---------------------------- //
 
-TEST(BaseOptionTransformationTests, ShouldNotImplementToInt) {
+TEST(BaseOption_transformation, ShouldNotImplementToInt) {
   auto option = MockOption("name");
   EXPECT_THROW(option.toInt(), std::runtime_error);
 }
 
-TEST(BaseOptionTransformationTests, ShouldNotImplementToDouble) {
+TEST(BaseOption_transformation, ShouldNotImplementToDouble) {
   auto option = MockOption("name");
   EXPECT_THROW(option.toDouble(), std::runtime_error);
 }
 
-TEST(BaseOptionTransformationTests, ShouldNotImplementToFloat) {
+TEST(BaseOption_transformation, ShouldNotImplementToFloat) {
   auto option = MockOption("name");
   EXPECT_THROW(option.toFloat(), std::runtime_error);
 }
 
-TEST(BaseOptionTransformationTests, ShouldApplyTransformationBeforeCheck) {
+TEST(BaseOption_transformation, ShouldApplyTransformationBeforeCheck) {
   class MyOption : public MockOption {
    public:
     MyOption() : MockOption("name") {}

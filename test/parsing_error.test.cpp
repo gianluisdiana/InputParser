@@ -5,7 +5,7 @@
 
 namespace input_parser {
 
-TEST(ParsingErrorTest, ShouldInheritFromInvalidArgument) {
+TEST(ParsingError_class, ShouldInheritFromInvalidArgument) {
   EXPECT_THAT(ParsingError(""), ::testing::An<std::invalid_argument>());
 }
 

@@ -5,27 +5,27 @@
 
 namespace input_parser {
 
-TEST(ConstraintTests, ShouldReceiveCallbackAndMessage) {
+TEST(Constraint_constructor, ShouldReceiveCallbackAndMessage) {
   const auto callback = [](const std::any &) { return true; };
   const auto message = "Error message";
   EXPECT_NO_THROW(Constraint(callback, message));
 }
 
-TEST(ConstraintTests, ShouldDisplayErrorMessage) {
+TEST(Constraint_getErrorMessage, ShouldDisplayErrorMessage) {
   const auto callback = [](const std::any &) { return false; };
   const auto message = "Error message";
   const auto constraint = Constraint(callback, message);
   EXPECT_EQ(constraint.getErrorMessage(), message);
 }
 
-TEST(ConstraintTests, ShouldReturnABoolean) {
+TEST(Constraint_call, ShouldReturnABoolean) {
   const auto callback = [](const std::any &) { return true; };
   const auto message = "Error message";
   const auto constraint = Constraint(callback, message);
   EXPECT_TRUE(constraint.call(0));
 }
 
-TEST(ConstraintTests, ShouldReceiveAValueAndUseIt) {
+TEST(Constraint_call, ShouldReceiveAValueAndUseIt) {
   const auto isEven = [](const std::any &value) {
     return std::any_cast<int>(value) % 2 == 0;
   };
@@ -39,7 +39,7 @@ TEST(ConstraintTests, ShouldReceiveAValueAndUseIt) {
   EXPECT_FALSE(constraint.call(999'999));
 }
 
-TEST(ConstraintTests, ShouldBeAbleToThrowExceptions) {
+TEST(Constraint_call, ShouldBeAbleToThrowExceptions) {
   const auto callback = [](const std::any &) -> bool {
     throw std::runtime_error("Error");
   };
