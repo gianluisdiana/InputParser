@@ -19,7 +19,7 @@
 #include <functional>
 #include <string>
 
-namespace input {
+namespace input_parser {
 
 /**
  * @brief Represents a function that must be satisfy when passing a certain
@@ -63,6 +63,6 @@ class Constraint {
   const std::string error_message_;
 };
 
-}  // namespace input
+}  // namespace input_parser
 
 #endif  // _INPUT_CONSTRAINT_HPP_

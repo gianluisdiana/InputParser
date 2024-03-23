@@ -14,9 +14,9 @@
 #ifndef _INPUT_SINGLE_OPTION_HPP_
 #define _INPUT_SINGLE_OPTION_HPP_
 
-#include <input/option/base_option.hpp>
+#include <input_parser/option/base_option.hpp>
 
-namespace input {
+namespace input_parser {
 
 /**
  * @brief A single option is an option that requires one more argument.
@@ -144,6 +144,6 @@ SingleOption::to(const std::function<T(const std::string &)> &transformation) {
   return *this;
 }
 
-}  // namespace input
+}  // namespace input_parser
 
 #endif  // _INPUT_SINGLE_OPTION_HPP_

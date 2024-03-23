@@ -14,9 +14,9 @@
 #ifndef _INPUT_FLAG_OPTION_HPP_
 #define _INPUT_FLAG_OPTION_HPP_
 
-#include <input/option/base_option.hpp>
+#include <input_parser/option/base_option.hpp>
 
-namespace input {
+namespace input_parser {
 
 /**
  *  @brief A flag option is an option that must be placed alone. Represents a
@@ -135,6 +135,6 @@ FlagOption::to(const std::function<T(const bool &)> &transformation) {
   return *this;
 }
 
-}  // namespace input
+}  // namespace input_parser
 
 #endif  // _INPUT_FLAG_OPTION_HPP_

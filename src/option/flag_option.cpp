@@ -1,6 +1,6 @@
-#include <input/option/flag_option.hpp>
+#include <input_parser/option/flag_option.hpp>
 
-namespace input {
+namespace input_parser {
 
 FlagOption &FlagOption::toInt() {
   return to<int>([](const bool &value) -> int { return value ? 1 : 0; });
@@ -18,4 +18,4 @@ FlagOption &FlagOption::toFloat() {
   });
 }
 
-}  // namespace input
+}  // namespace input_parser

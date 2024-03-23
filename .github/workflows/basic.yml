@@ -53,3 +53,23 @@ jobs:
         git diff --name-only --diff-filter=d origin/main...HEAD |
         grep -E '\.((c|h)pp)$' |
         xargs clang-format-14 -style=file --Werror -n
+
+  tests:
+    # The name of the job, this name is used in the GitHub user interface
+    name: Pass all tests (Google tests library)
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run CMake
+      run: cmake . -DBUILD_INPUT_PARSER_TESTS=ON
+
+    - name: Compile the program (using Make)
+      run: make
+
+    - name: Run the tests executable
+      run: cd test && ctest

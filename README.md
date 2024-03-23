@@ -11,16 +11,16 @@
 In order to create a parser we must include the folder _<parser.hpp>_. To start parsing arguments create  __Parser__ object:
 
 ```cpp
-#include <input/parser.hpp>
+#include <input_parser/parser.hpp>
 
-auto parser = input::Parser();
+auto parser = input_parser::Parser();
 ```
 
 To add new options, simply call `addOption`. This method receives a function that doesn't receives parameter and returns an `BaseOption` child (see [Option Types](#options)).
 
 ```cpp
-parser.addOption([] -> auto {
-  return input::FlagOption();
+parser.addOption<input_parser::FlagOption>([] {
+  return input_parser::FlagOption();
 });
 ```
 
@@ -30,7 +30,7 @@ A basic how to use information can be displayed calling `displayUsage`.
 ```cpp
 try {
   parser.parse(argc, argv);
-} catch (input::ParsingError& error) {
+} catch (input_parser::ParsingError& error) {
   std::cerr << error.what() << "\n";
   parser.displayUsage();
   return 1;
@@ -46,15 +46,17 @@ A flag option is an option that must be placed alone. Represents a boolean value
 For example:
 
 ```cpp
-auto flag_option = input::FlagOption("-v", "--verbose")
+auto flag_option = input_parser::FlagOption("-v", "--verbose")
   .addDescription("Whether if the program will display the output or not")
   .addDefaultValue(false);
-auto parser = input::Parser()
-  .addOption([flag_option] -> auto { return flag_option; });
+auto parser = input_parser::Parser()
+  .addOption<input_parser::FlagOption>([flag_option] {
+    return flag_option;
+  });
 
 try {
   parser.parse(argc, argv);
-} catch (input::ParsingError& error) {
+} catch (input_parser::ParsingError& error) {
   std::cerr << error.what() << "\n";
   parser.displayUsage();
   return 1;
@@ -80,10 +82,11 @@ Hello World!
   The option manage default values different from the others two: if an option has a default value but the program is called with the flag activated, the value to be assigned will the opposite of the default. Look at this example:
 
   ```cpp
-  auto parser = input::Parser()
-    .addOption([] -> auto { return input::FlagOption("-v", "--verbose")
-      .addDescription("Whether if the program will display information or not")
-      .addDefaultValue(true);
+  auto parser = input_parser::Parser()
+    .addOption<input_parser::FlagOption>([] {
+      return input_parser::FlagOption("-v", "--verbose")
+        .addDescription("Whether if the program will display information or not")
+        .addDefaultValue(true);
     });
   parser.parse(argc, argv);
   if (parser.getValue<bool>("-v")) std::cout << "Really important information!\n";
@@ -103,13 +106,14 @@ Hello World!
   Using a flag option allows you to create a different type value from a boolean. For example:
 
   ```cpp
-  auto parser = input::Parser()
-    .addOption([] -> auto { return input::FlagOption("-g", "--greeting")
-      .addDescription("Whether if the program will say hi or bye")
-      .addDefaultValue(false)
-      .to<std::string>([](const bool& value) -> std::string {
-        return value ? "Hi!" : "Bye!";
-      });
+  auto parser = input_parser::Parser()
+    .addOption<input_parser::FlagOption>([] {
+      return input_parser::FlagOption("-g", "--greeting")
+        .addDescription("Whether if the program will say hi or bye")
+        .addDefaultValue(false)
+        .to<std::string>([](const bool& value) -> std::string {
+          return value ? "Hi!" : "Bye!";
+        });
     });
   parser.parse(argc, argv);
   std::cout << parser.getValue<std::string>("-g") << '\n';
@@ -133,9 +137,9 @@ A single option is an option that must be placed with an extra argument. Origina
 For example:
 
 ```cpp
-auto parser = input::Parser()
-  .addOption([] -> auto {
-    return input::SingleOption("-n")
+auto parser = input_parser::Parser()
+  .addOption<input_parser::SingleOption>([] {
+    return input_parser::SingleOption("-n")
       .addDescription("The name of the person using this program");
   });
 
@@ -146,12 +150,12 @@ std::cout << parser.getValue<std::string>("-n") << " is using this program!\n";
 And we can execute the code:
 ```bash
 $ ./a.out
-terminate called after throwing an instance of 'input::ParsingError'
+terminate called after throwing an instance of 'input_parser::ParsingError'
   what():  Missing option -n
 Aborted
 
 $ ./a.out -n
-terminate called after throwing an instance of 'input::ParsingError'
+terminate called after throwing an instance of 'input_parser::ParsingError'
   what():  After the -n option should be an extra argument!
 Aborted
 
@@ -164,9 +168,9 @@ A compound option is an option that must be placed with at least one extra argum
 Here's an example:
 
 ```cpp
-auto parser = input::Parser()
-  .addOption([] -> auto {
-    return input::CompoundOption("-n", "--numbers")
+auto parser = input_parser::Parser()
+  .addOption<input_parser::CompoundOption>([] {
+    return input_parser::CompoundOption("-n", "--numbers")
       .addDescription("The numbers to be added together")
       .toDouble();
   });
@@ -183,12 +187,12 @@ std::cout << "The sum of the number is: " << result << '\n';
 And when executed, we get the following output:
 ```bash
 $ ./a.out
-terminate called after throwing an instance of 'input::ParsingError'
+terminate called after throwing an instance of 'input_parser::ParsingError'
   what():  Missing option -n
 Aborted
 
 $ ./a.out -n
-terminate called after throwing an instance of 'input::ParsingError'
+terminate called after throwing an instance of 'input_parser::ParsingError'
   what():  After the -n option should be at least an extra argument!
 Aborted
 
@@ -204,9 +208,9 @@ The sum of the number is: 2.601
   This options allows the user to provide a callback function that will be applied to each of the elements stored using the _elementsTo_ method. The callback provided must have one _std::string_ parameter and return variable with the type desired.
 
   ```cpp
-  auto parser = input::Parser()
-    .addOption([] -> auto {
-      return input::CompoundOption("--approves")
+  auto parser = input_parser::Parser()
+    .addOption<input_parser::CompoundOption>([] {
+      return input_parser::CompoundOption("--approves")
         .addDescription("A group of y's and n's that will be counted")
         .elementsTo<bool>([](const std::string& element) {
           return element == "y" || element == "Y";
@@ -238,9 +242,9 @@ The sum of the number is: 2.601
     int y;
   };
 
-  auto parser = input::Parser()
-    .addOption([] -> auto {
-      return input::CompoundOption("-c", "--coordinate")
+  auto parser = input_parser::Parser()
+    .addOption<input_parser::CompoundOption>([] {
+      return input_parser::CompoundOption("-c", "--coordinate")
         .addDescription("The coordinate of a point (x, y)")
         .to<Coordinate>([](const std::vector<std::string>& value) {
           return Coordinate{
@@ -275,4 +279,25 @@ add_executable(my_project src/main.cpp)
 
 target_link_libraries(${PROJECT_NAME} input_parser)
 add_subdirectory(InputParser)
+```
+
+### Fetching the repository
+
+Another way to integrate this library is by using the _FetchContent_ module. Just add these lines to your _CMakeLists.txt_ file.
+
+```cmake
+cmake_minimum_required(VERSION 3.22)
+
+PROJECT(my_project)
+
+include(FetchContent)
+
+FetchContent_Declare(
+  input_parser
+  URL https://github.com/gianluisdiana/InputParser/releases/download/0.4.1/InputParser.zip)
+FetchContent_MakeAvailable(input_parser)
+
+add_executable(my_project src/main.cpp)
+
+target_link_libraries(${PROJECT_NAME} input_parser)
 ```

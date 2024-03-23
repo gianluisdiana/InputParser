@@ -15,9 +15,9 @@
 #include <iostream>
 #include <set>
 
-#include <input/parser.hpp>
+#include <input_parser/parser.hpp>
 
-namespace input {
+namespace input_parser {
 
 Parser::Parser() : options_ {}, names_ {} {}
 
@@ -37,7 +37,7 @@ void Parser::parse(int argc, char *raw_argv[]) {
     else if (hasSingle(argv[index]))
       index += parseSingle(argv, index);
     else if (hasCompound(argv[index]))
-      index += parseMultiple(argv, index);
+      index += parseCompound(argv, index);
     else
       throw ParsingError("Invalid arguments provided!");
   }
@@ -88,7 +88,7 @@ int Parser::parseSingle(
   return 1;
 }
 
-int Parser::parseMultiple(
+int Parser::parseCompound(
   const std::vector<std::string> &arguments, const unsigned int index
 ) {
   std::vector<std::string> values {};
@@ -196,4 +196,4 @@ void Parser::displayUsage() const {
   std::cout << usage << "\n\n" << description << "\n";
 }
 
-}  // namespace input
+}  // namespace input_parser
