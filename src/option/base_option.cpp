@@ -27,11 +27,11 @@ BaseOption &BaseOption::addDescription(const std::string &description) {
 
 void BaseOption::setValue(const std::any &value) {
   if (transform_before_check_) {
-    value_ = applyTransformation(value);
+    value_ = transformation_(value);
     checkConstraints(value_);
   } else {
     checkConstraints(value);
-    value_ = applyTransformation(value);
+    value_ = transformation_(value);
   }
 }
 

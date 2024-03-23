@@ -223,18 +223,6 @@ class BaseOption {
   std::vector<Constraint> constraints_;
 
   /**
-   * @brief Applies the transformation function to the provided value
-   * (if a transformation function was provided).
-   *
-   * @param value The value to transform
-   * @return The transformed value (or the original value if no transformation
-   * function was provided).
-   */
-  inline const std::any applyTransformation(const std::any &value) const {
-    return transformation_ == nullptr ? value : transformation_(value);
-  }
-
-  /**
    * @brief Checks if the provided value satisfies all the constraints.
    *
    * @param value The value to check
@@ -247,10 +235,11 @@ template <
   typename =
     typename std::enable_if_t<is_string_type<T> && (is_string_type<Ts> && ...)>>
 BaseOption::BaseOption(const T name, const Ts... extra_names) :
-  value_ {}, default_value_ {}, names_ {std::vector<std::string> {
-                                  name, extra_names...}},
-  description_ {}, required_ {true}, transform_before_check_ {false},
-  transformation_ {nullptr}, constraints_ {} {}
+  value_ {}, default_value_ {}, names_ {}, description_ {}, required_ {true},
+  transform_before_check_ {false}, transformation_ {}, constraints_ {} {
+  names_ = {name, extra_names...};
+  transformation_ = [](const std::any &value) -> std::any { return value; };
+}
 
 template <class T>
 BaseOption &BaseOption::addConstraint(
@@ -275,7 +264,7 @@ const T BaseOption::getValue() const {
 template <class T>
 const T BaseOption::getDefaultValue() const {
   if (!hasDefaultValue()) throw std::invalid_argument("No default value");
-  return std::any_cast<T>(applyTransformation(default_value_));
+  return std::any_cast<T>(transformation_(default_value_));
 }
 
 }  // namespace input_parser
