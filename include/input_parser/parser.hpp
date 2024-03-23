@@ -164,6 +164,12 @@ class Parser {
    */
   void checkMissingOptions() const;
 
+  /**
+   * @brief Check if the help option was specified.
+   * If so, display the usage and exit the program.
+   */
+  void checkHelpOption() const;
+
   // ------------------------- Individual parsers -------------------------- //
 
   /**

@@ -41,6 +41,7 @@ void Parser::parse(int argc, char *raw_argv[]) {
     else
       throw ParsingError("Invalid arguments provided!");
   }
+  checkHelpOption();
   checkMissingOptions();
 }
 
@@ -116,6 +117,13 @@ void Parser::checkMissingOptions() const {
       },
       option
     );
+  }
+}
+
+void Parser::checkHelpOption() const {
+  if (hasOption("-h") && getValue<bool>("-h")) {
+    displayUsage();
+    exit(0);
   }
 }
 

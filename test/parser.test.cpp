@@ -89,6 +89,23 @@ TEST(Parser_addOption, AddsMixedOptions) {
   EXPECT_EQ(parser.getValue<std::vector<std::string>>("-c"), compound_expected);
 }
 
+// ----------------------------- AddHelpOption ----------------------------- //
+
+TEST(Parser_addHelpOption, AddsHelpOption) {
+  auto parser = input_parser::Parser().addHelpOption();
+  const char *argv[] = {"test", "--help"};
+  EXPECT_NO_THROW(parser.parse(2, (char **)argv));
+}
+
+TEST(Parser_addHelpOption, AddsHelpOptionWithOtherOptions) {
+  auto parser =
+    input_parser::Parser().addHelpOption().addOption<input_parser::FlagOption>(
+      [] { return input_parser::FlagOption("-v", "--verbose"); }
+    );
+  const char *argv[] = {"test", "-v"};
+  EXPECT_NO_THROW(parser.parse(2, (char **)argv));
+}
+
 // --------------------------------- Parse --------------------------------- //
 
 TEST(Parser_parse, DoesNotThrowErrorParsingWithoutOptions) {
