@@ -21,6 +21,7 @@ enable_testing()
 set(SOURCE
   "option/base_option.test.cpp"
   constraint.test.cpp
+  parser.test.cpp
   parsing_error.test.cpp
 )
 
