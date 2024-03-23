@@ -12,7 +12,6 @@
 #ifndef _INPUT_PARSER_HPP_
 #define _INPUT_PARSER_HPP_
 
-#include <memory>
 #include <unordered_map>
 #include <variant>
 
@@ -197,7 +196,7 @@ class Parser {
    * @param index The index of the compound option to parse.
    * @return How many arguments have been read.
    */
-  int parseMultiple(
+  int parseCompound(
     const std::vector<std::string> &arguments, const unsigned int index
   );
 };
