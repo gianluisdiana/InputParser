@@ -50,9 +50,9 @@ BaseOption &BaseOption::beRequired(const bool required) {
 void BaseOption::checkConstraints(const std::any &value) const {
   for (const auto &constraint : constraints_) {
     if (!constraint.call(value)) {
-      const std::string error_message = constraint.getErrorMessage();
+      const std::string &error_message = constraint.getErrorMessage();
       throw ParsingError(
-        error_message == "" ? "Constraint not satisfied." : error_message
+        error_message.empty() ? "Constraint not satisfied." : error_message
       );
     }
   }

@@ -87,7 +87,7 @@ class Parser {
    * @param argc The amount of arguments provided when executing the program.
    * @param raw_argv A vector of strings with the arguments.
    */
-  void parse(int argc, char *raw_argv[]);
+  void parse(unsigned int argc, char *raw_argv[]);
 
   /**
    * @brief Shows to the user how to execute the program correctly.
@@ -100,6 +100,16 @@ class Parser {
   // Helper map to get the option by name.
   std::unordered_map<std::string, std::string> names_;
 
+  // ---------------------------- Static Methods --------------------------- //
+
+  /**
+   * @brief Sets the value of an option.
+   *
+   * @param option The option to be changed.
+   * @param value The value to be assigned to the option.
+   */
+  static void setOptionValue(Option &option, const std::any &value);
+
   // ------------------------------- Getters ------------------------------- //
 
   /** @brief Gives readonly access to the option with the provided name */
@@ -111,16 +121,6 @@ class Parser {
   inline Option &getOption(const std::string &name) {
     return options_.at(names_.at(name));
   }
-
-  // ------------------------------- Setters ------------------------------- //
-
-  /**
-   * @brief Sets the value of an option.
-   *
-   * @param option The option to be changed.
-   * @param value The value to be assigned to the option.
-   */
-  void setOptionValue(Option &option, const std::any &value);
 
   // ------------------------------- Checks ------------------------------- //
 
@@ -189,7 +189,7 @@ class Parser {
    * @param index The index of the single option to parse.
    * @return How many arguments have been read.
    */
-  int parseSingle(
+  unsigned int parseSingle(
     const std::vector<std::string> &arguments, const unsigned int index
   );
 
@@ -202,13 +202,12 @@ class Parser {
    * @param index The index of the compound option to parse.
    * @return How many arguments have been read.
    */
-  int parseCompound(
+  unsigned int parseCompound(
     const std::vector<std::string> &arguments, const unsigned int index
   );
 };
 
-template <
-  typename T, typename = std::enable_if_t<std::is_base_of_v<BaseOption, T>>>
+template <typename T, typename>
 Parser &Parser::addOption(const std::function<const T()> &create_option) {
   const auto option = create_option();
   const auto &reference_name = option.getNames()[0];

@@ -19,7 +19,7 @@
 
 namespace input_parser {
 
-Parser::Parser() : options_ {}, names_ {} {}
+Parser::Parser() = default;
 
 Parser &Parser::addHelpOption() {
   return addOption<FlagOption>([] {
@@ -29,17 +29,18 @@ Parser &Parser::addHelpOption() {
   });
 }
 
-void Parser::parse(int argc, char *raw_argv[]) {
+void Parser::parse(unsigned int argc, char *raw_argv[]) {
   const std::vector<std::string> argv(raw_argv, raw_argv + argc);
-  for (int index = 1; index < argc; ++index) {
-    if (hasFlag(argv[index]))
+  for (unsigned int index = 1; index < argc; ++index) {
+    if (hasFlag(argv[index])) {
       parseFlag(argv[index]);
-    else if (hasSingle(argv[index]))
+    } else if (hasSingle(argv[index])) {
       index += parseSingle(argv, index);
-    else if (hasCompound(argv[index]))
+    } else if (hasCompound(argv[index])) {
       index += parseCompound(argv, index);
-    else
+    } else {
       throw ParsingError("Invalid arguments provided!");
+    }
   }
   checkHelpOption();
   checkMissingOptions();
@@ -77,7 +78,7 @@ void Parser::parseFlag(const std::string &flag_name) {
   );
 }
 
-int Parser::parseSingle(
+unsigned int Parser::parseSingle(
   const std::vector<std::string> &arguments, const unsigned int index
 ) {
   if (index + 1 >= arguments.size() || hasOption(arguments[index + 1])) {
@@ -85,11 +86,11 @@ int Parser::parseSingle(
       "After the " + arguments[index] + " option should be an extra argument!"
     );
   }
-  setOptionValue(getOption(arguments[index]), arguments[index + 1]);
+  Parser::setOptionValue(getOption(arguments[index]), arguments[index + 1]);
   return 1;
 }
 
-int Parser::parseCompound(
+unsigned int Parser::parseCompound(
   const std::vector<std::string> &arguments, const unsigned int index
 ) {
   std::vector<std::string> values {};
@@ -104,7 +105,7 @@ int Parser::parseCompound(
       " option should be at least an extra argument!"
     );
   }
-  setOptionValue(getOption(arguments[index]), values);
+  Parser::setOptionValue(getOption(arguments[index]), values);
   return local_index - index - 1;
 }
 
@@ -112,8 +113,9 @@ void Parser::checkMissingOptions() const {
   for (const auto &[_, option] : options_) {
     std::visit(
       [](auto &&opt) {
-        if (opt.isRequired() && !opt.hasValue() && !opt.hasDefaultValue())
+        if (opt.isRequired() && !opt.hasValue() && !opt.hasDefaultValue()) {
           throw ParsingError("Missing option " + opt.getNames()[0]);
+        }
       },
       option
     );
@@ -175,12 +177,11 @@ void Parser::checkHelpOption() const {
 
 void Parser::displayUsage() const {
   std::string usage = "Usage: ./exec_name";
-  std::string description = "";
+  std::string description;
   std::set<Option> options_displayed;
   for (const auto &[option_name, option] : options_) {
-    // if (options_displayed.contains(option)) continue;
     std::visit(
-      [&usage, option_name, &description](auto &&opt) {
+      [&usage, &option_name = option_name, &description](auto &&opt) {
         const std::pair<std::string, std::string> brackets_or_not =
           opt.isRequired() ? std::make_pair("<", ">")
                            : std::make_pair("[", "]");
@@ -199,7 +200,6 @@ void Parser::displayUsage() const {
       },
       option
     );
-    // options_displayed.insert(option);
   }
   std::cout << usage << "\n\n" << description << "\n";
 }

@@ -5,18 +5,28 @@ cmake_minimum_required(VERSION 3.22)
 
 # Set the project name
 project(input_parser
-  VERSION 0.4.0
-  DESCRIPTION "An argument parser for C++23"
+  VERSION 0.4.1
+  DESCRIPTION "An argument parser for C++20"
   HOMEPAGE_URL "https://github.com/gianluisdiana/InputParser"
   LANGUAGES CXX
 )
 
-# ----------------------------- Extra CMake Modules ---------------------------- #
+# -------------------------- Clang-Tidy Integration ------------------------- #
+
+find_program(CLANG_TIDY_COMMAND NAMES "clang-tidy")
+if(CLANG_TIDY_COMMAND)
+  set(CMAKE_CXX_CLANG_TIDY
+    ${CLANG_TIDY_COMMAND};
+    -config-file=${CMAKE_SOURCE_DIR}/.clang-tidy -extra-arg=-std=c++20;
+  )
+endif()
+
+# --------------------------- Extra CMake Modules --------------------------- #
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-# ---------------------------------- Sources ----------------------------------- #
+# --------------------------------- Sources --------------------------------- #
 
 # Create a sources variable with a link to all cpp files to compile
 set(SOURCE
@@ -32,7 +42,7 @@ add_library(${PROJECT_NAME} STATIC
   ${SOURCE}
 )
 
-# -------------------------------- Header files -------------------------------- #
+# ------------------------------- Header files ------------------------------ #
 
 # Set the directories that should be included in the build command for this target
 # when running g++ these will be included as -I/directory/path/
@@ -43,7 +53,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 # ----------------------------- Compile options ----------------------------- #
 
 # Set the C++ standard we will use to compile the library
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 
 # Add flags to the compiler
 target_compile_options(${PROJECT_NAME} PRIVATE
@@ -55,7 +65,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 
 # ---------------------------------- Tests ---------------------------------- #
 
-# Only add the tests directory if the BUILD_INPUT_PARSER_TESTS option is turned on
+# Only add the tests directory if the BUILD_INPUT_PARSER_TESTS flag is turned on
 # cmake -DBUILD_INPUT_PARSER_TESTS=ON ..
 if(BUILD_INPUT_PARSER_TESTS)
   add_subdirectory(test)

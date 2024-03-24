@@ -230,10 +230,7 @@ class BaseOption {
   void checkConstraints(const std::any &value) const;
 };
 
-template <
-  typename T, typename... Ts,
-  typename =
-    typename std::enable_if_t<is_string_type<T> && (is_string_type<Ts> && ...)>>
+template <typename T, typename... Ts, typename>
 BaseOption::BaseOption(const T name, const Ts... extra_names) :
   value_ {}, default_value_ {}, names_ {}, description_ {}, required_ {true},
   transform_before_check_ {false}, transformation_ {}, constraints_ {} {

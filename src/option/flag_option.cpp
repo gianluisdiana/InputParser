@@ -14,7 +14,7 @@ FlagOption &FlagOption::toDouble() {
 
 FlagOption &FlagOption::toFloat() {
   return to<float>([](const bool &value) -> float {
-    return value ? 1.0f : 0.0f;
+    return value ? 1.0F : 0.0F;
   });
 }
 
