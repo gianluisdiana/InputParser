@@ -123,10 +123,7 @@ void Parser::checkMissingOptions() const {
 }
 
 void Parser::checkHelpOption() const {
-  if (hasOption("-h") && getValue<bool>("-h")) {
-    displayUsage();
-    exit(0);
-  }
+  if (hasOption("-h") && getValue<bool>("-h")) { throw ParsingError(usage()); }
 }
 
 /**
@@ -175,25 +172,17 @@ void Parser::checkHelpOption() const {
 // author << "\n";
 //
 
-void Parser::displayUsage() const {
+std::string Parser::usage() const {
   std::string usage = "Usage: ./exec_name";
   std::string description;
-  std::set<Option> options_displayed;
   for (const auto &[option_name, option] : options_) {
     std::visit(
       [&usage, &option_name = option_name, &description](auto &&opt) {
         const std::pair<std::string, std::string> brackets_or_not =
           opt.isRequired() ? std::make_pair("<", ">")
                            : std::make_pair("[", "]");
-        usage += " " + brackets_or_not.first + option_name;
-        // + opt.getExtraArgumentName() + brackets_or_not.second;
-        using T = std::decay_t<decltype(opt)>;
-        if constexpr (std::is_same_v<T, SingleOption>) {
-          usage += " extra_argument";
-        } else if constexpr (std::is_same_v<T, CompoundOption>) {
-          usage += " extra_argument1 extra_argument2 ...";
-        }
-        usage += brackets_or_not.second;
+        usage += " " + brackets_or_not.first + option_name +
+                 opt.getArgumentName() + brackets_or_not.second;
         if (opt.getDescription() != "") {
           description += option_name + " -> " + opt.getDescription() + "\n";
         }
@@ -201,7 +190,7 @@ void Parser::displayUsage() const {
       option
     );
   }
-  std::cout << usage << "\n\n" << description << "\n";
+  return usage + "\n\n" + description + "\n";
 }
 
 }  // namespace input_parser

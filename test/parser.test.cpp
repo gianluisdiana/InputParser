@@ -91,10 +91,10 @@ TEST(Parser_addOption, AddsMixedOptions) {
 
 // ----------------------------- AddHelpOption ----------------------------- //
 
-TEST(Parser_addHelpOption, AddsHelpOption) {
+TEST(Parser_addHelpOption, AddsOptionalHelpOption) {
   auto parser = input_parser::Parser().addHelpOption();
-  const char *argv[] = {"test", "--help"};
-  EXPECT_NO_THROW(parser.parse(2, (char **)argv));
+  const char *argv[] = {"test"};
+  EXPECT_NO_THROW(parser.parse(1, (char **)argv));
 }
 
 TEST(Parser_addHelpOption, AddsHelpOptionWithOtherOptions) {
@@ -260,6 +260,41 @@ TEST(Parser_parse, ThrowsErrorExpectingNotProvidedOption) {
         parser.parse(3, (char **)argv);
       } catch (const input_parser::ParsingError &e) {
         EXPECT_STREQ(e.what(), "Missing option -v");
+        throw;
+      }
+    },
+    input_parser::ParsingError
+  );
+}
+
+TEST(Parser_parse, ThrowsExceptionParsingAndProvidingHelpOption) {
+  auto parser = input_parser::Parser().addHelpOption();
+  const char *argv[] = {"test", "-h"};
+  EXPECT_THROW(
+    {
+      try {
+        parser.parse(2, (char **)argv);
+      } catch (const input_parser::ParsingError &e) {
+        EXPECT_STREQ(e.what(), parser.usage().c_str());
+        throw;
+      }
+    },
+    input_parser::ParsingError
+  );
+}
+
+TEST(Parser_parse, ThrowsHelpOptionWithOtherOptions) {
+  auto parser =
+    input_parser::Parser().addHelpOption().addOption<input_parser::FlagOption>(
+      [] { return input_parser::FlagOption("-v", "--verbose"); }
+    );
+  const char *argv[] = {"test", "-h", "-v"};
+  EXPECT_THROW(
+    {
+      try {
+        parser.parse(3, (char **)argv);
+      } catch (const input_parser::ParsingError &e) {
+        EXPECT_STREQ(e.what(), parser.usage().c_str());
         throw;
       }
     },

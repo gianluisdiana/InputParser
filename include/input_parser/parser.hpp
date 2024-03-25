@@ -92,7 +92,7 @@ class Parser {
   /**
    * @brief Shows to the user how to execute the program correctly.
    */
-  void displayUsage() const;
+  std::string usage() const;
 
  private:
   // All the options registered.
