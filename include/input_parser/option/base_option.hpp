@@ -115,6 +115,11 @@ class BaseOption {
     return description_;
   }
 
+  /** @brief Gets the argument placeholder of the option (if needed). */
+  inline const std::string &getArgumentName() const {
+    return argument_name_;
+  }
+
   // ------------------------------- Setters ------------------------------- //
 
   /**
@@ -221,6 +226,8 @@ class BaseOption {
   std::function<std::any(const std::any &)> transformation_;
   // A list of constraints that the value of the option must satisfy
   std::vector<Constraint> constraints_;
+  // The placeholder for the argument of the option
+  std::string argument_name_;
 
   /**
    * @brief Checks if the provided value satisfies all the constraints.
@@ -232,8 +239,7 @@ class BaseOption {
 
 template <typename T, typename... Ts, typename>
 BaseOption::BaseOption(const T name, const Ts... extra_names) :
-  value_ {}, default_value_ {}, names_ {}, description_ {}, required_ {true},
-  transform_before_check_ {false}, transformation_ {}, constraints_ {} {
+  required_ {true}, transform_before_check_ {false} {
   names_ = {name, extra_names...};
   transformation_ = [](const std::any &value) -> std::any { return value; };
 }

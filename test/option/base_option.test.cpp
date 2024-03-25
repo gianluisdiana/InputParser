@@ -126,6 +126,11 @@ TEST(BaseOption_getters, ShouldReturnDefaultValueTransformedIfNoValue) {
   EXPECT_FALSE(option.getDefaultValue<bool>());
 }
 
+TEST(BaseOption_getters, StartsWithNoArgumentName) {
+  const auto option = MockOption("name");
+  EXPECT_EQ(option.getArgumentName(), "");
+}
+
 // ------------------------------- Setters ------------------------------- //
 
 TEST(BaseOption_setters, ShouldAssignAPrimitiveToTheValue) {

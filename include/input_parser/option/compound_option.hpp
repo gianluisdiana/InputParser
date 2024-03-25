@@ -41,8 +41,7 @@ class CompoundOption : public BaseOption {
     typename T, typename... Ts,
     typename = typename std::enable_if_t<
       is_string_type<T> && (is_string_type<Ts> && ...)>>
-  CompoundOption(const T name, const Ts... extra_names) :
-    BaseOption(name, extra_names...) {}
+  CompoundOption(const T name, const Ts... extra_names);
 
   /**
    * @brief Indicates if the option is a compound option.
@@ -146,6 +145,12 @@ class CompoundOption : public BaseOption {
     return static_cast<CompoundOption &>(BaseOption::beRequired(required));
   }
 };
+
+template <typename T, typename... Ts, typename>
+CompoundOption::CompoundOption(const T name, const Ts... extra_names) :
+  BaseOption(name, extra_names...) {
+  argument_name_ = " value1 value2 ...";
+}
 
 template <class T>
 CompoundOption &CompoundOption::to(

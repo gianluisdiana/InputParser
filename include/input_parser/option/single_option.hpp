@@ -40,8 +40,7 @@ class SingleOption : public BaseOption {
     typename T, typename... Ts,
     typename = typename std::enable_if_t<
       is_string_type<T> && (is_string_type<Ts> && ...)>>
-  SingleOption(const T name, const Ts... extra_names) :
-    BaseOption(name, extra_names...) {}
+  SingleOption(const T name, const Ts... extra_names);
 
   /**
    * @brief Indicates if the option is a single option.
@@ -134,6 +133,12 @@ class SingleOption : public BaseOption {
     return static_cast<SingleOption &>(BaseOption::beRequired(required));
   }
 };
+
+template <typename T, typename... Ts, typename>
+SingleOption::SingleOption(const T name, const Ts... extra_names) :
+  BaseOption(name, extra_names...) {
+  argument_name_ = " value";
+}
 
 template <class T>
 SingleOption &
