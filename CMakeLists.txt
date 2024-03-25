@@ -14,7 +14,7 @@ project(input_parser
 # -------------------------- Clang-Tidy Integration ------------------------- #
 
 find_program(CLANG_TIDY_COMMAND NAMES "clang-tidy")
-if(CLANG_TIDY_COMMAND)
+if(CLANG_TIDY_COMMAND AND (NOT BUILD_INPUT_PARSER_TESTS))
   set(CMAKE_CXX_CLANG_TIDY
     ${CLANG_TIDY_COMMAND};
     -config-file=${CMAKE_SOURCE_DIR}/.clang-tidy -extra-arg=-std=c++20;
