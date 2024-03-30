@@ -6,10 +6,16 @@ cmake_minimum_required(VERSION 3.22)
 # Set the project name
 project(input_parser
   VERSION 0.4.1
-  DESCRIPTION "An argument parser for C++20"
+  DESCRIPTION "An argument parser for C++23"
   HOMEPAGE_URL "https://github.com/gianluisdiana/InputParser"
   LANGUAGES CXX
 )
+
+# ------------------------------- C++ Standard ------------------------------ #
+
+# Set the C++ standard we will use to compile the library
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # -------------------------- Clang-Tidy Integration ------------------------- #
 
@@ -17,7 +23,7 @@ find_program(CLANG_TIDY_COMMAND NAMES "clang-tidy")
 if(CLANG_TIDY_COMMAND AND (NOT BUILD_INPUT_PARSER_TESTS))
   set(CMAKE_CXX_CLANG_TIDY
     ${CLANG_TIDY_COMMAND};
-    -config-file=${CMAKE_SOURCE_DIR}/.clang-tidy -extra-arg=-std=c++20;
+    -config-file=${CMAKE_SOURCE_DIR}/.clang-tidy;
   )
 endif()
 
@@ -25,12 +31,6 @@ endif()
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
-
-# ------------------------------- C++ Standard ------------------------------ #
-
-# Set the C++ standard we will use to compile the library
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # --------------------------------- Sources --------------------------------- #
 
