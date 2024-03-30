@@ -39,14 +39,13 @@ class Parser {
   /**
    * @brief Adds an option to be parsed.
    *
-   * @tparam T The type of the option to be added, must be a subclass of
-   * BaseOption.
+   * @tparam CreateFunction The type of the function that creates the option.
    * @param create_option A function that returns the option.
    * @return The instance of the object that called this method.
    */
-  template <typename T>
-  Parser &addOption(const std::function<const T()> &create_option
-  ) requires(std::is_base_of_v<BaseOption, T>);
+  template <typename CreateFunction>
+  Parser &addOption(const CreateFunction &create_option
+  ) requires(std::is_invocable_r_v<Option, CreateFunction>);
 
   /**
    * @brief Adds a basic help option to the parser.
@@ -207,9 +206,9 @@ class Parser {
   );
 };
 
-template <typename T>
-Parser &Parser::addOption(const std::function<const T()> &create_option
-) requires(std::is_base_of_v<BaseOption, T>) {
+template <typename CreateFunction>
+Parser &Parser::addOption(const CreateFunction &create_option
+) requires(std::is_invocable_r_v<Option, CreateFunction>) {
   const auto option = create_option();
   const auto &reference_name = option.getNames().front();
   for (const auto &name : option.getNames()) {

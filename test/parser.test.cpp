@@ -9,13 +9,13 @@ namespace input_parser {
 
 TEST(Parser_addOption, ThrowsErrorWithOptionsWithSameName) {
   auto parser = input_parser::Parser();
-  EXPECT_NO_THROW(parser.addOption<input_parser::CompoundOption>([] {
+  EXPECT_NO_THROW(parser.addOption([] {
     return input_parser::CompoundOption("-n", "--names");
   }));
   EXPECT_THROW(
     {
       try {
-        parser.addOption<input_parser::SingleOption>([] {
+        parser.addOption([] {
           return input_parser::SingleOption("-n", "--name");
         });
       } catch (const std::invalid_argument &e) {
@@ -28,7 +28,7 @@ TEST(Parser_addOption, ThrowsErrorWithOptionsWithSameName) {
 }
 
 TEST(Parser_addOption, AddsFlagOption) {
-  auto parser = input_parser::Parser().addOption<input_parser::FlagOption>([] {
+  auto parser = input_parser::Parser().addOption([] {
     return input_parser::FlagOption("-f", "--flag");
   });
   const char *argv[] = {"test", "--flag"};
@@ -38,10 +38,9 @@ TEST(Parser_addOption, AddsFlagOption) {
 }
 
 TEST(Parser_addOption, AddsSingleOption) {
-  auto parser =
-    input_parser::Parser().addOption<input_parser::SingleOption>([] {
-      return input_parser::SingleOption("-s", "--single");
-    });
+  auto parser = input_parser::Parser().addOption([] {
+    return input_parser::SingleOption("-s", "--single");
+  });
   auto expected = "value";
   const char *argv[] = {"test", "--single", expected};
   parser.parse(3, (char **)argv);
@@ -50,10 +49,9 @@ TEST(Parser_addOption, AddsSingleOption) {
 }
 
 TEST(Parser_addOption, AddsCompoundOption) {
-  auto parser =
-    input_parser::Parser().addOption<input_parser::CompoundOption>([] {
-      return input_parser::CompoundOption("-c", "--compound");
-    });
+  auto parser = input_parser::Parser().addOption([] {
+    return input_parser::CompoundOption("-c", "--compound");
+  });
   auto expected = std::vector<std::string> {"value1", "value2"};
   const char *argv[] = {"test", "--compound", "value1", "value2"};
   parser.parse(4, (char **)argv);
@@ -63,16 +61,9 @@ TEST(Parser_addOption, AddsCompoundOption) {
 
 TEST(Parser_addOption, AddsMixedOptions) {
   auto parser = input_parser::Parser();
-  parser
-    .addOption<input_parser::FlagOption>([] {
-      return input_parser::FlagOption("-f", "--flag");
-    })
-    .addOption<input_parser::SingleOption>([] {
-      return input_parser::SingleOption("-s", "--single");
-    })
-    .addOption<input_parser::CompoundOption>([] {
-      return input_parser::CompoundOption("-c", "--compound");
-    });
+  parser.addOption([] { return input_parser::FlagOption("-f", "--flag"); })
+    .addOption([] { return input_parser::SingleOption("-s", "--single"); })
+    .addOption([] { return input_parser::CompoundOption("-c", "--compound"); });
   const auto single_expected = "value";
   const auto compound_expected = std::vector<std::string> {"value1", "value2"};
   const char *argv[] = {
@@ -98,10 +89,9 @@ TEST(Parser_addHelpOption, AddsOptionalHelpOption) {
 }
 
 TEST(Parser_addHelpOption, AddsHelpOptionWithOtherOptions) {
-  auto parser =
-    input_parser::Parser().addHelpOption().addOption<input_parser::FlagOption>(
-      [] { return input_parser::FlagOption("-v", "--verbose"); }
-    );
+  auto parser = input_parser::Parser().addHelpOption().addOption([] {
+    return input_parser::FlagOption("-v", "--verbose");
+  });
   const char *argv[] = {"test", "-v"};
   EXPECT_NO_THROW(parser.parse(2, (char **)argv));
 }
@@ -131,7 +121,7 @@ TEST(Parser_parse, ThrowsErrorParsingParametersWithoutOptions) {
 }
 
 TEST(Parser_parse, ParsesFlagOption) {
-  auto parser = input_parser::Parser().addOption<input_parser::FlagOption>([] {
+  auto parser = input_parser::Parser().addOption([] {
     return input_parser::FlagOption("-v", "--verbose");
   });
   const char *argv[] = {"test", "--verbose"};
@@ -139,7 +129,7 @@ TEST(Parser_parse, ParsesFlagOption) {
 }
 
 TEST(Parser_parse, ParsesFlagOptionAsTrue) {
-  auto parser = input_parser::Parser().addOption<input_parser::FlagOption>([] {
+  auto parser = input_parser::Parser().addOption([] {
     return input_parser::FlagOption("-v", "--verbose");
   });
   const char *argv[] = {"test", "--verbose"};
@@ -149,7 +139,7 @@ TEST(Parser_parse, ParsesFlagOptionAsTrue) {
 }
 
 TEST(Parser_parse, GetsDefaultOptionNegated) {
-  auto parser = input_parser::Parser().addOption<input_parser::FlagOption>([] {
+  auto parser = input_parser::Parser().addOption([] {
     return input_parser::FlagOption("-v", "--verbose").addDefaultValue(true);
   });
   const char *argv[] = {"test", "-v"};
@@ -159,20 +149,18 @@ TEST(Parser_parse, GetsDefaultOptionNegated) {
 }
 
 TEST(Parser_parse, ParsesSingleOption) {
-  auto parser =
-    input_parser::Parser().addOption<input_parser::SingleOption>([] {
-      return input_parser::SingleOption("-s", "--single");
-    });
+  auto parser = input_parser::Parser().addOption([] {
+    return input_parser::SingleOption("-s", "--single");
+  });
   const auto expected = "value";
   const char *argv[] = {"test", "--single", expected};
   EXPECT_NO_THROW(parser.parse(3, (char **)argv));
 }
 
 TEST(Parser_parse, ParsesSingleOptionAsString) {
-  auto parser =
-    input_parser::Parser().addOption<input_parser::SingleOption>([] {
-      return input_parser::SingleOption("-s", "--single");
-    });
+  auto parser = input_parser::Parser().addOption([] {
+    return input_parser::SingleOption("-s", "--single");
+  });
   const auto expected = "value";
   const char *argv[] = {"test", "--single", expected};
   parser.parse(3, (char **)argv);
@@ -181,10 +169,9 @@ TEST(Parser_parse, ParsesSingleOptionAsString) {
 }
 
 TEST(Parser_parse, ThrowsErrorExpectingSingleOptionArgument) {
-  auto parser =
-    input_parser::Parser().addOption<input_parser::SingleOption>([] {
-      return input_parser::SingleOption("-s", "--single");
-    });
+  auto parser = input_parser::Parser().addOption([] {
+    return input_parser::SingleOption("-s", "--single");
+  });
   const char *argv[] = {"test", "--single"};
   EXPECT_THROW(
     {
@@ -202,20 +189,18 @@ TEST(Parser_parse, ThrowsErrorExpectingSingleOptionArgument) {
 }
 
 TEST(Parser_parse, ParsesCompoundOption) {
-  auto parser =
-    input_parser::Parser().addOption<input_parser::CompoundOption>([] {
-      return input_parser::CompoundOption("-c", "--compound");
-    });
+  auto parser = input_parser::Parser().addOption([] {
+    return input_parser::CompoundOption("-c", "--compound");
+  });
   const auto expected = std::vector<std::string> {"value1", "value2"};
   const char *argv[] = {"test", "--compound", "value1", "value2"};
   EXPECT_NO_THROW(parser.parse(4, (char **)argv));
 }
 
 TEST(Parser_parse, ParsesCompoundOptionAsStringVector) {
-  auto parser =
-    input_parser::Parser().addOption<input_parser::CompoundOption>([] {
-      return input_parser::CompoundOption("-c", "--compound");
-    });
+  auto parser = input_parser::Parser().addOption([] {
+    return input_parser::CompoundOption("-c", "--compound");
+  });
   const auto expected = std::vector<std::string> {"value1", "value2"};
   const char *argv[] = {"test", "--compound", "value1", "value2"};
   parser.parse(4, (char **)argv);
@@ -224,10 +209,9 @@ TEST(Parser_parse, ParsesCompoundOptionAsStringVector) {
 }
 
 TEST(Parser_parse, ThrowsErrorExpectingCompoundOptionArgument) {
-  auto parser =
-    input_parser::Parser().addOption<input_parser::CompoundOption>([] {
-      return input_parser::CompoundOption("-c", "--compound");
-    });
+  auto parser = input_parser::Parser().addOption([] {
+    return input_parser::CompoundOption("-c", "--compound");
+  });
   const char *argv[] = {"test", "-c"};
   EXPECT_THROW(
     {
@@ -246,13 +230,8 @@ TEST(Parser_parse, ThrowsErrorExpectingCompoundOptionArgument) {
 
 TEST(Parser_parse, ThrowsErrorExpectingNotProvidedOption) {
   auto parser = input_parser::Parser();
-  parser
-    .addOption<input_parser::FlagOption>([] {
-      return input_parser::FlagOption("-v", "--verbose");
-    })
-    .addOption<input_parser::SingleOption>([] {
-      return input_parser::SingleOption("-s", "--single");
-    });
+  parser.addOption([] { return input_parser::FlagOption("-v", "--verbose"); }
+  ).addOption([] { return input_parser::SingleOption("-s", "--single"); });
   const char *argv[] = {"test", "--single", "value"};
   EXPECT_THROW(
     {
@@ -284,10 +263,9 @@ TEST(Parser_parse, ThrowsExceptionParsingAndProvidingHelpOption) {
 }
 
 TEST(Parser_parse, ThrowsHelpOptionWithOtherOptions) {
-  auto parser =
-    input_parser::Parser().addHelpOption().addOption<input_parser::FlagOption>(
-      [] { return input_parser::FlagOption("-v", "--verbose"); }
-    );
+  auto parser = input_parser::Parser().addHelpOption().addOption([] {
+    return input_parser::FlagOption("-v", "--verbose");
+  });
   const char *argv[] = {"test", "-h", "-v"};
   EXPECT_THROW(
     {

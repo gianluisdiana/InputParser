@@ -12,9 +12,6 @@
  *
  */
 
-#include <iostream>
-#include <set>
-
 #include <input_parser/parser.hpp>
 
 namespace input_parser {
@@ -22,7 +19,7 @@ namespace input_parser {
 Parser::Parser() = default;
 
 Parser &Parser::addHelpOption() {
-  return addOption<FlagOption>([] {
+  return addOption([] {
     return FlagOption("-h", "--help")
       .addDescription("Shows how to use the program.")
       .addDefaultValue(false);
@@ -177,7 +174,7 @@ std::string Parser::usage() const {
   std::string description;
   for (const auto &[option_name, option] : options_) {
     std::visit(
-      [&usage, &option_name = option_name, &description](auto &&opt) {
+      [&](auto &&opt) {
         const std::pair<std::string, std::string> brackets_or_not =
           opt.isRequired() ? std::make_pair("<", ">")
                            : std::make_pair("[", "]");
