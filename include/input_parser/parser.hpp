@@ -44,9 +44,9 @@ class Parser {
    * @param create_option A function that returns the option.
    * @return The instance of the object that called this method.
    */
-  template <
-    typename T, typename = std::enable_if_t<std::is_base_of_v<BaseOption, T>>>
-  Parser &addOption(const std::function<const T()> &create_option);
+  template <typename T>
+  Parser &addOption(const std::function<const T()> &create_option
+  ) requires(std::is_base_of_v<BaseOption, T>);
 
   /**
    * @brief Adds a basic help option to the parser.
@@ -207,10 +207,11 @@ class Parser {
   );
 };
 
-template <typename T, typename>
-Parser &Parser::addOption(const std::function<const T()> &create_option) {
+template <typename T>
+Parser &Parser::addOption(const std::function<const T()> &create_option
+) requires(std::is_base_of_v<BaseOption, T>) {
   const auto option = create_option();
-  const auto &reference_name = option.getNames()[0];
+  const auto &reference_name = option.getNames().front();
   for (const auto &name : option.getNames()) {
     if (hasOption(name)) throw std::invalid_argument("Option already exists!");
     names_[name] = reference_name;

@@ -26,6 +26,12 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+# ------------------------------- C++ Standard ------------------------------ #
+
+# Set the C++ standard we will use to compile the library
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # --------------------------------- Sources --------------------------------- #
 
 # Create a sources variable with a link to all cpp files to compile
@@ -51,9 +57,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 # ----------------------------- Compile options ----------------------------- #
-
-# Set the C++ standard we will use to compile the library
-set(CMAKE_CXX_STANDARD 20)
 
 # Add flags to the compiler
 target_compile_options(${PROJECT_NAME} PRIVATE

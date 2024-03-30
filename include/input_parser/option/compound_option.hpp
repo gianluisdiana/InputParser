@@ -37,11 +37,9 @@ class CompoundOption : public BaseOption {
    * @param name The name of the option
    * @param extra_names Extra names that the option can be recognized by
    */
-  template <
-    typename T, typename... Ts,
-    typename = typename std::enable_if_t<
-      is_string_type<T> && (is_string_type<Ts> && ...)>>
-  CompoundOption(const T name, const Ts... extra_names);
+  CompoundOption(
+    StringKind auto const name, StringKind auto const... extra_names
+  );
 
   /**
    * @brief Indicates if the option is a compound option.
@@ -146,8 +144,9 @@ class CompoundOption : public BaseOption {
   }
 };
 
-template <typename T, typename... Ts, typename>
-CompoundOption::CompoundOption(const T name, const Ts... extra_names) :
+CompoundOption::CompoundOption(
+  StringKind auto const name, StringKind auto const... extra_names
+) :
   BaseOption(name, extra_names...) {
   argument_name_ = " value1 value2 ...";
 }

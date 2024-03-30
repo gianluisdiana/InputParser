@@ -36,11 +36,9 @@ class SingleOption : public BaseOption {
    * @param name The name of the option
    * @param extra_names Extra names that the option can be recognized by
    */
-  template <
-    typename T, typename... Ts,
-    typename = typename std::enable_if_t<
-      is_string_type<T> && (is_string_type<Ts> && ...)>>
-  SingleOption(const T name, const Ts... extra_names);
+  SingleOption(
+    StringKind auto const name, StringKind auto const... extra_names
+  );
 
   /**
    * @brief Indicates if the option is a single option.
@@ -134,8 +132,9 @@ class SingleOption : public BaseOption {
   }
 };
 
-template <typename T, typename... Ts, typename>
-SingleOption::SingleOption(const T name, const Ts... extra_names) :
+SingleOption::SingleOption(
+  StringKind auto const name, StringKind auto const... extra_names
+) :
   BaseOption(name, extra_names...) {
   argument_name_ = " value";
 }

@@ -36,11 +36,7 @@ class FlagOption : public BaseOption {
    * @param name The name of the option
    * @param extra_names Extra names that the option can be recognized by
    */
-  template <
-    typename T, typename... Ts,
-    typename = typename std::enable_if_t<
-      is_string_type<T> && (is_string_type<Ts> && ...)>>
-  FlagOption(const T name, const Ts... extra_names) :
+  FlagOption(StringKind auto const name, StringKind auto const... extra_names) :
     BaseOption(name, extra_names...) {}
 
   /**
