@@ -23,7 +23,7 @@
 #include <stdexcept>
 
 #include <input_parser/constraint.hpp>
-#include <input_parser/local_type_traits.hpp>
+#include <input_parser/local_concepts.hpp>
 
 namespace input_parser {
 
@@ -33,16 +33,10 @@ class BaseOption {
   /**
    * @brief Constructs an empty option with the provided names.
    *
-   * @tparam T Type of the mandatory name (must be strings or const char*)
-   * @tparam Ts Types of the names (same type as T)
    * @param name The name of the option
    * @param extra_names Extra names that the option can be recognized by
    */
-  template <
-    typename T, typename... Ts,
-    typename = typename std::enable_if_t<
-      is_string_type<T> && (is_string_type<Ts> && ...)>>
-  BaseOption(const T name, const Ts... extra_names);
+  BaseOption(StringKind auto const name, StringKind auto const... extra_names);
 
   // ------------------------------- Adders ------------------------------- //
 
@@ -113,6 +107,11 @@ class BaseOption {
   /** @brief Gets the description of the option */
   inline const std::string &getDescription() const {
     return description_;
+  }
+
+  /** @brief Gets the argument placeholder of the option (if needed). */
+  inline const std::string &getArgumentName() const {
+    return argument_name_;
   }
 
   // ------------------------------- Setters ------------------------------- //
@@ -221,6 +220,8 @@ class BaseOption {
   std::function<std::any(const std::any &)> transformation_;
   // A list of constraints that the value of the option must satisfy
   std::vector<Constraint> constraints_;
+  // The placeholder for the argument of the option
+  std::string argument_name_;
 
   /**
    * @brief Checks if the provided value satisfies all the constraints.
@@ -230,13 +231,11 @@ class BaseOption {
   void checkConstraints(const std::any &value) const;
 };
 
-template <
-  typename T, typename... Ts,
-  typename =
-    typename std::enable_if_t<is_string_type<T> && (is_string_type<Ts> && ...)>>
-BaseOption::BaseOption(const T name, const Ts... extra_names) :
-  value_ {}, default_value_ {}, names_ {}, description_ {}, required_ {true},
-  transform_before_check_ {false}, transformation_ {}, constraints_ {} {
+BaseOption::BaseOption(
+  StringKind auto const name, StringKind auto const... extra_names
+) :
+  required_ {true},
+  transform_before_check_ {false} {
   names_ = {name, extra_names...};
   transformation_ = [](const std::any &value) -> std::any { return value; };
 }

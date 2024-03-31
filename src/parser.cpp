@@ -12,37 +12,49 @@
  *
  */
 
-#include <iostream>
-#include <set>
-
 #include <input_parser/parser.hpp>
 
 namespace input_parser {
 
-Parser::Parser() : options_ {}, names_ {} {}
+// ---------------------------- Static methods ---------------------------- //
+
+void Parser::setOptionValue(Option &option, const std::any &value) {
+  std::visit([&value](auto &&opt) { opt.setValue(value); }, option);
+}
+
+// ----------------------------- Constructors ----------------------------- //
+
+Parser::Parser() = default;
+
+// -------------------------------- Adders -------------------------------- //
 
 Parser &Parser::addHelpOption() {
-  return addOption<FlagOption>([] {
+  return addOption([] {
     return FlagOption("-h", "--help")
       .addDescription("Shows how to use the program.")
       .addDefaultValue(false);
   });
 }
 
-void Parser::parse(int argc, char *raw_argv[]) {
+void Parser::parse(unsigned int argc, char *raw_argv[]) {
   const std::vector<std::string> argv(raw_argv, raw_argv + argc);
-  for (int index = 1; index < argc; ++index) {
-    if (hasFlag(argv[index]))
-      parseFlag(argv[index]);
-    else if (hasSingle(argv[index]))
-      index += parseSingle(argv, index);
-    else if (hasCompound(argv[index]))
-      index += parseCompound(argv, index);
-    else
+  for (unsigned int index = 1; index < argc; ++index) {
+    if (!hasOption(argv[index])) {
       throw ParsingError("Invalid arguments provided!");
+    }
+    if (hasFlag(argv[index])) {
+      parseFlag(argv[index]);
+    } else if (hasSingle(argv[index])) {
+      index += parseSingle(argv, index);
+    } else if (hasCompound(argv[index])) {
+      index += parseCompound(argv, index);
+    }
   }
+  checkHelpOption();
   checkMissingOptions();
 }
+
+// -------------------------------- Checks -------------------------------- //
 
 bool Parser::hasFlag(const std::string &name) const {
   return hasOption(name) &&
@@ -61,9 +73,24 @@ bool Parser::hasCompound(const std::string &name) const {
          );
 }
 
-void Parser::setOptionValue(Option &option, const std::any &value) {
-  std::visit([&value](auto &&opt) { opt.setValue(value); }, option);
+void Parser::checkMissingOptions() const {
+  for (const auto &[_, option] : options_) {
+    std::visit(
+      [](auto &&opt) {
+        if (opt.isRequired() && !opt.hasValue() && !opt.hasDefaultValue()) {
+          throw ParsingError("Missing option " + opt.getNames()[0]);
+        }
+      },
+      option
+    );
+  }
 }
+
+void Parser::checkHelpOption() const {
+  if (hasOption("-h") && getValue<bool>("-h")) { throw ParsingError(usage()); }
+}
+
+// -------------------------- Individual parsers -------------------------- //
 
 void Parser::parseFlag(const std::string &flag_name) {
   std::visit(
@@ -76,7 +103,7 @@ void Parser::parseFlag(const std::string &flag_name) {
   );
 }
 
-int Parser::parseSingle(
+unsigned int Parser::parseSingle(
   const std::vector<std::string> &arguments, const unsigned int index
 ) {
   if (index + 1 >= arguments.size() || hasOption(arguments[index + 1])) {
@@ -84,11 +111,11 @@ int Parser::parseSingle(
       "After the " + arguments[index] + " option should be an extra argument!"
     );
   }
-  setOptionValue(getOption(arguments[index]), arguments[index + 1]);
+  Parser::setOptionValue(getOption(arguments[index]), arguments[index + 1]);
   return 1;
 }
 
-int Parser::parseCompound(
+unsigned int Parser::parseCompound(
   const std::vector<std::string> &arguments, const unsigned int index
 ) {
   std::vector<std::string> values {};
@@ -103,20 +130,8 @@ int Parser::parseCompound(
       " option should be at least an extra argument!"
     );
   }
-  setOptionValue(getOption(arguments[index]), values);
+  Parser::setOptionValue(getOption(arguments[index]), values);
   return local_index - index - 1;
-}
-
-void Parser::checkMissingOptions() const {
-  for (const auto &[_, option] : options_) {
-    std::visit(
-      [](auto &&opt) {
-        if (opt.isRequired() && !opt.hasValue() && !opt.hasDefaultValue())
-          throw ParsingError("Missing option " + opt.getNames()[0]);
-      },
-      option
-    );
-  }
 }
 
 /**
@@ -165,35 +180,25 @@ void Parser::checkMissingOptions() const {
 // author << "\n";
 //
 
-void Parser::displayUsage() const {
+std::string Parser::usage() const {
   std::string usage = "Usage: ./exec_name";
-  std::string description = "";
-  std::set<Option> options_displayed;
+  std::string description;
   for (const auto &[option_name, option] : options_) {
-    // if (options_displayed.contains(option)) continue;
     std::visit(
-      [&usage, option_name, &description](auto &&opt) {
+      [&](auto &&opt) {
         const std::pair<std::string, std::string> brackets_or_not =
           opt.isRequired() ? std::make_pair("<", ">")
                            : std::make_pair("[", "]");
-        usage += " " + brackets_or_not.first + option_name;
-        // + opt.getExtraArgumentName() + brackets_or_not.second;
-        using T = std::decay_t<decltype(opt)>;
-        if constexpr (std::is_same_v<T, SingleOption>) {
-          usage += " extra_argument";
-        } else if constexpr (std::is_same_v<T, CompoundOption>) {
-          usage += " extra_argument1 extra_argument2 ...";
-        }
-        usage += brackets_or_not.second;
+        usage += " " + brackets_or_not.first + option_name +
+                 opt.getArgumentName() + brackets_or_not.second;
         if (opt.getDescription() != "") {
           description += option_name + " -> " + opt.getDescription() + "\n";
         }
       },
       option
     );
-    // options_displayed.insert(option);
   }
-  std::cout << usage << "\n\n" << description << "\n";
+  return usage + "\n\n" + description + "\n";
 }
 
 }  // namespace input_parser

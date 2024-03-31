@@ -16,11 +16,7 @@ class MockOption : public BaseOption {
    */
   MockOption() : BaseOption("") {};
 
-  template <
-    typename T, typename... Ts,
-    typename = typename std::enable_if_t<
-      is_string_type<T> && (is_string_type<Ts> && ...)>>
-  MockOption(const T name, const Ts... extra_names) :
+  MockOption(StringKind auto const name, StringKind auto const... extra_names) :
     BaseOption(name, extra_names...) {}
 
   inline BaseOption &toInt() override {
@@ -124,6 +120,11 @@ TEST(BaseOption_getters, ShouldReturnDefaultValueTransformedIfNoValue) {
   option.negates().addDefaultValue(true);
   EXPECT_FALSE(option.getValue<bool>());
   EXPECT_FALSE(option.getDefaultValue<bool>());
+}
+
+TEST(BaseOption_getters, StartsWithNoArgumentName) {
+  const auto option = MockOption("name");
+  EXPECT_EQ(option.getArgumentName(), "");
 }
 
 // ------------------------------- Setters ------------------------------- //
