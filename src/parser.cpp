@@ -16,7 +16,17 @@
 
 namespace input_parser {
 
+// ---------------------------- Static methods ---------------------------- //
+
+void Parser::setOptionValue(Option &option, const std::any &value) {
+  std::visit([&value](auto &&opt) { opt.setValue(value); }, option);
+}
+
+// ----------------------------- Constructors ----------------------------- //
+
 Parser::Parser() = default;
+
+// -------------------------------- Adders -------------------------------- //
 
 Parser &Parser::addHelpOption() {
   return addOption([] {
@@ -29,19 +39,22 @@ Parser &Parser::addHelpOption() {
 void Parser::parse(unsigned int argc, char *raw_argv[]) {
   const std::vector<std::string> argv(raw_argv, raw_argv + argc);
   for (unsigned int index = 1; index < argc; ++index) {
+    if (!hasOption(argv[index])) {
+      throw ParsingError("Invalid arguments provided!");
+    }
     if (hasFlag(argv[index])) {
       parseFlag(argv[index]);
     } else if (hasSingle(argv[index])) {
       index += parseSingle(argv, index);
     } else if (hasCompound(argv[index])) {
       index += parseCompound(argv, index);
-    } else {
-      throw ParsingError("Invalid arguments provided!");
     }
   }
   checkHelpOption();
   checkMissingOptions();
 }
+
+// -------------------------------- Checks -------------------------------- //
 
 bool Parser::hasFlag(const std::string &name) const {
   return hasOption(name) &&
@@ -60,9 +73,24 @@ bool Parser::hasCompound(const std::string &name) const {
          );
 }
 
-void Parser::setOptionValue(Option &option, const std::any &value) {
-  std::visit([&value](auto &&opt) { opt.setValue(value); }, option);
+void Parser::checkMissingOptions() const {
+  for (const auto &[_, option] : options_) {
+    std::visit(
+      [](auto &&opt) {
+        if (opt.isRequired() && !opt.hasValue() && !opt.hasDefaultValue()) {
+          throw ParsingError("Missing option " + opt.getNames()[0]);
+        }
+      },
+      option
+    );
+  }
 }
+
+void Parser::checkHelpOption() const {
+  if (hasOption("-h") && getValue<bool>("-h")) { throw ParsingError(usage()); }
+}
+
+// -------------------------- Individual parsers -------------------------- //
 
 void Parser::parseFlag(const std::string &flag_name) {
   std::visit(
@@ -104,23 +132,6 @@ unsigned int Parser::parseCompound(
   }
   Parser::setOptionValue(getOption(arguments[index]), values);
   return local_index - index - 1;
-}
-
-void Parser::checkMissingOptions() const {
-  for (const auto &[_, option] : options_) {
-    std::visit(
-      [](auto &&opt) {
-        if (opt.isRequired() && !opt.hasValue() && !opt.hasDefaultValue()) {
-          throw ParsingError("Missing option " + opt.getNames()[0]);
-        }
-      },
-      option
-    );
-  }
-}
-
-void Parser::checkHelpOption() const {
-  if (hasOption("-h") && getValue<bool>("-h")) { throw ParsingError(usage()); }
 }
 
 /**

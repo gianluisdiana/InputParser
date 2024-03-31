@@ -73,8 +73,8 @@ class Parser {
    * @tparam T The type of the value to be returned.
    * @return The value of the option casted to the type provided.
    */
-  template <class T = std::string>
-  const T getValue(const std::string &name) const;
+  template <class T>
+  T getValue(const std::string &name) const;
 
   // -------------------------------- Utility ------------------------------ //
 
@@ -220,7 +220,7 @@ Parser &Parser::addOption(const CreateFunction &create_option
 }
 
 template <class T>
-const T Parser::getValue(const std::string &name) const {
+T Parser::getValue(const std::string &name) const {
   if (!hasOption(name)) {
     throw ParsingError(
       "The option " + name + " was not assigned at the parser"
