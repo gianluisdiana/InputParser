@@ -45,8 +45,12 @@ jobs:
 
     - name: Install clang-format
       run: |
+        sudo wget https://apt.llvm.org/llvm.sh
+        sudo chmod +x llvm.sh;
+        sudo ./llvm.sh 19;
         sudo apt-get update
-        sudo apt-get install -y clang-format-19
+        sudo apt update
+        sudo apt install -y clang-format-19
 
     - name: Format code
       run: |
@@ -64,6 +68,15 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - uses: actions/checkout@v3
+
+    - name: Install clang-tidy-19
+      run: |
+        sudo wget https://apt.llvm.org/llvm.sh
+        sudo chmod +x llvm.sh;
+        sudo ./llvm.sh 19;
+        sudo apt-get update
+        sudo apt update
+        sudo apt install -y clang-tidy-19
 
     - name: Run CMake
       run: cmake . -DBUILD_INPUT_PARSER_TESTS=ON
