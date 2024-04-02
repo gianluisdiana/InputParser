@@ -1,3 +1,5 @@
+#include <string>
+
 #include <input_parser/option/single_option.hpp>
 
 namespace input_parser {
