@@ -25,6 +25,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Install clang-tidy-19
+      run: |
+        sudo wget https://apt.llvm.org/llvm.sh
+        sudo chmod +x llvm.sh;
+        sudo ./llvm.sh 19;
+        sudo apt-get update
+        sudo apt update
+        sudo apt install -y clang-tidy-19
+
     - name: Run CMake
       run: cmake .
 
@@ -45,14 +54,18 @@ jobs:
 
     - name: Install clang-format
       run: |
+        sudo wget https://apt.llvm.org/llvm.sh
+        sudo chmod +x llvm.sh;
+        sudo ./llvm.sh 19;
         sudo apt-get update
-        sudo apt-get install -y clang-format-14
+        sudo apt update
+        sudo apt install -y clang-format-19
 
     - name: Format code
       run: |
         git diff --name-only --diff-filter=d origin/main...HEAD |
         grep -E '\.((c|h)pp)$' |
-        xargs clang-format-14 -style=file --Werror -n
+        xargs clang-format-19 -style=file --Werror -n
 
   tests:
     # The name of the job, this name is used in the GitHub user interface

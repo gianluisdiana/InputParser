@@ -26,7 +26,7 @@ namespace input_parser {
  *   <-d>
  *    └─> The name of the flag.
  */
-class FlagOption : public BaseOption {
+class FlagOption final : public BaseOption {
  public:
   /**
    * @brief Constructs an empty option with the provided names.

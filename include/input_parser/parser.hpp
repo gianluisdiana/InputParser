@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef _INPUT_PARSER_HPP_
-#define _INPUT_PARSER_HPP_
+#ifndef _INPUT_PARSER_PARSER_HPP_
+#define _INPUT_PARSER_PARSER_HPP_
 
 #include <unordered_map>
 #include <variant>
@@ -32,7 +32,7 @@ using Option = std::variant<FlagOption, CompoundOption, SingleOption>;
 class Parser {
  public:
   /** @brief Create an empty parser with no options */
-  Parser();
+  Parser() = default;
 
   // -------------------------------- Adders ------------------------------- //
 
@@ -44,8 +44,8 @@ class Parser {
    * @return The instance of the object that called this method.
    */
   template <typename CreateFunction>
-  Parser &addOption(const CreateFunction &create_option
-  ) requires(std::is_invocable_r_v<Option, CreateFunction>);
+  Parser &addOption(const CreateFunction &create_option)
+  requires std::is_invocable_r_v<Option, CreateFunction>;
 
   /**
    * @brief Adds a basic help option to the parser.
@@ -207,8 +207,9 @@ class Parser {
 };
 
 template <typename CreateFunction>
-Parser &Parser::addOption(const CreateFunction &create_option
-) requires(std::is_invocable_r_v<Option, CreateFunction>) {
+Parser &Parser::addOption(const CreateFunction &create_option)
+requires std::is_invocable_r_v<Option, CreateFunction>
+{
   const auto option = create_option();
   const auto &reference_name = option.getNames().front();
   for (const auto &name : option.getNames()) {
@@ -233,4 +234,4 @@ T Parser::getValue(const std::string &name) const {
 
 }  // namespace input_parser
 
-#endif  // _INPUT_PARSER_HPP_
+#endif  // _INPUT_PARSER_PARSER_HPP_

@@ -9,6 +9,8 @@
  * parser, that can be a flag, a single value or compound values.
  *
  */
+#include <any>
+#include <string>
 
 #include <input_parser/option/base_option.hpp>
 #include <input_parser/parsing_error.hpp>

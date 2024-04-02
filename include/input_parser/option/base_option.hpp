@@ -233,9 +233,7 @@ class BaseOption {
 
 BaseOption::BaseOption(
   StringKind auto const name, StringKind auto const... extra_names
-) :
-  required_ {true},
-  transform_before_check_ {false} {
+) : required_ {true}, transform_before_check_ {false} {
   names_ = {name, extra_names...};
   transformation_ = [](const std::any &value) -> std::any { return value; };
 }

@@ -12,7 +12,13 @@
  *
  */
 
+#include <any>
+#include <utility>
+#include <variant>
+#include <vector>
+
 #include <input_parser/parser.hpp>
+#include <input_parser/parsing_error.hpp>
 
 namespace input_parser {
 
@@ -21,10 +27,6 @@ namespace input_parser {
 void Parser::setOptionValue(Option &option, const std::any &value) {
   std::visit([&value](auto &&opt) { opt.setValue(value); }, option);
 }
-
-// ----------------------------- Constructors ----------------------------- //
-
-Parser::Parser() = default;
 
 // -------------------------------- Adders -------------------------------- //
 
