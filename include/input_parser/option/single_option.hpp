@@ -26,7 +26,7 @@ namespace input_parser {
  *    │       └─> The extra required argument.
  *    └─> The name of the option.
  */
-class SingleOption : public BaseOption {
+class SingleOption final : public BaseOption {
  public:
   /**
    * @brief Constructs an empty option with the provided names.
@@ -134,15 +134,14 @@ class SingleOption : public BaseOption {
 
 SingleOption::SingleOption(
   StringKind auto const name, StringKind auto const... extra_names
-) :
-  BaseOption(name, extra_names...) {
+) : BaseOption(name, extra_names...) {
   argument_name_ = " value";
 }
 
 template <class T>
 SingleOption &
 SingleOption::to(const std::function<T(const std::string &)> &transformation) {
-  transformation_ = [transformation](const std::any &value) -> auto{
+  transformation_ = [transformation](const std::any &value) -> auto {
     return transformation(std::any_cast<std::string>(value));
   };
   return *this;

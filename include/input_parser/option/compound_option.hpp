@@ -27,7 +27,7 @@ namespace input_parser {
  *    │            └─> The extra required arguments.
  *    └─> The name of the option.
  */
-class CompoundOption : public BaseOption {
+class CompoundOption final : public BaseOption {
  public:
   /**
    * @brief Constructs an empty option with the provided names.
@@ -146,8 +146,7 @@ class CompoundOption : public BaseOption {
 
 CompoundOption::CompoundOption(
   StringKind auto const name, StringKind auto const... extra_names
-) :
-  BaseOption(name, extra_names...) {
+) : BaseOption(name, extra_names...) {
   argument_name_ = " value1 value2 ...";
 }
 
@@ -155,7 +154,7 @@ template <class T>
 CompoundOption &CompoundOption::to(
   const std::function<T(const std::vector<std::string> &)> &transformation
 ) {
-  transformation_ = [transformation](const std::any &value) -> auto{
+  transformation_ = [transformation](const std::any &value) -> auto {
     return transformation(std::any_cast<std::vector<std::string>>(value));
   };
   return *this;
@@ -165,7 +164,7 @@ template <class T>
 CompoundOption &CompoundOption::elementsTo(
   const std::function<T(const std::string &)> &transformation
 ) {
-  transformation_ = [transformation](const std::any &values) -> auto{
+  transformation_ = [transformation](const std::any &values) -> auto {
     const auto string_values = std::any_cast<std::vector<std::string>>(values);
     std::vector<T> transformed_values;
     for (const auto &value : string_values) {

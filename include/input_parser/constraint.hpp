@@ -37,9 +37,7 @@ class Constraint {
   Constraint(
     const std::function<bool(const std::any &)> &call,
     const std::string &error_message
-  ) :
-    call_ {call},
-    error_message_ {error_message} {}
+  ) : call_ {call}, error_message_ {error_message} {}
 
   /** @brief Gives read-only access to the error message */
   inline const std::string &getErrorMessage() const {

@@ -46,13 +46,13 @@ jobs:
     - name: Install clang-format
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang-format-14
+        sudo apt-get install -y clang-format-19
 
     - name: Format code
       run: |
         git diff --name-only --diff-filter=d origin/main...HEAD |
         grep -E '\.((c|h)pp)$' |
-        xargs clang-format-14 -style=file --Werror -n
+        xargs clang-format-19 -style=file --Werror -n
 
   tests:
     # The name of the job, this name is used in the GitHub user interface

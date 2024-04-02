@@ -73,7 +73,8 @@ TEST(Parser_addOption, AddsMixedOptions) {
     single_expected,
     "--compound",
     compound_expected[0].c_str(),
-    compound_expected[1].c_str()};
+    compound_expected[1].c_str()
+  };
   parser.parse(7, (char **)argv);
   EXPECT_TRUE(parser.getValue<bool>("-f"));
   EXPECT_EQ(parser.getValue<std::string>("-s"), single_expected);
@@ -106,7 +107,7 @@ TEST(Parser_parse, DoesNotThrowErrorParsingWithoutOptions) {
 
 TEST(Parser_parse, ThrowsErrorParsingParametersWithoutOptions) {
   auto parser = input_parser::Parser();
-  auto argv = new const char *[2] { "test", "param" };
+  auto argv = new const char *[2] {"test", "param"};
   EXPECT_THROW(
     {
       try {
