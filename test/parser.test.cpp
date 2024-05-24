@@ -107,7 +107,7 @@ TEST(Parser_parse, DoesNotThrowErrorParsingWithoutOptions) {
 
 TEST(Parser_parse, ThrowsErrorParsingParametersWithoutOptions) {
   auto parser = input_parser::Parser();
-  auto argv = new const char *[2] {"test", "param"};
+  const char* argv[] = {"test", "param"};
   EXPECT_THROW(
     {
       try {
