@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef _PARSING_ERROR_HPP_
-#define _PARSING_ERROR_HPP_
+#ifndef PARSING_ERROR_HPP_
+#define PARSING_ERROR_HPP_
 
 #include <stdexcept>
 
@@ -32,4 +32,4 @@ class ParsingError : public std::invalid_argument {
 
 }  // namespace input_parser
 
-#endif  // _PARSING_ERROR_HPP_
+#endif  // PARSING_ERROR_HPP_

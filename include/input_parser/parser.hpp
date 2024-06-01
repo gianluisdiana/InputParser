@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef _INPUT_PARSER_PARSER_HPP_
-#define _INPUT_PARSER_PARSER_HPP_
+#ifndef INPUT_PARSER_PARSER_HPP_
+#define INPUT_PARSER_PARSER_HPP_
 
 #include <unordered_map>
 #include <variant>
@@ -22,15 +22,19 @@
 
 namespace input_parser {
 
-/** @brief The type of an option */
-using Option = std::variant<FlagOption, CompoundOption, SingleOption>;
-
 /**
  * @brief Represents a parser of the arguments provided when the program is
  * executed.
  */
 class Parser {
  public:
+  // ------------------------------- Typedefs ------------------------------ //
+
+  /** @brief The type of an option */
+  using Option = std::variant<FlagOption, CompoundOption, SingleOption>;
+
+  // ------------------------------ Constructors --------------------------- //
+
   /** @brief Create an empty parser with no options */
   Parser() = default;
 
@@ -112,12 +116,12 @@ class Parser {
   // ------------------------------- Getters ------------------------------- //
 
   /** @brief Gives readonly access to the option with the provided name */
-  inline const Option &getOption(const std::string &name) const {
+  const Option &getOption(const std::string &name) const {
     return options_.at(names_.at(name));
   }
 
   /** @brief Gives read-write access to the option with the provided name */
-  inline Option &getOption(const std::string &name) {
+  Option &getOption(const std::string &name) {
     return options_.at(names_.at(name));
   }
 
@@ -129,7 +133,7 @@ class Parser {
    * @param name The name of the possible option.
    * @return Whether the parser registered the option or not.
    */
-  inline bool hasOption(const std::string &name) const {
+  bool hasOption(const std::string &name) const {
     return names_.find(name) != names_.end();
   }
 
@@ -188,9 +192,8 @@ class Parser {
    * @param index The index of the single option to parse.
    * @return How many arguments have been read.
    */
-  unsigned int parseSingle(
-    const std::vector<std::string> &arguments, const unsigned int index
-  );
+  unsigned int
+  parseSingle(const std::vector<std::string> &arguments, unsigned int index);
 
   /**
    * @brief Reads all the extra arguments provided after the compound option.
@@ -201,9 +204,8 @@ class Parser {
    * @param index The index of the compound option to parse.
    * @return How many arguments have been read.
    */
-  unsigned int parseCompound(
-    const std::vector<std::string> &arguments, const unsigned int index
-  );
+  unsigned int
+  parseCompound(const std::vector<std::string> &arguments, unsigned int index);
 };
 
 template <typename CreateFunction>
@@ -213,7 +215,9 @@ requires std::is_invocable_r_v<Option, CreateFunction>
   const auto option = create_option();
   const auto &reference_name = option.getNames().front();
   for (const auto &name : option.getNames()) {
-    if (hasOption(name)) throw std::invalid_argument("Option already exists!");
+    if (hasOption(name)) {
+      throw std::invalid_argument("Option already exists!");
+    }
     names_[name] = reference_name;
   }
   options_.emplace(reference_name, option);
@@ -234,4 +238,4 @@ T Parser::getValue(const std::string &name) const {
 
 }  // namespace input_parser
 
-#endif  // _INPUT_PARSER_PARSER_HPP_
+#endif  // INPUT_PARSER_PARSER_HPP_

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _INPUT_BASE_OPTION_HPP_
-#define _INPUT_BASE_OPTION_HPP_
+#ifndef INPUT_BASE_OPTION_HPP_
+#define INPUT_BASE_OPTION_HPP_
 
 #include <stdexcept>
 
@@ -36,7 +36,10 @@ class BaseOption {
    * @param name The name of the option
    * @param extra_names Extra names that the option can be recognized by
    */
-  BaseOption(StringKind auto const name, StringKind auto const... extra_names);
+  explicit BaseOption(StringKind auto name, StringKind auto... extra_names);
+
+  /** @brief Virtual destructor */
+  virtual ~BaseOption() = default;
 
   // ------------------------------- Adders ------------------------------- //
 
@@ -87,7 +90,7 @@ class BaseOption {
    * @return The value of the option casted to the specified type.
    */
   template <class T>
-  const T getValue() const;
+  [[nodiscard]] T getValue() const;
 
   /**
    * @brief Gets the default value of the option.
@@ -97,20 +100,20 @@ class BaseOption {
    * @return The default value of the option casted to the specified type.
    */
   template <class T>
-  const T getDefaultValue() const;
+  [[nodiscard]] T getDefaultValue() const;
 
   /** @brief Gets the names of the option */
-  inline const std::vector<std::string> &getNames() const {
+  [[nodiscard]] const std::vector<std::string> &getNames() const {
     return names_;
   }
 
   /** @brief Gets the description of the option */
-  inline const std::string &getDescription() const {
+  [[nodiscard]] const std::string &getDescription() const {
     return description_;
   }
 
   /** @brief Gets the argument placeholder of the option (if needed). */
-  inline const std::string &getArgumentName() const {
+  [[nodiscard]] const std::string &getArgumentName() const {
     return argument_name_;
   }
 
@@ -128,32 +131,32 @@ class BaseOption {
   // ------------------------------- Checks ------------------------------- //
 
   /** @brief Checks if the option is a flag */
-  virtual inline bool isFlag() const {
+  [[nodiscard]] virtual bool isFlag() const {
     return false;
   }
 
   /** @brief Checks if the option will require an extra parameter */
-  virtual inline bool isSingle() const {
+  [[nodiscard]] virtual bool isSingle() const {
     return false;
   }
 
   /** @brief Checks if the option will require at least one extra parameter */
-  virtual inline bool isCompound() const {
+  [[nodiscard]] virtual bool isCompound() const {
     return false;
   }
 
   /** @brief Checks if the option is required */
-  inline bool isRequired() const {
+  [[nodiscard]] bool isRequired() const {
     return required_;
   }
 
   /** @brief Checks if the option has a value defined */
-  inline bool hasValue() const {
+  [[nodiscard]] bool hasValue() const {
     return value_.has_value();
   }
 
   /** @brief Checks if the option has a default value defined */
-  inline bool hasDefaultValue() const {
+  [[nodiscard]] bool hasDefaultValue() const {
     return default_value_.has_value();
   }
 
@@ -200,7 +203,7 @@ class BaseOption {
    * default.
    * @return The instance of the object that called this method.
    */
-  BaseOption &beRequired(const bool required = true);
+  BaseOption &beRequired(bool required = true);
 
  protected:
   // The value of the option
@@ -212,10 +215,10 @@ class BaseOption {
   // Short explanation of what the option does
   std::string description_;
   // Indicates if the option is required
-  bool required_;
+  bool required_ {true};
   // Indicates if the transformation function should be applied before or after
   // the constraints
-  bool transform_before_check_;
+  bool transform_before_check_ {false};
   // A function that transforms the value of the option
   std::function<std::any(const std::any &)> transformation_;
   // A list of constraints that the value of the option must satisfy
@@ -231,12 +234,9 @@ class BaseOption {
   void checkConstraints(const std::any &value) const;
 };
 
-BaseOption::BaseOption(
-  StringKind auto const name, StringKind auto const... extra_names
-) : required_ {true}, transform_before_check_ {false} {
-  names_ = {name, extra_names...};
-  transformation_ = [](const std::any &value) -> std::any { return value; };
-}
+BaseOption::BaseOption(StringKind auto name, StringKind auto... extra_names) :
+  names_ {name, extra_names...},
+  transformation_ {[](const std::any &value) -> std::any { return value; }} {}
 
 template <class T>
 BaseOption &BaseOption::addConstraint(
@@ -253,17 +253,17 @@ BaseOption &BaseOption::addConstraint(
 }
 
 template <class T>
-const T BaseOption::getValue() const {
-  if (!hasValue()) return getDefaultValue<T>();
+T BaseOption::getValue() const {
+  if (!hasValue()) { return getDefaultValue<T>(); }
   return std::any_cast<T>(value_);
 }
 
 template <class T>
-const T BaseOption::getDefaultValue() const {
-  if (!hasDefaultValue()) throw std::invalid_argument("No default value");
+T BaseOption::getDefaultValue() const {
+  if (!hasDefaultValue()) { throw std::invalid_argument("No default value"); }
   return std::any_cast<T>(transformation_(default_value_));
 }
 
 }  // namespace input_parser
 
-#endif  // _INPUT_BASE_OPTION_HPP_
+#endif  // INPUT_BASE_OPTION_HPP_

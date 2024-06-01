@@ -12,12 +12,13 @@
  *
  */
 
-#ifndef _INPUT_CONSTRAINT_HPP_
-#define _INPUT_CONSTRAINT_HPP_
+#ifndef INPUT_CONSTRAINT_HPP_
+#define INPUT_CONSTRAINT_HPP_
 
 #include <any>
 #include <functional>
 #include <string>
+#include <utility>
 
 namespace input_parser {
 
@@ -35,12 +36,11 @@ class Constraint {
    * returns false.
    */
   Constraint(
-    const std::function<bool(const std::any &)> &call,
-    const std::string &error_message
-  ) : call_ {call}, error_message_ {error_message} {}
+    const std::function<bool(const std::any &)> &call, std::string error_message
+  ) : call_ {call}, error_message_ {std::move(error_message)} {}
 
   /** @brief Gives read-only access to the error message */
-  inline const std::string &getErrorMessage() const {
+  [[nodiscard]] const std::string &getErrorMessage() const {
     return error_message_;
   }
 
@@ -50,17 +50,17 @@ class Constraint {
    * @param value The value to be passed to the constraint function.
    * @return Whether the constraint function returns true or false.
    */
-  inline bool call(const std::any &value) const {
+  [[nodiscard]] bool call(const std::any &value) const {
     return call_(value);
   }
 
  private:
   // The function that must be satisfied.
-  const std::function<bool(const std::any &)> call_;
+  std::function<bool(const std::any &)> call_;
   // The error message to be displayed if the function returns false.
-  const std::string error_message_;
+  std::string error_message_;
 };
 
 }  // namespace input_parser
 
-#endif  // _INPUT_CONSTRAINT_HPP_
+#endif  // INPUT_CONSTRAINT_HPP_

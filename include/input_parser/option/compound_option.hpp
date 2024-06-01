@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef _INPUT_COMPOUND_OPTION_HPP_
-#define _INPUT_COMPOUND_OPTION_HPP_
+#ifndef INPUT_COMPOUND_OPTION_HPP_
+#define INPUT_COMPOUND_OPTION_HPP_
 
 #include <input_parser/option/base_option.hpp>
 
@@ -37,16 +37,18 @@ class CompoundOption final : public BaseOption {
    * @param name The name of the option
    * @param extra_names Extra names that the option can be recognized by
    */
-  CompoundOption(
-    StringKind auto const name, StringKind auto const... extra_names
-  );
+  explicit CompoundOption(
+    const StringKind auto name, const StringKind auto... extra_names
+  ) : BaseOption(name, extra_names...) {
+    argument_name_ = " value1 value2 ...";
+  }
 
   /**
    * @brief Indicates if the option is a compound option.
    *
    * @return True.
    */
-  inline bool isCompound() const override {
+  [[nodiscard]] bool isCompound() const override {
     return true;
   }
 
@@ -116,39 +118,33 @@ class CompoundOption final : public BaseOption {
 
   // ------------------------ Static casted methods ------------------------ //
 
-  inline CompoundOption &addDefaultValue(const std::any &value) {
-    return static_cast<CompoundOption &>(BaseOption::addDefaultValue(value));
+  CompoundOption &addDefaultValue(const std::any &value) {
+    return dynamic_cast<CompoundOption &>(BaseOption::addDefaultValue(value));
   }
 
-  inline CompoundOption &addDescription(const std::string &description) {
-    return static_cast<CompoundOption &>(BaseOption::addDescription(description)
-    );
+  CompoundOption &addDescription(const std::string &description) {
+    return dynamic_cast<CompoundOption &>(BaseOption::addDescription(description
+    ));
   }
 
   template <class T>
-  inline CompoundOption &addConstraint(
+  CompoundOption &addConstraint(
     const std::function<bool(const T &)> &constraint,
     const std::string &error_message
   ) {
-    return static_cast<CompoundOption &>(
+    return dynamic_cast<CompoundOption &>(
       BaseOption::addConstraint(constraint, error_message)
     );
   }
 
-  inline CompoundOption &transformBeforeCheck() {
-    return static_cast<CompoundOption &>(BaseOption::transformBeforeCheck());
+  CompoundOption &transformBeforeCheck() {
+    return dynamic_cast<CompoundOption &>(BaseOption::transformBeforeCheck());
   }
 
-  inline CompoundOption &beRequired(const bool &required = true) {
-    return static_cast<CompoundOption &>(BaseOption::beRequired(required));
+  CompoundOption &beRequired(const bool &required = true) {
+    return dynamic_cast<CompoundOption &>(BaseOption::beRequired(required));
   }
 };
-
-CompoundOption::CompoundOption(
-  StringKind auto const name, StringKind auto const... extra_names
-) : BaseOption(name, extra_names...) {
-  argument_name_ = " value1 value2 ...";
-}
 
 template <class T>
 CompoundOption &CompoundOption::to(
@@ -166,10 +162,11 @@ CompoundOption &CompoundOption::elementsTo(
 ) {
   transformation_ = [transformation](const std::any &values) -> auto {
     const auto string_values = std::any_cast<std::vector<std::string>>(values);
-    std::vector<T> transformed_values;
-    for (const auto &value : string_values) {
-      transformed_values.push_back(transformation(value));
-    }
+    std::vector<T> transformed_values(string_values.size());
+    std::transform(
+      string_values.begin(), string_values.end(), transformed_values.begin(),
+      transformation
+    );
     return transformed_values;
   };
   return *this;
@@ -177,4 +174,4 @@ CompoundOption &CompoundOption::elementsTo(
 
 }  // namespace input_parser
 
-#endif  // _INPUT_COMPOUND_OPTION_HPP_
+#endif  // INPUT_COMPOUND_OPTION_HPP_

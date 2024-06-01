@@ -1,5 +1,5 @@
-#ifndef _INPUT_LOCAL_CONCEPTS_HPP_
-#define _INPUT_LOCAL_CONCEPTS_HPP_
+#ifndef INPUT_LOCAL_CONCEPTS_HPP_
+#define INPUT_LOCAL_CONCEPTS_HPP_
 
 #include <concepts>
 #include <string>
@@ -16,4 +16,4 @@ concept StringKind =
 
 }  // namespace input_parser
 
-#endif  // _INPUT_LOCAL_CONCEPTS_HPP_
+#endif  // INPUT_LOCAL_CONCEPTS_HPP_

@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef _INPUT_SINGLE_OPTION_HPP_
-#define _INPUT_SINGLE_OPTION_HPP_
+#ifndef INPUT_SINGLE_OPTION_HPP_
+#define INPUT_SINGLE_OPTION_HPP_
 
 #include <input_parser/option/base_option.hpp>
 
@@ -36,16 +36,18 @@ class SingleOption final : public BaseOption {
    * @param name The name of the option
    * @param extra_names Extra names that the option can be recognized by
    */
-  SingleOption(
-    StringKind auto const name, StringKind auto const... extra_names
-  );
+  explicit SingleOption(
+    const StringKind auto name, const StringKind auto... extra_names
+  ) : BaseOption(name, extra_names...) {
+    argument_name_ = " value";
+  }
 
   /**
    * @brief Indicates if the option is a single option.
    *
    * @return True.
    */
-  inline bool isSingle() const override {
+  [[nodiscard]] bool isSingle() const override {
     return true;
   }
 
@@ -105,38 +107,33 @@ class SingleOption final : public BaseOption {
 
   // ------------------------ Static casted methods ------------------------ //
 
-  inline SingleOption &addDefaultValue(const std::any &value) {
-    return static_cast<SingleOption &>(BaseOption::addDefaultValue(value));
+  SingleOption &addDefaultValue(const std::any &value) {
+    return dynamic_cast<SingleOption &>(BaseOption::addDefaultValue(value));
   }
 
-  inline SingleOption &addDescription(const std::string &description) {
-    return static_cast<SingleOption &>(BaseOption::addDescription(description));
+  SingleOption &addDescription(const std::string &description) {
+    return dynamic_cast<SingleOption &>(BaseOption::addDescription(description)
+    );
   }
 
   template <class T>
-  inline SingleOption &addConstraint(
+  SingleOption &addConstraint(
     const std::function<bool(const T &)> &constraint,
     const std::string &error_message
   ) {
-    return static_cast<SingleOption &>(
+    return dynamic_cast<SingleOption &>(
       BaseOption::addConstraint(constraint, error_message)
     );
   }
 
-  inline SingleOption &transformBeforeCheck() {
-    return static_cast<SingleOption &>(BaseOption::transformBeforeCheck());
+  SingleOption &transformBeforeCheck() {
+    return dynamic_cast<SingleOption &>(BaseOption::transformBeforeCheck());
   }
 
-  inline SingleOption &beRequired(const bool &required = true) {
-    return static_cast<SingleOption &>(BaseOption::beRequired(required));
+  SingleOption &beRequired(const bool &required = true) {
+    return dynamic_cast<SingleOption &>(BaseOption::beRequired(required));
   }
 };
-
-SingleOption::SingleOption(
-  StringKind auto const name, StringKind auto const... extra_names
-) : BaseOption(name, extra_names...) {
-  argument_name_ = " value";
-}
 
 template <class T>
 SingleOption &
@@ -149,4 +146,4 @@ SingleOption::to(const std::function<T(const std::string &)> &transformation) {
 
 }  // namespace input_parser
 
-#endif  // _INPUT_SINGLE_OPTION_HPP_
+#endif  // INPUT_SINGLE_OPTION_HPP_

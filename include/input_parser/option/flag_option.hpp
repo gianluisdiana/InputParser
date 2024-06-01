@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef _INPUT_FLAG_OPTION_HPP_
-#define _INPUT_FLAG_OPTION_HPP_
+#ifndef INPUT_FLAG_OPTION_HPP_
+#define INPUT_FLAG_OPTION_HPP_
 
 #include <input_parser/option/base_option.hpp>
 
@@ -36,15 +36,16 @@ class FlagOption final : public BaseOption {
    * @param name The name of the option
    * @param extra_names Extra names that the option can be recognized by
    */
-  FlagOption(StringKind auto const name, StringKind auto const... extra_names) :
-    BaseOption(name, extra_names...) {}
+  explicit FlagOption(
+    StringKind auto const name, StringKind auto const... extra_names
+  ) : BaseOption(name, extra_names...) {}
 
   /**
    * @brief Indicates if the option is a flag.
    *
    * @return True.
    */
-  inline bool isFlag() const override {
+  [[nodiscard]] bool isFlag() const override {
     return true;
   }
 
@@ -95,30 +96,30 @@ class FlagOption final : public BaseOption {
 
   // ------------------------ Static casted methods ------------------------ //
 
-  inline FlagOption &addDefaultValue(const std::any &value) {
-    return static_cast<FlagOption &>(BaseOption::addDefaultValue(value));
+  FlagOption &addDefaultValue(const std::any &value) {
+    return dynamic_cast<FlagOption &>(BaseOption::addDefaultValue(value));
   }
 
-  inline FlagOption &addDescription(const std::string &description) {
-    return static_cast<FlagOption &>(BaseOption::addDescription(description));
+  FlagOption &addDescription(const std::string &description) {
+    return dynamic_cast<FlagOption &>(BaseOption::addDescription(description));
   }
 
   template <class T>
-  inline FlagOption &addConstraint(
+  FlagOption &addConstraint(
     const std::function<bool(const T &)> &constraint,
     const std::string &error_message
   ) {
-    return static_cast<FlagOption &>(
+    return dynamic_cast<FlagOption &>(
       BaseOption::addConstraint(constraint, error_message)
     );
   }
 
-  inline FlagOption &transformBeforeCheck() {
-    return static_cast<FlagOption &>(BaseOption::transformBeforeCheck());
+  FlagOption &transformBeforeCheck() {
+    return dynamic_cast<FlagOption &>(BaseOption::transformBeforeCheck());
   }
 
-  inline FlagOption &beRequired(const bool &required = true) {
-    return static_cast<FlagOption &>(BaseOption::beRequired(required));
+  FlagOption &beRequired(const bool &required = true) {
+    return dynamic_cast<FlagOption &>(BaseOption::beRequired(required));
   }
 };
 
@@ -133,4 +134,4 @@ FlagOption::to(const std::function<T(const bool &)> &transformation) {
 
 }  // namespace input_parser
 
-#endif  // _INPUT_FLAG_OPTION_HPP_
+#endif  // INPUT_FLAG_OPTION_HPP_

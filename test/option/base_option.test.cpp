@@ -19,15 +19,15 @@ class MockOption : public BaseOption {
   MockOption(StringKind auto const name, StringKind auto const... extra_names) :
     BaseOption(name, extra_names...) {}
 
-  inline BaseOption &toInt() override {
+  BaseOption &toInt() override {
     throw std::runtime_error("Not implemented");
   }
 
-  inline BaseOption &toDouble() override {
+  BaseOption &toDouble() override {
     throw std::runtime_error("Not implemented");
   }
 
-  inline BaseOption &toFloat() override {
+  BaseOption &toFloat() override {
     throw std::runtime_error("Not implemented");
   }
 };
