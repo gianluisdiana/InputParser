@@ -15,7 +15,6 @@
 #ifndef INPUT_CONSTRAINT_HPP_
 #define INPUT_CONSTRAINT_HPP_
 
-#include <any>
 #include <functional>
 #include <string>
 #include <utility>
@@ -25,7 +24,9 @@ namespace input_parser {
 /**
  * @brief Represents a function that must be satisfy when passing a certain
  * argument. If the function returns false, an error message is displayed.
+ * @tparam Type The type of the value that the constraint will be applied to.
  */
+template <typename Type>
 class Constraint {
  public:
   /**
@@ -36,7 +37,7 @@ class Constraint {
    * returns false.
    */
   Constraint(
-    const std::function<bool(const std::any &)> &call, std::string error_message
+    const std::function<bool(const Type &)> &call, std::string error_message
   ) : call_ {call}, error_message_ {std::move(error_message)} {}
 
   /** @brief Gives read-only access to the error message */
@@ -50,13 +51,13 @@ class Constraint {
    * @param value The value to be passed to the constraint function.
    * @return Whether the constraint function returns true or false.
    */
-  [[nodiscard]] bool call(const std::any &value) const {
+  [[nodiscard]] bool call(const Type &value) const {
     return call_(value);
   }
 
  private:
   // The function that must be satisfied.
-  std::function<bool(const std::any &)> call_;
+  std::function<bool(const Type &)> call_;
   // The error message to be displayed if the function returns false.
   std::string error_message_;
 };
