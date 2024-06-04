@@ -25,8 +25,10 @@ namespace input_parser {
  * @example
  *   <-d>
  *    └─> The name of the flag.
+ * @tparam ValueType The type of the value inside the option.
  */
-class FlagOption final : public BaseOption {
+template <typename ValueType>
+class FlagOption final : public BaseOption<ValueType, bool> {
  public:
   /**
    * @brief Constructs an empty option with the provided names.
@@ -37,8 +39,8 @@ class FlagOption final : public BaseOption {
    * @param extra_names Extra names that the option can be recognized by
    */
   explicit FlagOption(
-    StringKind auto const name, StringKind auto const... extra_names
-  ) : BaseOption(name, extra_names...) {}
+    string_kind auto const name, string_kind auto const... extra_names
+  ) : BaseOption<ValueType, bool>(name, extra_names...) {}
 
   /**
    * @brief Indicates if the option is a flag.
@@ -48,18 +50,6 @@ class FlagOption final : public BaseOption {
   [[nodiscard]] bool isFlag() const override {
     return true;
   }
-
-  /**
-   * @brief Transforms the value of the option using the provided function.
-   * The function must take a const bool& as argument and return the type
-   * provided as template argument.
-   *
-   * @tparam T The type to transform the value to.
-   * @param transformation The function that transforms the value of the option
-   * @return The instance of the object that called this method.
-   */
-  template <class T>
-  FlagOption &to(const std::function<T(const bool &)> &transformation);
 
   /**
    * @brief Converts the value of the option to an integer.
@@ -96,40 +86,62 @@ class FlagOption final : public BaseOption {
 
   // ------------------------ Static casted methods ------------------------ //
 
-  FlagOption &addDefaultValue(const std::any &value) {
-    return dynamic_cast<FlagOption &>(BaseOption::addDefaultValue(value));
-  }
-
-  FlagOption &addDescription(const std::string &description) {
-    return dynamic_cast<FlagOption &>(BaseOption::addDescription(description));
-  }
-
-  template <class T>
-  FlagOption &addConstraint(
-    const std::function<bool(const T &)> &constraint,
-    const std::string &error_message
-  ) {
+  FlagOption &addDefaultValue(const ValueType &value) {
     return dynamic_cast<FlagOption &>(
-      BaseOption::addConstraint(constraint, error_message)
+      BaseOption<ValueType, bool>::addDefaultValue(value)
     );
   }
 
-  FlagOption &transformBeforeCheck() {
-    return dynamic_cast<FlagOption &>(BaseOption::transformBeforeCheck());
+  FlagOption &addDescription(const std::string &description) {
+    return dynamic_cast<FlagOption &>(
+      BaseOption<ValueType, bool>::addDescription(description)
+    );
+  }
+
+  template <typename T>
+  requires same_as_any<T, ValueType, bool>
+  FlagOption &addConstraint(
+    const std::function<bool(const T &)> &constraint,
+    const std::string &error_message = ""
+  ) {
+    return dynamic_cast<FlagOption &>(
+      BaseOption<ValueType, bool>::addConstraint(constraint, error_message)
+    );
+  }
+
+  FlagOption &
+  addTransformation(const std::function<ValueType(bool)> &transformation) {
+    return dynamic_cast<FlagOption &>(
+      BaseOption<ValueType, bool>::addTransformation(transformation)
+    );
   }
 
   FlagOption &beRequired(const bool &required = true) {
-    return dynamic_cast<FlagOption &>(BaseOption::beRequired(required));
+    return dynamic_cast<FlagOption &>(
+      BaseOption<ValueType, bool>::beRequired(required)
+    );
   }
 };
 
-template <class T>
-FlagOption &
-FlagOption::to(const std::function<T(const bool &)> &transformation) {
-  transformation_ = [transformation](const std::any &value) -> std::any {
-    return transformation(std::any_cast<bool>(value));
-  };
-  return *this;
+template <typename ValueType>
+FlagOption<ValueType> &FlagOption<ValueType>::toInt() {
+  return addTransformation([](const bool &value) -> int {
+    return value ? 1 : 0;
+  });
+}
+
+template <typename ValueType>
+FlagOption<ValueType> &FlagOption<ValueType>::toDouble() {
+  return addTransformation([](const bool &value) -> double {
+    return value ? 1.0 : 0.0;
+  });
+}
+
+template <typename ValueType>
+FlagOption<ValueType> &FlagOption<ValueType>::toFloat() {
+  return addTransformation([](const bool &value) -> float {
+    return value ? 1.0F : 0.0F;
+  });
 }
 
 }  // namespace input_parser

@@ -7,7 +7,7 @@
  *
  * @brief File containing the description of a compound option used by the
  * parser, it can be describe as an option that requires at least one extra
- * parameter (it is represented by a vector of values of any type).
+ * parameter (it is represented by a vector of values of the template type).
  *
  */
 
@@ -26,8 +26,11 @@ namespace input_parser {
  *   <-c> <chain1 chain2 chain3 ...>
  *    │            └─> The extra required arguments.
  *    └─> The name of the option.
+ * @tparam ValueType The type of the values that the option will contain.
  */
-class CompoundOption final : public BaseOption {
+template <typename ValueType>
+class CompoundOption final :
+  public BaseOption<ValueType, std::vector<std::string>> {
  public:
   /**
    * @brief Constructs an empty option with the provided names.
@@ -38,8 +41,8 @@ class CompoundOption final : public BaseOption {
    * @param extra_names Extra names that the option can be recognized by
    */
   explicit CompoundOption(
-    const StringKind auto name, const StringKind auto... extra_names
-  ) : BaseOption(name, extra_names...) {
+    const string_kind auto name, const string_kind auto... extra_names
+  ) : BaseOption<ValueType, std::vector<std::string>>(name, extra_names...) {
     argument_name_ = " value1 value2 ...";
   }
 
@@ -76,9 +79,9 @@ class CompoundOption final : public BaseOption {
    * @param transformation The function that transforms the values of the option
    * @return The instance of the object that called this method.
    */
-  template <class T>
   CompoundOption &
-  elementsTo(const std::function<T(const std::string &)> &transformation);
+  elementsTo(const std::function<ValueType(const std::string &)> &transformation
+  );
 
   /**
    * @brief Converts all the elements of the option to integers.
@@ -116,60 +119,84 @@ class CompoundOption final : public BaseOption {
    */
   CompoundOption &toFloat() override;
 
-  // ------------------------ Static casted methods ------------------------ //
+  // ---------------------- Dinamically casted methods ---------------------- //
 
-  CompoundOption &addDefaultValue(const std::any &value) {
-    return dynamic_cast<CompoundOption &>(BaseOption::addDefaultValue(value));
+  CompoundOption &addDefaultValue(const ValueType &value) {
+    return dynamic_cast<CompoundOption &>(
+      BaseOption<ValueType, std::vector<std::string>>::addDefaultValue(value)
+    );
   }
 
   CompoundOption &addDescription(const std::string &description) {
-    return dynamic_cast<CompoundOption &>(BaseOption::addDescription(description
-    ));
-  }
-
-  template <class T>
-  CompoundOption &addConstraint(
-    const std::function<bool(const T &)> &constraint,
-    const std::string &error_message
-  ) {
     return dynamic_cast<CompoundOption &>(
-      BaseOption::addConstraint(constraint, error_message)
+      BaseOption<ValueType, std::vector<std::string>>::addDescription(
+        description
+      )
     );
   }
 
-  CompoundOption &transformBeforeCheck() {
-    return dynamic_cast<CompoundOption &>(BaseOption::transformBeforeCheck());
+  template <typename T>
+  requires same_as_any<T, ValueType, std::vector<std::string>>
+  CompoundOption &addConstraint(
+    const std::function<bool(const T &)> &constraint,
+    const std::string &error_message = ""
+  ) {
+    return dynamic_cast<CompoundOption &>(
+      BaseOption<ValueType, std::vector<std::string>>::addConstraint(
+        constraint, error_message
+      )
+    );
+  }
+
+  CompoundOption &addTransformation(
+    const std::function<ValueType(TransformationType)> &transformation
+  ) {
+    return dynamic_cast<CompoundOption &>(
+      BaseOption<ValueType, std::vector<std::string>>::addTransformation(
+        transformation
+      )
+    );
   }
 
   CompoundOption &beRequired(const bool &required = true) {
-    return dynamic_cast<CompoundOption &>(BaseOption::beRequired(required));
+    return dynamic_cast<CompoundOption &>(
+      BaseOption<ValueType, std::vector<std::string>>::beRequired(required)
+    );
   }
 };
 
-template <class T>
-CompoundOption &CompoundOption::to(
-  const std::function<T(const std::vector<std::string> &)> &transformation
+template <typename ValueType>
+CompoundOption<ValueType> &CompoundOption<ValueType>::elementsTo(
+  const std::function<ValueType(const std::string &)> &transformation
 ) {
-  transformation_ = [transformation](const std::any &value) -> auto {
-    return transformation(std::any_cast<std::vector<std::string>>(value));
-  };
-  return *this;
-}
-
-template <class T>
-CompoundOption &CompoundOption::elementsTo(
-  const std::function<T(const std::string &)> &transformation
-) {
-  transformation_ = [transformation](const std::any &values) -> auto {
-    const auto string_values = std::any_cast<std::vector<std::string>>(values);
-    std::vector<T> transformed_values(string_values.size());
+  return addTransformation([](const auto &values) {
+    std::vector<ValueType> transformed_values(values.size());
     std::transform(
-      string_values.begin(), string_values.end(), transformed_values.begin(),
-      transformation
+      values.begin(), values.end(), transformed_values.begin(), transformation
     );
     return transformed_values;
-  };
-  return *this;
+  });
+}
+
+template <typename ValueType>
+CompoundOption<ValueType> &CompoundOption<ValueType>::toInt() {
+  return elementsTo<int>([](const std::string &str) -> int {
+    return std::stoi(str);
+  });
+}
+
+template <typename ValueType>
+CompoundOption<ValueType> &CompoundOption<ValueType>::toDouble() {
+  return elementsTo<double>([](const std::string &str) -> double {
+    return std::stod(str);
+  });
+}
+
+template <typename ValueType>
+CompoundOption<ValueType> &CompoundOption<ValueType>::toFloat() {
+  return elementsTo<float>([](const std::string &str) -> float {
+    return std::stof(str);
+  });
 }
 
 }  // namespace input_parser

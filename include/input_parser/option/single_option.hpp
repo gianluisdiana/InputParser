@@ -7,7 +7,7 @@
  *
  * @brief File containing the description of a flag option used by the
  * parser, it can be described as an option that requires one extra parameter
- * (it is represented by a value of any type).
+ * (it is represented by a value of the template type).
  *
  */
 
@@ -25,8 +25,10 @@ namespace input_parser {
  *  <-f> <file_name>
  *    │       └─> The extra required argument.
  *    └─> The name of the option.
+ * @tparam ValueType The type of the value inside the option.
  */
-class SingleOption final : public BaseOption {
+template <typename ValueType>
+class SingleOption final : public BaseOption<ValueType, std::string> {
  public:
   /**
    * @brief Constructs an empty option with the provided names.
@@ -37,8 +39,8 @@ class SingleOption final : public BaseOption {
    * @param extra_names Extra names that the option can be recognized by
    */
   explicit SingleOption(
-    const StringKind auto name, const StringKind auto... extra_names
-  ) : BaseOption(name, extra_names...) {
+    const string_kind auto name, const string_kind auto... extra_names
+  ) : BaseOption<ValueType, std::string>(name, extra_names...) {
     argument_name_ = " value";
   }
 
@@ -50,18 +52,6 @@ class SingleOption final : public BaseOption {
   [[nodiscard]] bool isSingle() const override {
     return true;
   }
-
-  /**
-   * @brief Transforms the value of the option using the provided function.
-   * The function must take a const std::string& as argument and return the
-   * type provided as template argument.
-   *
-   * @tparam T The type to transform the value to.
-   * @param transformation The function that transforms the value of the option
-   * @return The instance of the object that called this method.
-   */
-  template <class T>
-  SingleOption &to(const std::function<T(const std::string &)> &transformation);
 
   /**
    * @brief Transform the string value to an integer.
@@ -105,43 +95,67 @@ class SingleOption final : public BaseOption {
    */
   SingleOption &toFloat() override;
 
-  // ------------------------ Static casted methods ------------------------ //
+  // ---------------------- Dinamically casted methods ---------------------- //
 
-  SingleOption &addDefaultValue(const std::any &value) {
-    return dynamic_cast<SingleOption &>(BaseOption::addDefaultValue(value));
+  SingleOption &addDefaultValue(const ValueType &value) {
+    return dynamic_cast<SingleOption &>(
+      BaseOption<ValueType, std::string>::addDefaultValue(value)
+    );
   }
 
   SingleOption &addDescription(const std::string &description) {
-    return dynamic_cast<SingleOption &>(BaseOption::addDescription(description)
+    return dynamic_cast<SingleOption &>(
+      BaseOption<ValueType, std::string>::addDescription(description)
     );
   }
 
-  template <class T>
+  template <typename T>
+  requires same_as_any<T, ValueType, std::string>
   SingleOption &addConstraint(
     const std::function<bool(const T &)> &constraint,
-    const std::string &error_message
+    const std::string &error_message = ""
   ) {
     return dynamic_cast<SingleOption &>(
-      BaseOption::addConstraint(constraint, error_message)
+      BaseOption<ValueType, std::string>::addConstraint(
+        constraint, error_message
+      )
     );
   }
 
-  SingleOption &transformBeforeCheck() {
-    return dynamic_cast<SingleOption &>(BaseOption::transformBeforeCheck());
+  SingleOption &
+  addTransformation(const std::function<ValueType(std::string)> &transformation
+  ) {
+    return dynamic_cast<SingleOption &>(
+      BaseOption<ValueType, std::string>::addTransformation(transformation)
+    );
   }
 
   SingleOption &beRequired(const bool &required = true) {
-    return dynamic_cast<SingleOption &>(BaseOption::beRequired(required));
+    return dynamic_cast<SingleOption &>(
+      BaseOption<ValueType, std::string>::beRequired(required)
+    );
   }
 };
 
-template <class T>
-SingleOption &
-SingleOption::to(const std::function<T(const std::string &)> &transformation) {
-  transformation_ = [transformation](const std::any &value) -> auto {
-    return transformation(std::any_cast<std::string>(value));
-  };
-  return *this;
+template <typename ValueType>
+SingleOption<ValueType> &SingleOption<ValueType>::toInt() {
+  return addTransformation([](const auto &value) -> int {
+    return std::stoi(value);
+  });
+}
+
+template <typename ValueType>
+SingleOption<ValueType> &SingleOption<ValueType>::toDouble() {
+  return addTransformation([](const auto &value) -> double {
+    return std::stod(value);
+  });
+}
+
+template <typename ValueType>
+SingleOption<ValueType> &SingleOption<ValueType>::toFloat() {
+  return addTransformation([](const auto &value) -> float {
+    return std::stof(value);
+  });
 }
 
 }  // namespace input_parser
