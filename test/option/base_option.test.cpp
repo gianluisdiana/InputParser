@@ -354,55 +354,67 @@ TEST(BaseOption_adders, ConstraintShouldNotAffectDefaultValue) {
 
 // ---------------------------- Transformations ---------------------------- //
 
-TEST(BaseOption_transformation, ShouldNotImplementToInt) {
-  auto option = MockOption<int>("name");
-  EXPECT_THROW(option.toInt(), std::runtime_error);
+TEST(BaseOption_transformation, ShouldTransformBasicTypes) {
+  auto option = MockOption<int, bool>("");
+  option.addTransformation([](const auto& value) {
+    return value ? 10 : -10;
+  });
+
+  option.setValue(true);
+  EXPECT_EQ(option.getValue(), 10);
+
+  option.setValue(false);
+  EXPECT_EQ(option.getValue(), -10);
 }
 
-TEST(BaseOption_transformation, ShouldNotImplementToDouble) {
-  auto option = MockOption<int>("name");
-  EXPECT_THROW(option.toDouble(), std::runtime_error);
+TEST(BaseOption_transformation, ShouldTransformToStruct) {
+  auto option = MockOption<MyStruct, int>("");
+  option.addTransformation([](const auto& value) {
+    return MyStruct(value * 5);
+  });
+
+  option.setValue(2);
+  EXPECT_EQ(option.getValue(), MyStruct(10));
 }
 
-TEST(BaseOption_transformation, ShouldNotImplementToFloat) {
-  auto option = MockOption<int>("name");
-  EXPECT_THROW(option.toFloat(), std::runtime_error);
+TEST(BaseOption_transformation, ShouldTransformToClass) {
+  auto option = MockOption<MyClass, int>("");
+  option.addTransformation([](const auto& value) {
+    auto new_value = 1;
+    for (int i = 0; i < value; ++i) new_value *= value;
+    return MyClass(new_value);
+  });
+
+  option.setValue(3);
+  EXPECT_EQ(option.getValue(), MyClass(27));
 }
 
-TEST(BaseOption_transformation, ShouldTransformValue) {
-  class MyOption : public MockOption<int, std::string> {
-   public:
-    MyOption() : MockOption<int, std::string>("name") {}
+TEST(BaseOption_transformation, ShouldApplyOnlyLastTransformation) {
+  auto option = MockOption<int, std::string>();
+  int count = 0;
+  option.addTransformation([&count](const auto &value) {
+    count++;
+    return std::stoi(value) * 2;
+  })
+  .addTransformation([&count](const auto &value) {
+    count++;
+    return std::stoi(value) + 23;
+  });
 
-    BaseOption &timesTen() {
-      return addTransformation([](const auto &value) {
-        return std::stoi(value) * 10;
-      });
-    }
-  };
-
-  auto option = MyOption();
-  const int expected = 40;
-  option.timesTen().setValue("4");
+  const int expected = 4 + 23;
+  EXPECT_NO_THROW(option.setValue("4"));
   EXPECT_EQ(option.getValue(), expected);
+  EXPECT_EQ(count, 1);
 }
 
 TEST(BaseOption_transformation, ShouldApplyTransformationBeforeCheck) {
-  class MyOption : public MockOption<int, std::string> {
-   public:
-    MyOption() : MockOption<int, std::string>("name") {}
-
-    BaseOption &doubles() {
-      return addTransformation([](const auto &value) {
-        return std::stoi(value) * 2;
-      });
-    }
-  };
-
-  auto option = MyOption();
-  option.doubles().addConstraint<int>(
-    [](const int &value) { return value < 10; }, "Value must be lower than 10"
-  );
+  auto option = MockOption<int ,std::string>();
+  option.addTransformation([](const auto &value) {
+    return std::stoi(value) * 2;
+  })
+  .addConstraint<int>([](const auto &value) {
+    return value < 10;
+  }, "Value must be lower than 10");
   const int expected = 4;
   EXPECT_NO_THROW(option.setValue("4"));
   EXPECT_EQ(option.getValue(), expected * 2);

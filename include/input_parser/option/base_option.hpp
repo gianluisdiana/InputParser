@@ -201,32 +201,6 @@ class BaseOption {
     return has_default_value_;
   }
 
-  // ------------------------ Common transformations ------------------------ //
-
-  /**
-   * @brief Defines a transformation function that transforms the value of the
-   * option to an integer. Must be implemented by the derived classes.
-   *
-   * @return The instance of the object that called this method.
-   */
-  virtual BaseOption &toInt() = 0;
-
-  /**
-   * @brief Defines a transformation function that transforms the value of the
-   * option to a double. Must be implemented by the derived classes.
-   *
-   * @return The instance of the object that called this method.
-   */
-  virtual BaseOption &toDouble() = 0;
-
-  /**
-   * @brief Defines a transformation function that transforms the value of the
-   * option to a float. Must be implemented by the derived classes.
-   *
-   * @return The instance of the object that called this method.
-   */
-  virtual BaseOption &toFloat() = 0;
-
   // ---------------------------- Other methods ---------------------------- //
 
   /**

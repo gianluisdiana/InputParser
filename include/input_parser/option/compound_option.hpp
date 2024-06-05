@@ -56,21 +56,6 @@ class CompoundOption final :
   }
 
   /**
-   * @brief Transform the vector that contains the option's values using the
-   * provided function. The function must take a const std::vector<std::string>&
-   * as argument and return the type provided as template argument.
-   *
-   * Only works for compound options.
-   *
-   * @tparam T The type to transform the vector to.
-   * @param transformation The function that transforms the vector of values
-   * @return The instance of the object that called this method.
-   */
-  template <class T>
-  CompoundOption &
-  to(const std::function<T(const std::vector<std::string> &)> &transformation);
-
-  /**
    * @brief Transform each option value using the provided function.
    * The function must take a const std::string& as argument and return the
    * type provided as template argument.
@@ -93,7 +78,7 @@ class CompoundOption final :
    * });
    * ```
    */
-  CompoundOption &toInt() override;
+  CompoundOption &elementsToInt() requires std::is_same_v<ValueType, std::vector<int>>;
 
   /**
    * @brief Converts all the elements of the option to doubles.
@@ -105,7 +90,7 @@ class CompoundOption final :
    * });
    * ```
    */
-  CompoundOption &toDouble() override;
+  CompoundOption &elementsToDouble() requires std::is_same_v<ValueType, std::vector<double>>;
 
   /**
    * @brief Converts all the elements of the option to floats.
@@ -117,7 +102,7 @@ class CompoundOption final :
    * });
    * ```
    */
-  CompoundOption &toFloat() override;
+   CompoundOption &elementsToFloat() requires std::is_same_v<ValueType, std::vector<float>>;
 
   // ---------------------- Dinamically casted methods ---------------------- //
 
@@ -169,7 +154,7 @@ template <typename ValueType>
 CompoundOption<ValueType> &CompoundOption<ValueType>::elementsTo(
   const std::function<ValueType(const std::string &)> &transformation
 ) {
-  return addTransformation([](const auto &values) {
+  return addTransformation([transformation](const auto &values) {
     std::vector<ValueType> transformed_values(values.size());
     std::transform(
       values.begin(), values.end(), transformed_values.begin(), transformation
@@ -179,21 +164,21 @@ CompoundOption<ValueType> &CompoundOption<ValueType>::elementsTo(
 }
 
 template <typename ValueType>
-CompoundOption<ValueType> &CompoundOption<ValueType>::toInt() {
+CompoundOption<ValueType> &CompoundOption<ValueType>::elementsToInt() {
   return elementsTo<int>([](const std::string &str) -> int {
     return std::stoi(str);
   });
 }
 
 template <typename ValueType>
-CompoundOption<ValueType> &CompoundOption<ValueType>::toDouble() {
+CompoundOption<ValueType> &CompoundOption<ValueType>::elementsToDouble() {
   return elementsTo<double>([](const std::string &str) -> double {
     return std::stod(str);
   });
 }
 
 template <typename ValueType>
-CompoundOption<ValueType> &CompoundOption<ValueType>::toFloat() {
+CompoundOption<ValueType> &CompoundOption<ValueType>::elementsToFloat() {
   return elementsTo<float>([](const std::string &str) -> float {
     return std::stof(str);
   });

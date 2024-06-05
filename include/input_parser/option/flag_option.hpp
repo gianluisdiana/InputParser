@@ -51,39 +51,6 @@ class FlagOption final : public BaseOption<ValueType, bool> {
     return true;
   }
 
-  /**
-   * @brief Converts the value of the option to an integer.
-   *
-   * Shortcut for:
-   * ```cpp
-   * option.to<int>([](const bool& value) -> int {
-   *  return value ? 1 : 0;
-   * });
-   */
-  FlagOption &toInt() override;
-
-  /**
-   * @brief Converts the value of the option to a double.
-   *
-   * Shortcut for:
-   * ```cpp
-   * option.to<double>([](const bool& value) -> double {
-   *  return value ? 1.0 : 0.0;
-   * });
-   */
-  FlagOption &toDouble() override;
-
-  /**
-   * @brief Converts the value of the option to a float.
-   *
-   * Shortcut for:
-   * ```cpp
-   * option.to<float>([](const bool& value) -> float {
-   *  return value ? 1.0f : 0.0f;
-   * });
-   */
-  FlagOption &toFloat() override;
-
   // ------------------------ Static casted methods ------------------------ //
 
   FlagOption &addDefaultValue(const ValueType &value) {
@@ -122,27 +89,6 @@ class FlagOption final : public BaseOption<ValueType, bool> {
     );
   }
 };
-
-template <typename ValueType>
-FlagOption<ValueType> &FlagOption<ValueType>::toInt() {
-  return addTransformation([](const bool &value) -> int {
-    return value ? 1 : 0;
-  });
-}
-
-template <typename ValueType>
-FlagOption<ValueType> &FlagOption<ValueType>::toDouble() {
-  return addTransformation([](const bool &value) -> double {
-    return value ? 1.0 : 0.0;
-  });
-}
-
-template <typename ValueType>
-FlagOption<ValueType> &FlagOption<ValueType>::toFloat() {
-  return addTransformation([](const bool &value) -> float {
-    return value ? 1.0F : 0.0F;
-  });
-}
 
 }  // namespace input_parser
 

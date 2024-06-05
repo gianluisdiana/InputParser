@@ -65,7 +65,7 @@ class SingleOption final : public BaseOption<ValueType, std::string> {
    *
    * @return The option itself.
    */
-  SingleOption &toInt() override;
+  SingleOption &toInt();
 
   /**
    * @brief Transform the string value to a double.
@@ -79,7 +79,7 @@ class SingleOption final : public BaseOption<ValueType, std::string> {
    *
    * @return The option itself.
    */
-  SingleOption &toDouble() override;
+  SingleOption &toDouble();
 
   /**
    * @brief Transform the string value to a float.
@@ -93,7 +93,7 @@ class SingleOption final : public BaseOption<ValueType, std::string> {
    *
    * @return The option itself.
    */
-  SingleOption &toFloat() override;
+  SingleOption &toFloat();
 
   // ---------------------- Dinamically casted methods ---------------------- //
 
