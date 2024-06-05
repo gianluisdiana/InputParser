@@ -43,7 +43,7 @@ TEST(Constraint_call, ShouldBeAbleToThrowExceptions) {
   };
   const auto message = "Error message";
   const auto constraint = Constraint<double>(callback, message);
-  EXPECT_THROW(constraint.call(0), std::runtime_error);
+  EXPECT_THROW(auto _ = constraint.call(0), std::runtime_error);
 }
 
 }  // namespace input_parser
