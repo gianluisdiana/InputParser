@@ -34,42 +34,21 @@ include(CMakePackageConfigHelpers)
 
 # --------------------------------- Sources --------------------------------- #
 
-# Create a sources variable with a link to all cpp files to compile
-set(SOURCE
-  src/parser.cpp
-  src/option/base_option.cpp
-  src/option/flag_option.cpp
-  src/option/compound_option.cpp
-  src/option/single_option.cpp
-)
-
-# Add all the sources to the library
-add_library(${PROJECT_NAME} STATIC
-  ${SOURCE}
-)
+# Add the library as an interface
+add_library(${PROJECT_NAME} INTERFACE)
 
 # ------------------------------- Header files ------------------------------ #
 
-# Set the directories that should be included in the build command for this target
-# when running g++ these will be included as -I/directory/path/
-target_include_directories(${PROJECT_NAME} PUBLIC
+# Set the directories that should be included in the build command for this
+# target when running g++ these will be included as -I/directory/path/
+target_include_directories(${PROJECT_NAME} INTERFACE
   ${PROJECT_SOURCE_DIR}/include
-)
-
-# ----------------------------- Compile options ----------------------------- #
-
-# Add flags to the compiler
-target_compile_options(${PROJECT_NAME} PRIVATE
-  -Wall
-  -Wextra
-  -Wshadow
-  -O3
 )
 
 # ---------------------------------- Tests ---------------------------------- #
 
 # Only add the tests directory if the BUILD_INPUT_PARSER_TESTS flag is turned on
-# cmake -DBUILD_INPUT_PARSER_TESTS=ON ..
+# $ cmake -DBUILD_INPUT_PARSER_TESTS=ON ..
 if(BUILD_INPUT_PARSER_TESTS)
   add_subdirectory(test)
 endif()
