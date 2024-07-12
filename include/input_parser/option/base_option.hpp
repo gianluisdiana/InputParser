@@ -201,6 +201,16 @@ class BaseOption {
     return has_default_value_;
   }
 
+  // TODO: TEST
+  /**
+   * @brief Checks if the option is valid, i.e., if it is required, it has a
+   * value or a default value.
+   * This should be called after all the values have been set.
+   */
+  [[nodiscard]] bool isValid() const {
+    return !isRequired() || (hasValue() || hasDefaultValue());
+  }
+
   // ---------------------------- Other methods ---------------------------- //
 
   /**
