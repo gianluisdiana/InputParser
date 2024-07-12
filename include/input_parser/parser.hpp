@@ -13,7 +13,6 @@
 #define INPUT_PARSER_PARSER_HPP_
 
 #include <unordered_map>
-#include <variant>
 
 #include <input_parser/option/compound_option.hpp>
 #include <input_parser/option/flag_option.hpp>
@@ -55,7 +54,9 @@ class Parser {
     std::unordered_map<std::string, std::reference_wrapper<OptionType>>;
 
   /** @brief The type of the container that holds all the options */
-  using OptionContainer = std::tuple<OptionMap<FlagOption<Types>>...>;
+  using OptionContainer = std::tuple<
+    OptionMap<FlagOption<Types>>..., OptionMap<SingleOption<Types>>...,
+    OptionMap<CompoundOption<Types>>...>;
 
   // ------------------------------ Constructors --------------------------- //
 
@@ -212,12 +213,16 @@ void Parser<Types...>::parseFlag(const std::string &flag_name) {
   const std::string &reference_name = names_.at(flag_name);
   std::apply(
     [&, this](const auto &...option_maps) {
-      const auto setFlagValueIfHasOption = [&](const auto &option_map) {
-        if (option_map.contains(reference_name)) {
-          option_map.at(reference_name).get().setValue(true);
+      const auto setFlagValue = [&](const auto &option_map) {
+        if constexpr (same_as_any<
+                        std::decay_t<decltype(option_map)>,
+                        OptionMap<FlagOption<Types>>...>) {
+          if (option_map.contains(reference_name)) {
+            option_map.at(reference_name).get().setValue(true);
+          }
         }
       };
-      (setFlagValueIfHasOption(option_maps), ...);
+      (setFlagValue(option_maps), ...);
     },
     options_
   );
