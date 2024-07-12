@@ -42,9 +42,7 @@ class CompoundOption final :
    */
   explicit CompoundOption(
     const string_kind auto name, const string_kind auto... extra_names
-  ) : BaseOption<ValueType, std::vector<std::string>>(name, extra_names...) {
-    argument_name_ = " value1 value2 ...";
-  }
+  ) : BaseOption<ValueType, std::vector<std::string>>(name, extra_names...) {}
 
   /**
    * @brief Indicates if the option is a compound option.
@@ -78,7 +76,8 @@ class CompoundOption final :
    * });
    * ```
    */
-  CompoundOption &elementsToInt() requires std::is_same_v<ValueType, std::vector<int>>;
+  CompoundOption &elementsToInt()
+  requires std::is_same_v<ValueType, std::vector<int>>;
 
   /**
    * @brief Converts all the elements of the option to doubles.
@@ -90,7 +89,8 @@ class CompoundOption final :
    * });
    * ```
    */
-  CompoundOption &elementsToDouble() requires std::is_same_v<ValueType, std::vector<double>>;
+  CompoundOption &elementsToDouble()
+  requires std::is_same_v<ValueType, std::vector<double>>;
 
   /**
    * @brief Converts all the elements of the option to floats.
@@ -102,7 +102,8 @@ class CompoundOption final :
    * });
    * ```
    */
-   CompoundOption &elementsToFloat() requires std::is_same_v<ValueType, std::vector<float>>;
+  CompoundOption &elementsToFloat()
+  requires std::is_same_v<ValueType, std::vector<float>>;
 
   // ---------------------- Dinamically casted methods ---------------------- //
 
@@ -134,7 +135,7 @@ class CompoundOption final :
   }
 
   CompoundOption &addTransformation(
-    const std::function<ValueType(TransformationType)> &transformation
+    const std::function<ValueType(std::vector<std::string>)> &transformation
   ) {
     return dynamic_cast<CompoundOption &>(
       BaseOption<ValueType, std::vector<std::string>>::addTransformation(
@@ -164,21 +165,27 @@ CompoundOption<ValueType> &CompoundOption<ValueType>::elementsTo(
 }
 
 template <typename ValueType>
-CompoundOption<ValueType> &CompoundOption<ValueType>::elementsToInt() {
+CompoundOption<ValueType> &CompoundOption<ValueType>::elementsToInt()
+requires std::is_same_v<ValueType, std::vector<int>>
+{
   return elementsTo<int>([](const std::string &str) -> int {
     return std::stoi(str);
   });
 }
 
 template <typename ValueType>
-CompoundOption<ValueType> &CompoundOption<ValueType>::elementsToDouble() {
+CompoundOption<ValueType> &CompoundOption<ValueType>::elementsToDouble()
+requires std::is_same_v<ValueType, std::vector<double>>
+{
   return elementsTo<double>([](const std::string &str) -> double {
     return std::stod(str);
   });
 }
 
 template <typename ValueType>
-CompoundOption<ValueType> &CompoundOption<ValueType>::elementsToFloat() {
+CompoundOption<ValueType> &CompoundOption<ValueType>::elementsToFloat()
+requires std::is_same_v<ValueType, std::vector<float>>
+{
   return elementsTo<float>([](const std::string &str) -> float {
     return std::stof(str);
   });

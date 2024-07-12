@@ -40,9 +40,7 @@ class SingleOption final : public BaseOption<ValueType, std::string> {
    */
   explicit SingleOption(
     const string_kind auto name, const string_kind auto... extra_names
-  ) : BaseOption<ValueType, std::string>(name, extra_names...) {
-    argument_name_ = " value";
-  }
+  ) : BaseOption<ValueType, std::string>(name, extra_names...) {}
 
   /**
    * @brief Indicates if the option is a single option.
