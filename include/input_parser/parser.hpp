@@ -144,6 +144,14 @@ class Parser {
   bool hasFlag(const std::string &name) const;
 
   /**
+   * @brief Tells if the parser has a single option with the name provided.
+   *
+   * @param name The name of the possible option.
+   * @return Whether the parser registered the option or not.
+   */
+  bool hasSingle(const std::string &name) const;
+
+  /**
    * @brief Check if there are options that have not been specified.
    *  If so, a std::invalid_argument error will be thrown.
    */
@@ -159,6 +167,17 @@ class Parser {
    * @param flag_name The name of the option to give the value of true.
    */
   void parseFlag(const std::string &flag_name);
+
+  /**
+   * @brief Saves the extra argument after the single option.
+   *   Checks if that argument was supplied and is not another option specified.
+   *
+   * @param arguments All the arguments provided by command line.
+   * @param index The index of the single option to parse.
+   * @return How many arguments have been read.
+   */
+  unsigned int
+  parseSingle(const std::vector<std::string> &arguments, unsigned int index);
 };
 
 // --------------------------------- Parse --------------------------------- //
@@ -170,7 +189,11 @@ void Parser<Types...>::parse(unsigned int argc, char *raw_argv[]) {
     if (!hasOption(argv[index])) {
       throw ParsingError("Invalid arguments provided!");
     }
-    if (hasFlag(argv[index])) { parseFlag(argv[index]); }
+    if (hasFlag(argv[index])) {
+      parseFlag(argv[index]);
+    } else if (hasSingle(argv[index])) {
+      index += parseSingle(argv, index);
+    }
   }
   checkMissingOptions();
 }
@@ -183,6 +206,15 @@ bool Parser<Types...>::hasFlag(const std::string &name) const {
   return (
     ... ||
     std::get<OptionMap<FlagOption<Types>>>(options_).contains(reference_name)
+  );
+}
+
+template <typename... Types>
+bool Parser<Types...>::hasSingle(const std::string &name) const {
+  const std::string &reference_name = names_.at(name);
+  return (
+    ... ||
+    std::get<OptionMap<SingleOption<Types>>>(options_).contains(reference_name)
   );
 }
 
@@ -226,6 +258,34 @@ void Parser<Types...>::parseFlag(const std::string &flag_name) {
     },
     options_
   );
+}
+
+template <typename... Types>
+unsigned int Parser<Types...>::parseSingle(
+  const std::vector<std::string> &arguments, unsigned int index
+) {
+  if (index + 1 >= arguments.size() || hasOption(arguments[index + 1])) {
+    throw ParsingError(
+      "After the " + arguments[index] + " option should be an extra argument!"
+    );
+  }
+  const std::string &reference_name = names_.at(arguments[index]);
+  std::apply(
+    [&](const auto &...option_maps) {
+      const auto setSingleValue = [&](const auto &option_map) {
+        if constexpr (same_as_any<
+                        std::decay_t<decltype(option_map)>,
+                        OptionMap<SingleOption<Types>>...>) {
+          if (option_map.contains(reference_name)) {
+            option_map.at(reference_name).get().setValue(arguments[index + 1]);
+          }
+        }
+      };
+      (setSingleValue(option_maps), ...);
+    },
+    options_
+  );
+  return 1;
 }
 
 template <typename... Types>
