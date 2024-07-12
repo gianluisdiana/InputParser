@@ -23,15 +23,39 @@
 namespace input_parser {
 
 /**
+ * @brief Concept to check if the type is an option kind.
+ *
+ * @tparam OptionType The type to check. It must be a Flag, Single or Compound
+ * option.
+ * @tparam Types The types that the value of the option can be.
+ */
+template <typename OptionType, typename... Types>
+concept option_kind = same_as_any<
+  OptionType, FlagOption<Types>..., SingleOption<Types>...,
+  CompoundOption<Types>...>;
+
+/**
  * @brief Represents a parser of the arguments provided when the program is
  * executed.
+ *
+ * @tparam Types All the possible types that the option's values can have.
  */
+template <typename... Types>
 class Parser {
  public:
   // ------------------------------- Typedefs ------------------------------ //
 
-  /** @brief The type of an option */
-  using Option = std::variant<FlagOption, CompoundOption, SingleOption>;
+  /**
+   * @brief Represents a map with a string as key and a certain option as value.
+   *
+   * @tparam OptionType The type of the option to be stored.
+   */
+  template <typename OptionType>
+  using OptionMap =
+    std::unordered_map<std::string, std::reference_wrapper<OptionType>>;
+
+  /** @brief The type of the container that holds all the options */
+  using OptionContainer = std::tuple<OptionMap<FlagOption<Types>>...>;
 
   // ------------------------------ Constructors --------------------------- //
 
@@ -43,42 +67,23 @@ class Parser {
   /**
    * @brief Adds an option to be parsed.
    *
-   * @tparam CreateFunction The type of the function that creates the option.
-   * @param create_option A function that returns the option.
+   * @tparam OptionType The type of the option to be added.
+   * @param option A reference to the option that will be added.
    * @return The instance of the object that called this method.
    */
-  template <typename CreateFunction>
-  Parser &addOption(const CreateFunction &create_option)
-  requires std::is_invocable_r_v<Option, CreateFunction>;
-
-  /**
-   * @brief Adds a basic help option to the parser.
-   *  The option will be a flag and will have the names "-h" and "--help".
-   *
-   *  Shortcut for:
-   * ```cpp
-   *    addOption([] -> auto { return FlagOption()
-   *      .addNames("-h", "--help")
-   *      .addDescription("Shows how to use the program.")
-   *      .addDefaultValue(false);
-   *    });
-   * ```
-   *
-   * @return The instance of the object that called this method.
-   */
-  Parser &addHelpOption();
-
-  // ------------------------------- Getters ------------------------------- //
-
-  /**
-   * @brief Gets the value from an option.
-   *
-   * @param name The name of the option.
-   * @tparam T The type of the value to be returned.
-   * @return The value of the option casted to the type provided.
-   */
-  template <class T>
-  T getValue(const std::string &name) const;
+  template <typename OptionType>
+  requires option_kind<OptionType, Types...>
+  Parser &addOption(OptionType &option) {
+    const auto &reference_name = option.getNames().front();
+    for (const auto &name : option.getNames()) {
+      if (hasOption(name)) {
+        throw std::invalid_argument("Option already exists!");
+      }
+      names_.insert({name, reference_name});
+    }
+    std::get<OptionMap<OptionType>>(options_).insert({reference_name, option});
+    return *this;
+  }
 
   // -------------------------------- Utility ------------------------------ //
 
@@ -99,30 +104,22 @@ class Parser {
 
  private:
   // All the options registered.
-  std::unordered_map<std::string, Option> options_;
+  OptionContainer options_;
   // Helper map to get the option by name.
   std::unordered_map<std::string, std::string> names_;
 
-  // ---------------------------- Static Methods --------------------------- //
-
   /**
-   * @brief Sets the value of an option.
+   * @brief Gives read-write access to the option with the provided name.
+   * The option must be of the type provided in the template.
    *
-   * @param option The option to be changed.
-   * @param value The value to be assigned to the option.
+   * @tparam OptionType The type of the option to be returned.
+   * @param name The name of the option to be returned.
+   * @return A reference to the option with the provided name.
    */
-  static void setOptionValue(Option &option, const std::any &value);
-
-  // ------------------------------- Getters ------------------------------- //
-
-  /** @brief Gives readonly access to the option with the provided name */
-  const Option &getOption(const std::string &name) const {
-    return options_.at(names_.at(name));
-  }
-
-  /** @brief Gives read-write access to the option with the provided name */
-  Option &getOption(const std::string &name) {
-    return options_.at(names_.at(name));
+  template <typename OptionType>
+  requires option_kind<OptionType, Types...>
+  OptionType &getOption(const std::string &name) {
+    return std::get<OptionMap<OptionType>>(options_).at(names_[name]).get();
   }
 
   // ------------------------------- Checks ------------------------------- //
@@ -146,32 +143,10 @@ class Parser {
   bool hasFlag(const std::string &name) const;
 
   /**
-   * @brief Tells if the parser has a single option with the name provided.
-   *
-   * @param name The name of the possible option.
-   * @return Whether the parser registered the option or not.
-   */
-  bool hasSingle(const std::string &name) const;
-
-  /**
-   * @brief Tells if the parser has a compound option with the name provided.
-   *
-   * @param name The name of the possible option.
-   * @return Whether the parser registered the option or not.
-   */
-  bool hasCompound(const std::string &name) const;
-
-  /**
    * @brief Check if there are options that have not been specified.
    *  If so, a std::invalid_argument error will be thrown.
    */
   void checkMissingOptions() const;
-
-  /**
-   * @brief Check if the help option was specified.
-   * If so, display the usage and exit the program.
-   */
-  void checkHelpOption() const;
 
   // ------------------------- Individual parsers -------------------------- //
 
@@ -183,57 +158,75 @@ class Parser {
    * @param flag_name The name of the option to give the value of true.
    */
   void parseFlag(const std::string &flag_name);
-
-  /**
-   * @brief Saves the extra argument after the single option.
-   *   Checks if that argument was supplied and is not another option specified.
-   *
-   * @param arguments All the arguments provided by command line.
-   * @param index The index of the single option to parse.
-   * @return How many arguments have been read.
-   */
-  unsigned int
-  parseSingle(const std::vector<std::string> &arguments, unsigned int index);
-
-  /**
-   * @brief Reads all the extra arguments provided after the compound option.
-   *   Checks if the arguments were supplied and are not another option
-   * specified.
-   *
-   * @param arguments All the arguments provided by command line.
-   * @param index The index of the compound option to parse.
-   * @return How many arguments have been read.
-   */
-  unsigned int
-  parseCompound(const std::vector<std::string> &arguments, unsigned int index);
 };
 
-template <typename CreateFunction>
-Parser &Parser::addOption(const CreateFunction &create_option)
-requires std::is_invocable_r_v<Option, CreateFunction>
-{
-  const auto option = create_option();
-  const auto &reference_name = option.getNames().front();
-  for (const auto &name : option.getNames()) {
-    if (hasOption(name)) {
-      throw std::invalid_argument("Option already exists!");
+// --------------------------------- Parse --------------------------------- //
+
+template <typename... Types>
+void Parser<Types...>::parse(unsigned int argc, char *raw_argv[]) {
+  const std::vector<std::string> argv(raw_argv, raw_argv + argc);
+  for (unsigned int index = 1; index < argc; ++index) {
+    if (!hasOption(argv[index])) {
+      throw ParsingError("Invalid arguments provided!");
     }
-    names_[name] = reference_name;
+    if (hasFlag(argv[index])) { parseFlag(argv[index]); }
   }
-  options_.emplace(reference_name, option);
-  return *this;
+  checkMissingOptions();
 }
 
-template <class T>
-T Parser::getValue(const std::string &name) const {
-  if (!hasOption(name)) {
-    throw ParsingError(
-      "The option " + name + " was not assigned at the parser"
-    );
-  }
-  return std::visit(
-    [](auto &&opt) { return opt.template getValue<T>(); }, getOption(name)
+// --------------------------------- Checks -------------------------------- //
+
+template <typename... Types>
+bool Parser<Types...>::hasFlag(const std::string &name) const {
+  const std::string &reference_name = names_.at(name);
+  return (
+    ... ||
+    std::get<OptionMap<FlagOption<Types>>>(options_).contains(reference_name)
   );
+}
+
+template <typename... Types>
+void Parser<Types...>::checkMissingOptions() const {
+  std::string missing_options;
+  std::apply(
+    [this, &missing_options](const auto &...option_maps) {
+      auto checkOption = [&](const auto option_map) {
+        for (const auto &[name, option_ref] : option_map) {
+          auto &option = option_ref.get();
+          if (!option.isValid()) {
+            missing_options += "Missing option: " + name + "\n";
+          }
+        }
+      };
+      (checkOption(option_maps), ...);
+    },
+    options_
+  );
+  if (!missing_options.empty()) { throw ParsingError(missing_options); }
+}
+
+// ---------------------------- Individual parsers -------------------------- //
+
+template <typename... Types>
+void Parser<Types...>::parseFlag(const std::string &flag_name) {
+  const std::string &reference_name = names_.at(flag_name);
+  std::apply(
+    [&, this](const auto &...option_maps) {
+      const auto setFlagValueIfHasOption = [&](const auto &option_map) {
+        if (option_map.contains(reference_name)) {
+          option_map.at(reference_name).get().setValue(true);
+        }
+      };
+      (setFlagValueIfHasOption(option_maps), ...);
+    },
+    options_
+  );
+}
+
+template <typename... Types>
+std::string Parser<Types...>::usage() const {
+  std::string usage = "Usage:\n";
+  return usage;
 }
 
 }  // namespace input_parser
