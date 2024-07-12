@@ -33,16 +33,15 @@ TEST(Parser_addOption, AddsFlagOption) {
   EXPECT_TRUE(flag_option.getValue());
 }
 
-// TEST(Parser_addOption, AddsSingleOption) {
-//   auto parser = Parser().addOption([] {
-//     return SingleOption("-s", "--single");
-//   });
-//   auto expected = "value";
-//   const char *argv[] = {"test", "--single", expected};
-//   parser.parse(3, (char **)argv);
-//   EXPECT_EQ(parser.getValue<std::string>("-s"), expected);
-//   EXPECT_EQ(parser.getValue<std::string>("--single"), expected);
-// }
+TEST(Parser_addOption, AddsSingleOption) {
+  auto single = SingleOption<std::string>("-s", "--single");
+  auto parser = Parser<std::string>().addOption(single);
+  auto expected = "value";
+  const char *argv[] = {"test", "--single", expected};
+  parser.parse(3, (char **)argv);
+  EXPECT_EQ(single.getValue(), expected);
+  EXPECT_EQ(single.getValue(), expected);
+}
 
 // TEST(Parser_addOption, AddsCompoundOption) {
 //   auto parser = Parser().addOption([] {
@@ -150,45 +149,69 @@ TEST(Parser_parse, ParsesFlagOptionAsTrue) {
 // EXPECT_FALSE(parser.getValue<bool>("--verbose"));
 // }
 
-// TEST(Parser_parse, ParsesSingleOption) {
-//   auto parser = Parser().addOption([] {
-//     return SingleOption("-s", "--single");
-//   });
-//   const auto expected = "value";
-//   const char *argv[] = {"test", "--single", expected};
-//   EXPECT_NO_THROW(parser.parse(3, (char **)argv));
-// }
+TEST(Parser_parse, ParsesSingleOption) {
+  auto single = SingleOption<std::string>("-s", "--single");
+  auto parser = Parser<std::string>().addOption(single);
+  const auto expected = "value";
+  const char *argv[] = {"test", "--single", expected};
+  EXPECT_NO_THROW(parser.parse(3, (char **)argv));
+}
 
-// TEST(Parser_parse, ParsesSingleOptionAsString) {
-//   auto parser = Parser().addOption([] {
-//     return SingleOption("-s", "--single");
-//   });
-//   const auto expected = "value";
-//   const char *argv[] = {"test", "--single", expected};
-//   parser.parse(3, (char **)argv);
-//   EXPECT_EQ(parser.getValue<std::string>("-s"), expected);
-//   EXPECT_EQ(parser.getValue<std::string>("--single"), expected);
-// }
+TEST(Parser_parse, ParsesSingleOptionAsString) {
+  auto single = SingleOption<std::string>("-s", "--single");
+  auto parser = Parser<std::string>().addOption(single);
+  const auto expected = "value";
+  const char *argv[] = {"test", "--single", expected};
+  parser.parse(3, (char **)argv);
+  EXPECT_EQ(single.getValue(), expected);
+}
 
-// TEST(Parser_parse, ThrowsErrorExpectingSingleOptionArgument) {
-//   auto parser = Parser().addOption([] {
-//     return SingleOption("-s", "--single");
-//   });
-//   const char *argv[] = {"test", "--single"};
-//   EXPECT_THROW(
-//     {
-//       try {
-//         parser.parse(2, (char **)argv);
-//       } catch (const ParsingError &e) {
-//         EXPECT_STREQ(
-//           e.what(), "After the --single option should be an extra argument!"
-//         );
-//         throw;
-//       }
-//     },
-//     ParsingError
-//   );
-// }
+TEST(Parser_parse, ParsesSingleOptionAsOtherType) {
+  auto single = SingleOption<double>("-s", "--single").toDouble();
+  auto parser = Parser<double>().addOption(single);
+  const auto number_expected = 12.1;
+  const char *argv[] = {
+    "test", "--single", std::to_string(number_expected).c_str()
+  };
+  parser.parse(3, (char **)argv);
+  EXPECT_EQ(single.getValue(), number_expected);
+}
+
+TEST(Parser_parse, ThrowsErrorExpectingSingleOptionArgument) {
+  auto single = SingleOption<int>("-s", "--single").toInt();
+  auto parser = Parser<int>().addOption(single);
+  const char *argv[] = {"test", "--single"};
+  EXPECT_THROW(
+    {
+      try {
+        parser.parse(2, (char **)argv);
+      } catch (const ParsingError &e) {
+        EXPECT_STREQ(
+          e.what(), "After the --single option should be an extra argument!"
+        );
+        throw;
+      }
+    },
+    ParsingError
+  );
+}
+
+TEST(Parser_parse, ThrowsErrorParsingSingleIfNoTransformationProvided) {
+  auto single = SingleOption<long>("-n", "--number");
+  auto parser = Parser<long>().addOption(single);
+  const char *argv[] = {"test", "-n", "52"};
+  EXPECT_THROW(
+    {
+      try {
+        parser.parse(3, (char **)argv);
+      } catch (const std::invalid_argument &error) {
+        EXPECT_STREQ(error.what(), "No transformation function provided.");
+        throw error;
+      }
+    },
+    std::invalid_argument
+  );
+}
 
 // TEST(Parser_parse, ParsesCompoundOption) {
 //   auto parser = Parser().addOption([] {
