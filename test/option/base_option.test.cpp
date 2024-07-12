@@ -21,15 +21,15 @@ class MockOption : public BaseOption<ValueType, TransformationType> {
     string_kind auto const name, string_kind auto const... extra_names
   ) : BaseOption<ValueType, TransformationType>(name, extra_names...) {}
 
-  BaseOption<ValueType, TransformationType> &toInt() override {
+  BaseOption<ValueType, TransformationType> &toInt() {
     throw std::runtime_error("Not implemented");
   }
 
-  BaseOption<ValueType, TransformationType> &toDouble() override {
+  BaseOption<ValueType, TransformationType> &toDouble() {
     throw std::runtime_error("Not implemented");
   }
 
-  BaseOption<ValueType, TransformationType> &toFloat() override {
+  BaseOption<ValueType, TransformationType> &toFloat() {
     throw std::runtime_error("Not implemented");
   }
 };
