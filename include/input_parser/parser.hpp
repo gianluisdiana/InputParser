@@ -77,7 +77,7 @@ class Parser {
   Parser &addOption(OptionType &option) {
     const auto &reference_name = option.getNames().front();
     for (const auto &name : option.getNames()) {
-      if (hasOption(name)) {
+      if (hasOptionName(name)) {
         throw std::invalid_argument("Option already exists!");
       }
       names_.insert({name, reference_name});
@@ -131,37 +131,53 @@ class Parser {
    * @param name The name of the possible option.
    * @return Whether the parser registered the option or not.
    */
-  bool hasOption(const std::string &name) const {
+  bool hasOptionName(const std::string &name) const {
     return names_.find(name) != names_.end();
+  }
+
+  /**
+   * @brief Tells if the parser has an option with the reference name provided.
+   *
+   * @tparam OptionType The type of the option to be checked. Must be a Flag,
+   * Single or Compound option.
+   * @param reference_name The reference name of the option.
+   * @return Whether the parser registered the option or not.
+   */
+  template <typename OptionType>
+  requires option_kind<OptionType, Types...>
+  bool hasOption(const std::string &reference_name) const {
+    return std::get<OptionMap<OptionType>>(options_).contains(reference_name);
   }
 
   /**
    * @brief Tells if the parser has a flag option with the name provided.
    *
-   * @param name The name of the possible option.
-   * @return Whether the parser registered the option or not.
+   * @param reference_name The reference name of the option.
+   * @return Whether the parser has a flag option with the name provided or not.
    */
-  bool hasFlag(const std::string &name) const;
+  bool hasFlag(const std::string &reference_name) const;
 
   /**
    * @brief Tells if the parser has a single option with the name provided.
    *
-   * @param name The name of the possible option.
-   * @return Whether the parser registered the option or not.
+   * @param reference_name The reference name of the option.
+   * @return Whether the parser has a single option with the name provided or
+   * not.
    */
-  bool hasSingle(const std::string &name) const;
+  bool hasSingle(const std::string &reference_name) const;
 
   /**
    * @brief Tells if the parser has a compound option with the name provided.
    *
-   * @param name The name of the possible option.
-   * @return Whether the parser registered the option or not.
+   * @param reference_name The reference name of the option.
+   * @return Whether the parser has a compound option with the name provided or
+   * not.
    */
-  bool hasCompound(const std::string &name) const;
+  bool hasCompound(const std::string &reference_name) const;
 
   /**
    * @brief Check if there are options that have not been specified.
-   *  If so, a std::invalid_argument error will be thrown.
+   *  If so, a ParsingError error will be thrown.
    */
   void checkMissingOptions() const;
 
@@ -206,12 +222,13 @@ template <typename... Types>
 void Parser<Types...>::parse(unsigned int argc, char *raw_argv[]) {
   const std::vector<std::string> argv(raw_argv, raw_argv + argc);
   for (unsigned int index = 1; index < argc; ++index) {
-    if (!hasOption(argv[index])) {
+    if (!hasOptionName(argv[index])) {
       throw ParsingError("Invalid arguments provided!");
     }
-    if (hasFlag(argv[index])) {
-      parseFlag(argv[index]);
-    } else if (hasSingle(argv[index])) {
+    const std::string &reference_name = names_.at(argv[index]);
+    if (hasFlag(reference_name)) {
+      parseFlag(reference_name);
+    } else if (hasSingle(reference_name)) {
       index += parseSingle(argv, index);
     } else {
       index += parseCompound(argv, index);
@@ -223,31 +240,18 @@ void Parser<Types...>::parse(unsigned int argc, char *raw_argv[]) {
 // --------------------------------- Checks -------------------------------- //
 
 template <typename... Types>
-bool Parser<Types...>::hasFlag(const std::string &name) const {
-  const std::string &reference_name = names_.at(name);
-  return (
-    ... ||
-    std::get<OptionMap<FlagOption<Types>>>(options_).contains(reference_name)
-  );
+bool Parser<Types...>::hasFlag(const std::string &reference_name) const {
+  return (... || hasOption<FlagOption<Types>>(reference_name));
 }
 
 template <typename... Types>
-bool Parser<Types...>::hasSingle(const std::string &name) const {
-  const std::string &reference_name = names_.at(name);
-  return (
-    ... ||
-    std::get<OptionMap<SingleOption<Types>>>(options_).contains(reference_name)
-  );
+bool Parser<Types...>::hasSingle(const std::string &reference_name) const {
+  return (... || hasOption<SingleOption<Types>>(reference_name));
 }
 
 template <typename... Types>
-bool Parser<Types...>::hasCompound(const std::string &name) const {
-  const std::string &reference_name = names_.at(name);
-  return (
-    ... ||
-    std::get<OptionMap<CompoundOption<Types>>>(options_).contains(reference_name
-    )
-  );
+bool Parser<Types...>::hasCompound(const std::string &reference_name) const {
+  return (... || hasOption<CompoundOption<Types>>(reference_name));
 }
 
 template <typename... Types>
@@ -296,7 +300,7 @@ template <typename... Types>
 unsigned int Parser<Types...>::parseSingle(
   const std::vector<std::string> &arguments, unsigned int index
 ) {
-  if (index + 1 >= arguments.size() || hasOption(arguments[index + 1])) {
+  if (index + 1 >= arguments.size() || hasOptionName(arguments[index + 1])) {
     throw ParsingError(
       "After the " + arguments[index] + " option should be an extra argument!"
     );
@@ -326,7 +330,8 @@ unsigned int Parser<Types...>::parseCompound(
 ) {
   std::vector<std::string> values;
   unsigned int local_index = index + 1;
-  while (local_index < arguments.size() && !hasOption(arguments[local_index])) {
+  while (local_index < arguments.size() &&
+         !hasOptionName(arguments[local_index])) {
     values.push_back(arguments[local_index++]);
   }
   if (values.empty()) {
