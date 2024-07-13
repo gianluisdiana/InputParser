@@ -152,6 +152,14 @@ class Parser {
   bool hasSingle(const std::string &name) const;
 
   /**
+   * @brief Tells if the parser has a compound option with the name provided.
+   *
+   * @param name The name of the possible option.
+   * @return Whether the parser registered the option or not.
+   */
+  bool hasCompound(const std::string &name) const;
+
+  /**
    * @brief Check if there are options that have not been specified.
    *  If so, a std::invalid_argument error will be thrown.
    */
@@ -178,6 +186,18 @@ class Parser {
    */
   unsigned int
   parseSingle(const std::vector<std::string> &arguments, unsigned int index);
+
+  /**
+   * @brief Reads all the extra arguments provided after the compound option.
+   *   Checks if the arguments were supplied and are not another option
+   * specified.
+   *
+   * @param arguments All the arguments provided by command line.
+   * @param index The index of the compound option to parse.
+   * @return How many arguments have been read.
+   */
+  unsigned int
+  parseCompound(const std::vector<std::string> &arguments, unsigned int index);
 };
 
 // --------------------------------- Parse --------------------------------- //
@@ -193,6 +213,8 @@ void Parser<Types...>::parse(unsigned int argc, char *raw_argv[]) {
       parseFlag(argv[index]);
     } else if (hasSingle(argv[index])) {
       index += parseSingle(argv, index);
+    } else {
+      index += parseCompound(argv, index);
     }
   }
   checkMissingOptions();
@@ -215,6 +237,16 @@ bool Parser<Types...>::hasSingle(const std::string &name) const {
   return (
     ... ||
     std::get<OptionMap<SingleOption<Types>>>(options_).contains(reference_name)
+  );
+}
+
+template <typename... Types>
+bool Parser<Types...>::hasCompound(const std::string &name) const {
+  const std::string &reference_name = names_.at(name);
+  return (
+    ... ||
+    std::get<OptionMap<CompoundOption<Types>>>(options_).contains(reference_name
+    )
   );
 }
 
@@ -286,6 +318,40 @@ unsigned int Parser<Types...>::parseSingle(
     options_
   );
   return 1;
+}
+
+template <typename... Types>
+unsigned int Parser<Types...>::parseCompound(
+  const std::vector<std::string> &arguments, const unsigned int index
+) {
+  std::vector<std::string> values;
+  unsigned int local_index = index + 1;
+  while (local_index < arguments.size() && !hasOption(arguments[local_index])) {
+    values.push_back(arguments[local_index++]);
+  }
+  if (values.empty()) {
+    throw ParsingError(
+      "After the " + arguments[index] +
+      " option should be at least an extra argument!"
+    );
+  }
+  const std::string &reference_name = names_.at(arguments[index]);
+  std::apply(
+    [&](const auto &...option_maps) {
+      const auto setCompoundValue = [&](const auto &option_map) {
+        if constexpr (same_as_any<
+                        std::decay_t<decltype(option_map)>,
+                        OptionMap<CompoundOption<Types>>...>) {
+          if (option_map.contains(reference_name)) {
+            option_map.at(reference_name).get().setValue(values);
+          }
+        }
+      };
+      (setCompoundValue(option_maps), ...);
+    },
+    options_
+  );
+  return local_index - index - 1;
 }
 
 template <typename... Types>
