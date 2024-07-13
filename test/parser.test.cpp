@@ -7,23 +7,23 @@ namespace input_parser {
 
 // ------------------------------- AddOption ------------------------------- //
 
-// TEST(Parser_addOption, ThrowsErrorWithOptionsWithSameName) {
-// auto names_option = CompoundOption<std::vector<std::string>>("-n",
-// "--names"); auto parser = Parser<std::string, std::vector<std::string>>();
-// EXPECT_NO_THROW(parser.addOption(names_option));
-// auto name_option = SingleOption<std::string>("-n", "--name");
-// EXPECT_THROW(
-//   {
-//     try {
-//       parser.addOption(name_option);
-//     } catch (const std::invalid_argument &e) {
-//       EXPECT_STREQ(e.what(), "Option already exists!");
-//       throw;
-//     }
-//   },
-//   std::invalid_argument
-// );
-// }
+TEST(Parser_addOption, ThrowsErrorWithOptionsWithSameName) {
+  auto names_option = CompoundOption<std::vector<std::string>>("-n", "--names");
+  auto parser = Parser<std::string, std::vector<std::string>>();
+  EXPECT_NO_THROW(parser.addOption(names_option));
+  auto name_option = SingleOption<std::string>("-n", "--name");
+  EXPECT_THROW(
+    {
+      try {
+        parser.addOption(name_option);
+      } catch (const std::invalid_argument &e) {
+        EXPECT_STREQ(e.what(), "Option already exists!");
+        throw;
+      }
+    },
+    std::invalid_argument
+  );
+}
 
 TEST(Parser_addOption, AddsFlagOption) {
   auto flag_option = FlagOption<bool>("-f", "--flag");
@@ -43,39 +43,40 @@ TEST(Parser_addOption, AddsSingleOption) {
   EXPECT_EQ(single.getValue(), expected);
 }
 
-// TEST(Parser_addOption, AddsCompoundOption) {
-//   auto parser = Parser().addOption([] {
-//     return CompoundOption("-c", "--compound");
-//   });
-//   auto expected = std::vector<std::string> {"value1", "value2"};
-//   const char *argv[] = {"test", "--compound", "value1", "value2"};
-//   parser.parse(4, (char **)argv);
-//   EXPECT_EQ(parser.getValue<decltype(expected)>("-c"), expected);
-//   EXPECT_EQ(parser.getValue<decltype(expected)>("--compound"), expected);
-// }
+TEST(Parser_addOption, AddsCompoundOption) {
+  auto compound = CompoundOption<std::vector<std::string>>("-c", "--compound");
+  auto parser = Parser<std::vector<std::string>>().addOption(compound);
+  auto expected = std::vector<std::string> {"value1", "value2"};
+  const char *argv[] = {"test", "--compound", "value1", "value2"};
+  parser.parse(4, (char **)argv);
+  EXPECT_EQ(compound.getValue(), expected);
+}
 
-// TEST(Parser_addOption, AddsMixedOptions) {
-//   auto parser = Parser();
-//   parser.addOption([] { return FlagOption("-f", "--flag"); })
-//     .addOption([] { return SingleOption("-s", "--single"); })
-//     .addOption([] { return CompoundOption("-c", "--compound"); });
-//   const auto single_expected = "value";
-//   const auto compound_expected = std::vector<std::string> {"value1",
-//   "value2"}; const char *argv[] = {
-//     "test",
-//     "--flag",
-//     "--single",
-//     single_expected,
-//     "--compound",
-//     compound_expected[0].c_str(),
-//     compound_expected[1].c_str()
-//   };
-//   parser.parse(7, (char **)argv);
-//   EXPECT_TRUE(parser.getValue<bool>("-f"));
-//   EXPECT_EQ(parser.getValue<std::string>("-s"), single_expected);
-//   EXPECT_EQ(parser.getValue<std::vector<std::string>>("-c"),
-//   compound_expected);
-// }
+TEST(Parser_addOption, AddsMixedOptions) {
+  auto flag_option = FlagOption<bool>("-f", "--flag");
+  auto single_option = SingleOption<std::string>("-s", "--single");
+  auto compound_option =
+    CompoundOption<std::vector<std::string>>("-c", "--compound");
+  auto parser = Parser<bool, std::string, std::vector<std::string>>();
+  parser.addOption(flag_option)
+    .addOption(single_option)
+    .addOption(compound_option);
+  const auto single_expected = "value";
+  const auto compound_expected = std::vector<std::string> {"value1", "value2"};
+  const char *argv[] = {
+    "test",
+    "--flag",
+    "--single",
+    single_expected,
+    "--compound",
+    compound_expected[0].c_str(),
+    compound_expected[1].c_str()
+  };
+  parser.parse(7, (char **)argv);
+  EXPECT_TRUE(flag_option.getValue());
+  EXPECT_EQ(single_option.getValue(), single_expected);
+  EXPECT_EQ(compound_option.getValue(), compound_expected);
+}
 
 // // ----------------------------- AddHelpOption -----------------------------
 // //
@@ -213,64 +214,62 @@ TEST(Parser_parse, ThrowsErrorParsingSingleIfNoTransformationProvided) {
   );
 }
 
-// TEST(Parser_parse, ParsesCompoundOption) {
-//   auto parser = Parser().addOption([] {
-//     return CompoundOption("-c", "--compound");
-//   });
-//   const auto expected = std::vector<std::string> {"value1", "value2"};
-//   const char *argv[] = {"test", "--compound", "value1", "value2"};
-//   EXPECT_NO_THROW(parser.parse(4, (char **)argv));
-// }
+TEST(Parser_parse, ParsesCompoundOption) {
+  auto compound = CompoundOption<std::vector<std::string>>("-c", "--compound");
+  auto parser = Parser<std::vector<std::string>>().addOption(compound);
+  const auto expected = std::vector<std::string> {"value1", "value2"};
+  const char *argv[] = {"test", "--compound", "value1", "value2"};
+  EXPECT_NO_THROW(parser.parse(4, (char **)argv));
+}
 
-// TEST(Parser_parse, ParsesCompoundOptionAsStringVector) {
-//   auto parser = Parser().addOption([] {
-//     return CompoundOption("-c", "--compound");
-//   });
-//   const auto expected = std::vector<std::string> {"value1", "value2"};
-//   const char *argv[] = {"test", "--compound", "value1", "value2"};
-//   parser.parse(4, (char **)argv);
-//   EXPECT_EQ(parser.getValue<decltype(expected)>("-c"), expected);
-//   EXPECT_EQ(parser.getValue<decltype(expected)>("--compound"), expected);
-// }
+TEST(Parser_parse, ParsesCompoundOptionAsStringVector) {
+  auto values_option = CompoundOption<std::vector<std::string>>("-v");
+  auto parser = Parser<std::vector<std::string>>().addOption(values_option);
+  const auto expected = std::vector<std::string> {"value1", "value2"};
+  const char *argv[] = {"test", "-v", "value1", "value2"};
+  parser.parse(4, (char **)argv);
+  EXPECT_EQ(values_option.getValue(), expected);
+}
 
-// TEST(Parser_parse, ThrowsErrorExpectingCompoundOptionArgument) {
-//   auto parser = Parser().addOption([] {
-//     return CompoundOption("-c", "--compound");
-//   });
-//   const char *argv[] = {"test", "-c"};
-//   EXPECT_THROW(
-//     {
-//       try {
-//         parser.parse(2, (char **)argv);
-//       } catch (const ParsingError &e) {
-//         EXPECT_STREQ(
-//           e.what(), "After the -c option should be at least an extra
-//           argument!"
-//         );
-//         throw;
-//       }
-//     },
-//     ParsingError
-//   );
-// }
+TEST(Parser_parse, ThrowsErrorExpectingCompoundOptionArgument) {
+  auto chars_option = CompoundOption<std::string>("--chars");
+  auto parser = Parser<std::string>().addOption(chars_option);
+  const char *argv[] = {"test", "--chars"};
+  EXPECT_THROW(
+    {
+      try {
+        parser.parse(2, (char **)argv);
+      } catch (const ParsingError &e) {
+        EXPECT_STREQ(
+          e.what(), "After the --chars option should be at least an extra "
+                    "argument!"
+        );
+        throw;
+      }
+    },
+    ParsingError
+  );
+}
 
-// TEST(Parser_parse, ThrowsErrorExpectingNotProvidedOption) {
-//   auto parser = Parser();
-//   parser.addOption([] { return FlagOption("-v", "--verbose"); }
-//   ).addOption([] { return SingleOption("-s", "--single"); });
-//   const char *argv[] = {"test", "--single", "value"};
-//   EXPECT_THROW(
-//     {
-//       try {
-//         parser.parse(3, (char **)argv);
-//       } catch (const ParsingError &e) {
-//         EXPECT_STREQ(e.what(), "Missing option -v");
-//         throw;
-//       }
-//     },
-//     ParsingError
-//   );
-// }
+TEST(Parser_parse, ThrowsErrorExpectingNotProvidedOption) {
+  auto display_text_option = FlagOption<bool>("-d", "--display-text");
+  auto text_option = SingleOption<std::string>("-t", "--text");
+  auto parser = Parser<bool, std::string>()
+                  .addOption(display_text_option)
+                  .addOption(text_option);
+  const char *argv[] = {"test", "-t", "value"};
+  EXPECT_THROW(
+    {
+      try {
+        parser.parse(3, (char **)argv);
+      } catch (const ParsingError &e) {
+        EXPECT_STREQ(e.what(), "Missing option: -d\n");
+        throw;
+      }
+    },
+    ParsingError
+  );
+}
 
 // TEST(Parser_parse, ThrowsExceptionParsingAndProvidingHelpOption) {
 //   auto parser = Parser().addHelpOption();
