@@ -20,14 +20,9 @@ namespace input_parser {
 /** @brief Represents an error ocurred parsing a program arguments */
 class ParsingError : public std::invalid_argument {
  public:
-  /**
-   * @brief Construct a ParsingError calling the std::invalid_arguments
-   * constructor
-   *
-   * @param message The message to be shown.
-   */
-  explicit ParsingError(const std::string &message) :
-    std::invalid_argument(message) {}
+  /** @brief Construct a ParsingError calling the std::invalid_arguments
+   * constructor. */
+  using invalid_argument::invalid_argument;
 };
 
 }  // namespace input_parser
