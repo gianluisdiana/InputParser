@@ -99,6 +99,8 @@ class Parser {
   // Helper map to get the option by name.
   std::unordered_map<std::string, std::string> names_ {};
 
+  // ------------------------------- Getters ------------------------------- //
+
   /**
    * @brief Gives read-write access to the option with the provided name.
    * The option must be of the type provided in the template.
@@ -112,6 +114,25 @@ class Parser {
   OptionType &getOption(const std::string &name) {
     return std::get<OptionMap<OptionType>>(options_).at(names_[name]).get();
   }
+
+  // ------------------------------- Setters ------------------------------- //
+
+  /**
+   * @brief Assigns the value to the option with the reference name provided.
+   *
+   * @tparam OptionTemplateType The templated type of the option to be set.
+   * Must be a Flag, Single or Compound templated option.
+   * @tparam ValueType The type of the value to be assigned to the option.
+   * If the option is a FlagOption, the value must be a bool.
+   * If the option is a SingleOption, the value must be the a string.
+   * If the option is a CompoundOption, the value must be a vector of strings.
+   * @param reference_name The reference name of the option to be set.
+   * @param value The value to be assigned to the option.
+   */
+  template <template <typename> class OptionTemplateType, typename ValueType>
+  requires same_as_any<ValueType, bool, std::string, std::vector<std::string>>
+  void
+  setOptionValue(const std::string &reference_name, const ValueType &value);
 
   // ------------------------------- Checks ------------------------------- //
 

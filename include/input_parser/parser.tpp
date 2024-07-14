@@ -23,6 +23,31 @@
 
 namespace input_parser {
 
+// -------------------------------- Setters -------------------------------- //
+
+template <typename... Types>
+template <template <typename> class OptionTemplateType, typename ValueType>
+requires same_as_any<ValueType, bool, std::string, std::vector<std::string>>
+void Parser<Types...>::setOptionValue(
+  const std::string &reference_name, const ValueType &value
+) {
+  std::apply(
+    [&](const auto &...option_maps) {
+      auto setValue = [&](const auto &option_map) {
+        if constexpr (same_as_any<
+                        std::decay_t<decltype(option_map)>,
+                        OptionMap<OptionTemplateType<Types>>...>) {
+          if (option_map.contains(reference_name)) {
+            option_map.at(reference_name).get().setValue(value);
+          }
+        }
+      };
+      (setValue(option_maps), ...);
+    },
+    options_
+  );
+}
+
 // --------------------------------- Adders --------------------------------- //
 
 template <typename... Types>
@@ -88,21 +113,7 @@ void Parser<Types...>::checkMissingOptions() const {
 template <typename... Types>
 void Parser<Types...>::parseFlag(const std::string &flag_name) {
   const std::string &reference_name = names_.at(flag_name);
-  std::apply(
-    [&, this](const auto &...option_maps) {
-      const auto setFlagValue = [&](const auto &option_map) {
-        if constexpr (same_as_any<
-                        std::decay_t<decltype(option_map)>,
-                        OptionMap<FlagOption<Types>>...>) {
-          if (option_map.contains(reference_name)) {
-            option_map.at(reference_name).get().setValue(true);
-          }
-        }
-      };
-      (setFlagValue(option_maps), ...);
-    },
-    options_
-  );
+  setOptionValue<FlagOption>(reference_name, true);
 }
 
 template <typename... Types>
@@ -115,21 +126,7 @@ unsigned int Parser<Types...>::parseSingle(
     );
   }
   const std::string &reference_name = names_.at(arguments[index]);
-  std::apply(
-    [&](const auto &...option_maps) {
-      const auto setSingleValue = [&](const auto &option_map) {
-        if constexpr (same_as_any<
-                        std::decay_t<decltype(option_map)>,
-                        OptionMap<SingleOption<Types>>...>) {
-          if (option_map.contains(reference_name)) {
-            option_map.at(reference_name).get().setValue(arguments[index + 1]);
-          }
-        }
-      };
-      (setSingleValue(option_maps), ...);
-    },
-    options_
-  );
+  setOptionValue<SingleOption>(reference_name, arguments[index + 1]);
   return 1;
 }
 
@@ -150,21 +147,7 @@ unsigned int Parser<Types...>::parseCompound(
     );
   }
   const std::string &reference_name = names_.at(arguments[index]);
-  std::apply(
-    [&](const auto &...option_maps) {
-      const auto setCompoundValue = [&](const auto &option_map) {
-        if constexpr (same_as_any<
-                        std::decay_t<decltype(option_map)>,
-                        OptionMap<CompoundOption<Types>>...>) {
-          if (option_map.contains(reference_name)) {
-            option_map.at(reference_name).get().setValue(values);
-          }
-        }
-      };
-      (setCompoundValue(option_maps), ...);
-    },
-    options_
-  );
+  setOptionValue<CompoundOption>(reference_name, values);
   return local_index - index - 1;
 }
 
